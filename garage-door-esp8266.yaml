@@ -1,3 +1,4 @@
+# https://esphome.io/guides/configuration-types.html#substitutions
 substitutions:
   name: konnected-garage-door
 
@@ -19,7 +20,7 @@ api:
 ota:
 
 dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/garage-door-esp8266.yaml
+  package_import_url: github://konnected-io/konnected-esphome/garage-door-esp8266.yaml@master
 
 wifi:
   ssid: !secret wifi_ssid
