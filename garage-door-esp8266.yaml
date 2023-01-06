@@ -23,9 +23,6 @@ dashboard_import:
   package_import_url: github://konnected-io/konnected-esphome/garage-door-esp8266.yaml@master
 
 wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
 
