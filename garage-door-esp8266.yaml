@@ -1,0 +1,143 @@
+substitutions:
+  name: konnected-garage-door
+
+esphome:
+  name: $name
+  platform: ESP8266
+  board: nodemcuv2
+  name_add_mac_suffix: true
+  project:
+    name: konnected.garage-door-esp8266
+    version: 0.1.0
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+dashboard_import:
+  package_import_url: github://konnected-io/konnected-esphome/garage-door-esp8266.yaml
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+
+improv_serial:
+
+captive_portal:
+
+binary_sensor:
+  - platform: gpio
+    pin: D9
+    name: Garage Door (wired)
+    device_class: garage_door
+    id: garage_door_wired_sensor
+
+switch:
+  - platform: gpio
+    pin: D6
+    name: Strobe
+
+  - platform: gpio
+    pin: D5
+    name: Garage Door Opener
+    id: garage_door_opener
+    on_turn_on:
+    - delay: 500ms
+    - switch.turn_off: garage_door_opener
+
+light:
+  - id: led_light
+    platform: binary
+    name: "Warning LED"
+    output: warning_led_output
+    effects:
+      - strobe:
+
+  - id: buzzer
+    platform: binary
+    output: buzzer_output
+    effects:
+      - strobe:
+          colors:
+            - state: true
+              duration: 80ms
+            - state: false
+              duration: 100ms  
+    internal: true  
+
+output:
+  - id: warning_led_output
+    platform: gpio
+    pin: D7
+
+  - id: buzzer_output
+    platform: gpio
+    pin: D8  
+    
+cover:
+  - platform: template
+    name: Garage Door
+    device_class: garage
+    lambda: |-
+      if (id(garage_door_wired_sensor).state) {
+        return COVER_OPEN;
+      } else {
+        return COVER_CLOSED;
+      }
+    open_action:
+      - switch.turn_on: garage_door_opener
+    close_action:
+      - light.turn_on:
+          id: led_light
+          effect: strobe
+      - light.turn_on:
+          id: buzzer
+          effect: strobe
+      - delay: 5s
+      - switch.turn_on: garage_door_opener
+    stop_action:
+      - switch.turn_on: garage_door_opener
+    on_closed:
+      - light.turn_off: led_light
+      - light.turn_off: buzzer
+
+i2c:
+  scan: True
+
+sensor:
+  - platform: vl53l0x
+    name: Distance
+    update_interval: 5s
+    long_range: true
+    accuracy_decimals: 1
+
+  - platform: wifi_signal
+    name: WiFi Signal
+    id: wifi_signal_db
+    entity_category: diagnostic
+
+  - platform: copy
+    source_id: wifi_signal_db
+    name: WiFi Signal Percent
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: Signal %
+    entity_category: diagnostic
+
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: IP Address
+      entity_category: diagnostic
+  
+    
+
+    
