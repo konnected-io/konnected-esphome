@@ -1,15 +1,14 @@
 # https://esphome.io/guides/configuration-types.html#substitutions
 substitutions:
-  name: konnected-garage-door
+  name: garage-door
 
 esphome:
   name: $name
   platform: ESP8266
   board: nodemcuv2
-  name_add_mac_suffix: true
   project:
     name: konnected.garage-door-esp8266
-    version: 0.1.0
+    version: "0.1.0"
 
 # Enable logging
 logger:
@@ -18,9 +17,6 @@ logger:
 api:
 
 ota:
-
-dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/garage-door-esp8266.yaml@master
 
 wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
