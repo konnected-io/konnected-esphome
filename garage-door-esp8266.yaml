@@ -32,6 +32,12 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
 
+####
+# WEB SEVER
+# Enables the built-in web server for viewing the device state, internals and controls via web browser
+# on the same local network as the device.
+web_server:
+
 improv_serial:
 
 captive_portal:
