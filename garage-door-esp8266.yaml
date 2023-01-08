@@ -48,7 +48,7 @@ packages:
   # GARAGE DOOR WIRED SENSOR
   # Enables a wired contact sensor for reporting the open or closed state of the garage door
   # via the physical INPUT terminals.
-  garage_door_wired_sensor: github://konnected-io/konnected-esphome/packages/garage_door_wired_sensor.yaml@master
+  garage_door_wired_sensor: github://konnected-io/konnected-esphome/packages/garage-door-wired-sensor.yaml@master
 
   ####
   # GARAGE DOOR OPENER BUTTON
@@ -111,7 +111,6 @@ sensor:
       - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
     unit_of_measurement: Signal %
     entity_category: diagnostic
-
 
 text_sensor:
   - platform: wifi_info

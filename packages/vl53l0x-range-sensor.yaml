@@ -17,6 +17,14 @@ sensor:
           - binary_sensor.template.publish:
               id: garage_door_range_sensor
               state: OFF
+    on_value:
+      - if:
+          condition:
+            lambda: "return id(open_distance).state == 'NaN';"
+          then:
+            - binary_sensor.template.publish:
+                id: garage_door_range_sensor
+                state: OFF
 
 number:
   - platform: template
