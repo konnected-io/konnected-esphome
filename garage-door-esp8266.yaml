@@ -1,14 +1,24 @@
 # https://esphome.io/guides/configuration-types.html#substitutions
 substitutions:
   name: garage-door
+  garage_door_opener_momentary_duration: 500ms
 
 esphome:
   name: $name
+  name_add_mac_suffix: true
   platform: ESP8266
   board: nodemcuv2
   project:
     name: konnected.garage-door-esp8266
     version: "0.1.0"
+
+####
+# DASHBOARD IMPORT
+# Enables automatic discovery and upgrades via ESPHome Dashboard
+# more: https://esphome.io/guides/getting_started_hassio.html
+dashboard_import:
+  package_import_url: github://konnected-io/konnected-esphome/garage-door-esp8266.yaml@master
+  import_full_config: true
 
 # Enable logging
 logger:
@@ -26,25 +36,29 @@ improv_serial:
 
 captive_portal:
 
-binary_sensor:
-  - platform: gpio
-    pin: D9
-    name: Garage Door (wired)
-    device_class: garage_door
-    id: garage_door_wired_sensor
+####
+# PACKAGES
+# The packages included below add functionality to your Konnected Garage Door opener device.
+# Depending on your connected hardware and setup, you may want to customize or add/remove packages
+# to configure your garage door opener to meet your needs. Comment (or remove) packages that you don't
+# need or want.
+packages:
 
-switch:
-  - platform: gpio
-    pin: D6
-    name: Strobe
+  ####
+  # GARAGE DOOR WIRED SENSOR
+  # Enables a wired contact sensor for reporting the open or closed state of the garage door
+  # via the physical INPUT terminals.
+  garage_door_wired_sensor: !include packages/garage-door-wired-sensor.yaml
 
-  - platform: gpio
-    pin: D5
-    name: Garage Door Opener
-    id: garage_door_opener
-    on_turn_on:
-    - delay: 500ms
-    - switch.turn_off: garage_door_opener
+  ####
+  # GARAGE DOOR OPENER BUTTON
+  # Enables the garage door opener relay labeled DOOR on the Konnected Garage Door Opener as a button entity
+  garage_door_opener_button: !include packages/garage-door-opener-button.yaml
+
+  ####
+  # STROBE
+  # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
+  garage_door_strobe: !include packages/garage-door-strobe.yaml
 
 light:
   - id: led_light
@@ -86,7 +100,7 @@ cover:
         return COVER_CLOSED;
       }
     open_action:
-      - switch.turn_on: garage_door_opener
+      - button.press: garage_door_opener_button
     close_action:
       - light.turn_on:
           id: led_light
@@ -95,9 +109,9 @@ cover:
           id: buzzer
           effect: strobe
       - delay: 5s
-      - switch.turn_on: garage_door_opener
+      - button.press: garage_door_opener_button
     stop_action:
-      - switch.turn_on: garage_door_opener
+      - button.press: garage_door_opener_button
     on_closed:
       - light.turn_off: led_light
       - light.turn_off: buzzer

@@ -1,0 +1,5 @@
+switch:
+  - platform: gpio
+    pin: D6
+    name: Strobe
+

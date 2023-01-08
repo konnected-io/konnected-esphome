@@ -1,9 +1,0 @@
-packages:
-  garage_door_esp8266: !include garage-door-esp8266.yaml
-
-dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/garage-door-esp8266.yaml
-
-esphome:
-  name_add_mac_suffix: true
-  

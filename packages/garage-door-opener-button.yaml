@@ -1,0 +1,11 @@
+output:
+  - id: garage_door_opener_output
+    platform: gpio
+    pin: D5
+
+button:
+  - platform: output
+    name: Garage Door Opener
+    id: garage_door_opener_button
+    output: garage_door_opener_output
+    duration: $garage_door_opener_momentary_duration
