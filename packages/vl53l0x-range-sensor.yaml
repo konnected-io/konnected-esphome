@@ -5,26 +5,6 @@ sensor:
     long_range: true
     accuracy_decimals: 2
     id: range_sensor
-    on_value_range:
-      - below: !lambda "return id(open_distance).state + 0.1;"
-        above: !lambda "return id(open_distance).state - 0.1;"
-        then:
-          - binary_sensor.template.publish:
-              id: garage_door_range_sensor
-              state: ON
-      - above: !lambda "return id(open_distance).state + 0.1;"
-        then:
-          - binary_sensor.template.publish:
-              id: garage_door_range_sensor
-              state: OFF
-    on_value:
-      - if:
-          condition:
-            lambda: "return id(open_distance).state == 'NaN';"
-          then:
-            - binary_sensor.template.publish:
-                id: garage_door_range_sensor
-                state: OFF
 
 number:
   - platform: template
@@ -35,8 +15,18 @@ number:
     step: 0.01
     restore_value: true
     optimistic: true
+    entity_category: config
+    mode: box
 
 binary_sensor:
   - platform: template
     name: Garage Door (range sensor)
     id: garage_door_range_sensor
+    lambda: |-
+      if (std::isnan(id(range_sensor).state) || id(range_sensor).state > id(open_distance).state + $open_garage_door_distance_margin_of_error) {
+        return false;
+      } else if (id(range_sensor).state > id(open_distance).state - $open_garage_door_distance_margin_of_error){
+        return true;
+      } else {
+        return {};
+      }

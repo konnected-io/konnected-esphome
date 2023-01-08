@@ -2,12 +2,14 @@
 substitutions:
   name: garage-door
   garage_door_opener_momentary_duration: 500ms
+  open_garage_door_distance_margin_of_error: "0.1"
 
 esphome:
   name: $name
   name_add_mac_suffix: true
   platform: ESP8266
   board: nodemcuv2
+  esp8266_restore_from_flash: true
   project:
     name: konnected.garage-door-esp8266
     version: "0.1.0"
