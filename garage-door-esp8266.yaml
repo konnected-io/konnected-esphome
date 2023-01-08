@@ -53,10 +53,6 @@ packages:
   # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
   garage_door_strobe: github://konnected-io/konnected-esphome/packages/garage-door-strobe.yaml@master
 
-  ####
-  # COVER
-  garage_door_cover: github://konnected-io/konnected-esphome/packages/garage-door-cover.yaml@master
-
 light:
   - id: led_light
     platform: binary
