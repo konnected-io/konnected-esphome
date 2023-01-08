@@ -10,13 +10,13 @@ sensor:
         above: !lambda "return id(open_distance).state - 0.1"
         then:
           - binary_sensor.template.publish:
-            id: garage_door_range_sensor
-            state: ON
+              id: garage_door_range_sensor
+              state: ON
       - above: !lambda "return id(open_distance).state + 0.1"
         then:
           - binary_sensor.template.publish:
-            id: garage_door_range_sensor
-            state: OFF
+              id: garage_door_range_sensor
+              state: OFF
 
 number:
   - platform: template
