@@ -37,6 +37,7 @@ wifi:
 # Enables the built-in web server for viewing the device state, internals and controls via web browser
 # on the same local network as the device.
 web_server:
+  include_internal: true
 
 improv_serial:
 
@@ -58,6 +59,12 @@ packages:
   # STROBE
   # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
   garage_door_strobe: github://konnected-io/konnected-esphome/packages/garage-door-strobe.yaml@master
+
+  ####
+  # RANGE SENSOR
+  # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
+  # the open/closed state of an overhead garage door.
+  vl53l0x_range_sensor: github://konnected-io/konnected-esphome/packages/vl53l0x-range-sensor.yaml@master
 
 light:
   - id: led_light
@@ -92,12 +99,6 @@ i2c:
   scan: True
 
 sensor:
-  - platform: vl53l0x
-    name: Distance
-    update_interval: 5s
-    long_range: true
-    accuracy_decimals: 1
-
   - platform: wifi_signal
     name: WiFi Signal
     id: wifi_signal_db
