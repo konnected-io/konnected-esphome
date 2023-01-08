@@ -36,29 +36,26 @@ improv_serial:
 
 captive_portal:
 
-####
-# PACKAGES
-# The packages included below add functionality to your Konnected Garage Door opener device.
-# Depending on your connected hardware and setup, you may want to customize or add/remove packages
-# to configure your garage door opener to meet your needs. Comment (or remove) packages that you don't
-# need or want.
 packages:
-
   ####
   # GARAGE DOOR WIRED SENSOR
   # Enables a wired contact sensor for reporting the open or closed state of the garage door
   # via the physical INPUT terminals.
-  garage_door_wired_sensor: !include packages/garage-door-wired-sensor.yaml
+  garage_door_wired_sensor: github://konnected-io/konnected-esphome/packages/garage_door_wired_sensor.yaml@master
 
   ####
   # GARAGE DOOR OPENER BUTTON
   # Enables the garage door opener relay labeled DOOR on the Konnected Garage Door Opener as a button entity
-  garage_door_opener_button: !include packages/garage-door-opener-button.yaml
+  garage_door_opener_button: github://konnected-io/konnected-esphome/packages/garage-door-opener-button.yaml@master
 
   ####
   # STROBE
   # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
-  garage_door_strobe: !include packages/garage-door-strobe.yaml
+  garage_door_strobe: github://konnected-io/konnected-esphome/packages/garage-door-strobe.yaml@master
+
+  ####
+  # COVER
+  garage_door_cover: github://konnected-io/konnected-esphome/packages/garage-door-cover.yaml@master
 
 light:
   - id: led_light
@@ -89,33 +86,6 @@ output:
     platform: gpio
     pin: D8  
     
-cover:
-  - platform: template
-    name: Garage Door
-    device_class: garage
-    lambda: |-
-      if (id(garage_door_wired_sensor).state) {
-        return COVER_OPEN;
-      } else {
-        return COVER_CLOSED;
-      }
-    open_action:
-      - button.press: garage_door_opener_button
-    close_action:
-      - light.turn_on:
-          id: led_light
-          effect: strobe
-      - light.turn_on:
-          id: buzzer
-          effect: strobe
-      - delay: 5s
-      - button.press: garage_door_opener_button
-    stop_action:
-      - button.press: garage_door_opener_button
-    on_closed:
-      - light.turn_off: led_light
-      - light.turn_off: buzzer
-
 i2c:
   scan: True
 
