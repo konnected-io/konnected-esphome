@@ -22,6 +22,10 @@ number:
   - platform: template
     name: Open garage door distance from device
     id: open_distance
+    min_value: 0
+    max_value: 2.0
+    step: 0.01
+    restore_value: true
 
 binary_sensor:
   - platform: template
