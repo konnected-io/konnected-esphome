@@ -6,13 +6,13 @@ sensor:
     accuracy_decimals: 2
     id: range_sensor
     on_value_range:
-      - below: !lambda "return id(open_distance).state + 0.1"
-        above: !lambda "return id(open_distance).state - 0.1"
+      - below: !lambda "return id(open_distance).state + 0.1;"
+        above: !lambda "return id(open_distance).state - 0.1;"
         then:
           - binary_sensor.template.publish:
               id: garage_door_range_sensor
               state: ON
-      - above: !lambda "return id(open_distance).state + 0.1"
+      - above: !lambda "return id(open_distance).state + 0.1;"
         then:
           - binary_sensor.template.publish:
               id: garage_door_range_sensor
