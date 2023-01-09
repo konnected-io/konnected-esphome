@@ -1,31 +1,22 @@
+i2c:
+  scan: True
+
 sensor:
   - platform: vl53l0x
-    name: Range
     update_interval: 5s
     long_range: true
     accuracy_decimals: 2
     id: range_sensor
-
-number:
-  - platform: template
-    name: Open garage door distance from device
-    id: open_distance
-    min_value: 0
-    max_value: 2.0
-    step: 0.01
-    restore_value: true
-    optimistic: true
-    entity_category: config
-    mode: box
+    internal: true
 
 binary_sensor:
   - platform: template
-    name: Garage Door (range sensor)
     id: garage_door_range_sensor
+    internal: true
     lambda: |-
-      if (std::isnan(id(range_sensor).state) || id(range_sensor).state > id(open_distance).state + $open_garage_door_distance_margin_of_error) {
+      if (std::isnan(id(range_sensor).state) || id(range_sensor).state > $open_garage_door_distance_from_ceiling + $open_garage_door_distance_margin_of_error) {
         return false;
-      } else if (id(range_sensor).state > id(open_distance).state - $open_garage_door_distance_margin_of_error){
+      } else if (id(range_sensor).state > $open_garage_door_distance_from_ceiling - $open_garage_door_distance_margin_of_error){
         return true;
       } else {
         return {};

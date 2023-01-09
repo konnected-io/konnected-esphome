@@ -1,0 +1,12 @@
+output:
+  - id: warning_led_output
+    platform: gpio
+    pin: D7
+    
+light:
+  - id: warning_led
+    platform: binary
+    output: warning_led_output
+    effects:
+      - strobe:
+    internal: true

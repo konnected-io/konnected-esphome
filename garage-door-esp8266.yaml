@@ -1,19 +1,154 @@
-# https://esphome.io/guides/configuration-types.html#substitutions
+####
+##
+## Konnected Garage Door Opener (ESP8266)
+## Firmware for ESPHome
+##
+## filename: garage-door-esp8266.yaml
+## GitHub: https://github.com/konnected-io/konnected-esphome
+## Buy Konnected hardware: https://konnected.io
+## Help & Support: https://help@konnected.io (support is provided for purchasers of Konnected hardware)
+##
+## Copyright© 2023 Konnected Inc.
+##
+## Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+## files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+## modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+## is furnished to do so, subject to the following conditions:
+##
+## The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+##
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+## OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+## LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+## IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+##
+####
+
+####
+# INTRODUCTION
+# 
+# This ESPHome based firmware configuration is designed for the Konnected Garage Door Opener v1,
+# but can also run on any ESP8266 device. The Garage Door Opener retrofits an older style traditional
+# garage door opener and implements the following features which are included as packages below:
+#
+# 1. Wired contact sensor for detecting open/closed state of garage door
+# 2. Optical range sensor for detecting open/closed state of garage door
+# 3. Emulates a garage door opener button wired to a dry contact relay to open/close the garage door.
+# 4. Implements a Garage Door "Cover" entity that is exposed to Home Assistant that incorporates the state of the garage door
+#    and controls to open/close it.
+# 5. Flashes an onboard LED and beeps an onboard piezo sounder as a warning before automatically closing.
+
+####
+# GENERAL SETTINGS
+# Customize these variables to your preferences and needs
+# more: https://esphome.io/guides/configuration-types.html#substitutions
 substitutions:
+
+  ####
+  # NAME
+  # By default, the name of the ESPHome device is "garage-door-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "garage-door-xxxxxx.local". Edit this variable to
+  # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
   name: garage-door
-  garage_door_opener_momentary_duration: 500ms
+  project_name: konnected.garage-door-esp8266
+  project_version: "0.1.0"
+  garage_door_cover_name: Garage Door
+  switch_name: Switch
+
+  ####
+  # GARAGE DOOR OPENER MOMENTARY DURATION
+  # Duration to make the relay contact closure for the garage door opener button circuit. 
+  garage_door_opener_momentary_duration: 300ms
+
+  ####
+  # OPEN GARAGE DOOR DISTANCE FROM CEILING
+  # The optical laser range sensor works to detect the open/closed state of the garage by looking down from the ceiling
+  # to detect the rolled-up garage door in front of it. Enter the distance (in meters) measured when the garage door is fully open.
+  open_garage_door_distance_from_ceiling: "0.68"
+
+  ####
+  # OPEN GARAGE DOOR DISTANCE MARGIN OF ERROR
+  # The margin of error (+/-) in meters from the value above to consider the garage door in the open position.
   open_garage_door_distance_margin_of_error: "0.1"
 
-esphome:
-  name: $name
-  name_add_mac_suffix: true
-  platform: ESP8266
-  board: nodemcuv2
-  esp8266_restore_from_flash: true
-  project:
-    name: konnected.garage-door-esp8266
-    version: "0.1.0"
+  ####
+  # GARAGE DOOR CLOSE WARNING DURATION
+  # Duration to blink the warning LED and beep the buzzer before the garage door closes.
+  garage_door_close_warning_duration: 5s
 
+####
+# PACKAGES
+# Each package includes a Garage Door Opener feature described
+# Remove or comment out any packages that you do not need or want.
+packages:
+
+  ####
+  # CORE
+  # This package is required and sets up core features.
+  # core: !include packages/core-esp8266.yaml
+  core: github://konnected-io/konnected-esphome/packages/core-esp8266.yaml@master
+
+  ####
+  # GARAGE DOOR COVER
+  # The Garage Door Cover is the main user interface entity representing a garage door in Home Assistant.
+  # more: https://www.home-assistant.io/integrations/cover/
+  #
+  # CHOOSE ONE of the following cover packages depending on the sensors used to determine the open/closed state of the door.
+  #
+  # 1. WIRED SENSOR ONLY - Include this line and remove or comment out the vl53l0x_range_sensor package below.
+  # garage_door_cover: !include packages/garage-door-cover-wired.yaml
+  #
+  # 2. RANGE SENSOR ONLY - Include this line and remove or comment out the garage_door_wired_sensor package below.
+  # garage_door_cover: !include packages/garage-door-cover-range.yaml
+  #
+  # 3. WIRED & RANGE SENSORS - Include this line.
+  # garage_door_cover: !include packages/garage-door-cover-wired-and-range.yaml
+  garage_door_cover: github://konnected-io/konnected-esphome/packages/garage-door-cover-wired-and-range.yaml@master
+
+  ####
+  # GARAGE DOOR WIRED SENSOR
+  # Enables a wired contact sensor for reporting the open or closed state of the garage door
+  # via the physical INPUT terminals.
+  # garage_door_wired_sensor: !include packages/garage-door-wired-sensor.yaml
+  garage_door_wired_sensor: github://konnected-io/konnected-esphome/packages/garage-door-wired-sensor.yaml@master
+
+  ####
+  # GARAGE DOOR RANGE SENSOR
+  # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
+  # the open/closed state of an overhead garage door.
+  # vl53l0x_range_sensor: !include packages/vl53l0x-range-sensor.yaml
+  vl53l0x_range_sensor: github://konnected-io/konnected-esphome/packages/vl53l0x-range-sensor.yaml@master
+
+  ####
+  # GARAGE DOOR OPENER BUTTON
+  # Enables the garage door opener relay labeled DOOR on the Konnected Garage Door Opener as a button entity. When
+  # pressed, the relay will close the dry contact, simulating a physical press of the garage door opener wall button.
+  # garage_door_opener_button: !include packages/garage-door-opener-button.yaml
+  garage_door_opener_button: github://konnected-io/konnected-esphome/packages/garage-door-opener-button.yaml@master
+
+  ####
+  # SWITCH
+  # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
+  # switch: !include packages/switch.yaml
+  switch: github://konnected-io/konnected-esphome/packages/switch.yaml@master
+
+  ####
+  # WARNING LED
+  # Enables the onboard warning LED light, with strobe effect. Used to visually warn of garage door automatic closing.
+  # warning_led: !include packages/warning-led.yaml
+  warning_led: github://konnected-io/konnected-esphome/packages/warning-led.yaml@master
+
+  ####
+  # WARNING BEEP
+  # Enables a repeating beep using the onboard piezo buzzer. Used to audibly warn of a garage door automatic closing.
+  # warning_beep: !include packages/warning-beep.yaml
+  warning_beep: github://konnected-io/konnected-esphome/packages/warning-beep.yaml@master
+
+  ####
+  # WIFI
+  # wifi: !include packages/wifi.yaml
+  wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
+    
 ####
 # DASHBOARD IMPORT
 # Enables automatic discovery and upgrades via ESPHome Dashboard
@@ -22,18 +157,6 @@ dashboard_import:
   package_import_url: github://konnected-io/konnected-esphome/garage-door-esp8266.yaml@master
   import_full_config: true
 
-# Enable logging
-logger:
-
-# Enable Home Assistant API
-api:
-
-ota:
-
-wifi:
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
-  ap:
-
 ####
 # WEB SEVER
 # Enables the built-in web server for viewing the device state, internals and controls via web browser
@@ -41,85 +164,19 @@ wifi:
 web_server:
   include_internal: true
 
-improv_serial:
+#### 
+# LOGGER
+# more: https://esphome.io/components/logger.html
+logger:
 
-captive_portal:
+####
+# NATIVE API for HOME ASSISTANT
+# Enables the native API for Home Assistant
+# more: https://esphome.io/components/api.html
+api:
 
-packages:
-  ####
-  # GARAGE DOOR WIRED SENSOR
-  # Enables a wired contact sensor for reporting the open or closed state of the garage door
-  # via the physical INPUT terminals.
-  garage_door_wired_sensor: github://konnected-io/konnected-esphome/packages/garage-door-wired-sensor.yaml@master
-
-  ####
-  # GARAGE DOOR OPENER BUTTON
-  # Enables the garage door opener relay labeled DOOR on the Konnected Garage Door Opener as a button entity
-  garage_door_opener_button: github://konnected-io/konnected-esphome/packages/garage-door-opener-button.yaml@master
-
-  ####
-  # STROBE
-  # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
-  garage_door_strobe: github://konnected-io/konnected-esphome/packages/garage-door-strobe.yaml@master
-
-  ####
-  # RANGE SENSOR
-  # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
-  # the open/closed state of an overhead garage door.
-  vl53l0x_range_sensor: github://konnected-io/konnected-esphome/packages/vl53l0x-range-sensor.yaml@master
-
-light:
-  - id: led_light
-    platform: binary
-    name: "Warning LED"
-    output: warning_led_output
-    effects:
-      - strobe:
-
-  - id: buzzer
-    platform: binary
-    output: buzzer_output
-    effects:
-      - strobe:
-          colors:
-            - state: true
-              duration: 80ms
-            - state: false
-              duration: 100ms  
-    internal: true  
-
-output:
-  - id: warning_led_output
-    platform: gpio
-    pin: D7
-
-  - id: buzzer_output
-    platform: gpio
-    pin: D8  
-    
-i2c:
-  scan: True
-
-sensor:
-  - platform: wifi_signal
-    name: WiFi Signal
-    id: wifi_signal_db
-    entity_category: diagnostic
-
-  - platform: copy
-    source_id: wifi_signal_db
-    name: WiFi Signal Percent
-    filters:
-      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
-    unit_of_measurement: Signal %
-    entity_category: diagnostic
-
-text_sensor:
-  - platform: wifi_info
-    ip_address:
-      name: IP Address
-      entity_category: diagnostic
-  
-    
-
-    
+#### 
+# OTA UPDATES
+# Enables over-the-air updates
+# more: https://esphome.io/components/ota.html
+ota:

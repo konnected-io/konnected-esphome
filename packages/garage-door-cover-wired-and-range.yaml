@@ -1,0 +1,26 @@
+cover:
+  - platform: template
+    name: $garage_door_cover_name
+    device_class: garage
+    lambda: |-
+      if (id(garage_door_wired_sensor).state || id(garage_door_range_sensor).state) {
+        return COVER_OPEN;
+      } else {
+        return COVER_CLOSED;
+      }
+    open_action:
+      - button.press: garage_door_opener_button
+    close_action:
+      - light.turn_on:
+          id: warning_led
+          effect: strobe
+      - light.turn_on:
+          id: warning_beep
+          effect: strobe
+      - delay: $garage_door_close_warning_duration
+      - button.press: garage_door_opener_button
+    stop_action:
+      - button.press: garage_door_opener_button
+    on_closed:
+      - light.turn_off: warning_led
+      - light.turn_off: warning_beep
