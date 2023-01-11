@@ -1,0 +1,8 @@
+esphome:
+  name: $name
+  name_add_mac_suffix: true
+  platform: ESP32
+  board: wesp32
+  project:
+    name: $project_name
+    version: $project_version

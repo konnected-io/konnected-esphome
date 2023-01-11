@@ -1,7 +1,7 @@
 ####
 ##
 ## Konnected Garage Door Opener (ESP8266)
-## Firmware for ESPHome
+## Firmware configuration for ESPHome
 ##
 ## filename: garage-door-esp8266.yaml
 ## GitHub: https://github.com/konnected-io/konnected-esphome
@@ -29,13 +29,13 @@
 # 
 # This ESPHome based firmware configuration is designed for the Konnected Garage Door Opener v1,
 # but can also run on any ESP8266 device. The Garage Door Opener retrofits an older style traditional
-# garage door opener and implements the following features which are included as packages below:
+# garage door opener and has the following features which are included as packages below:
 #
 # 1. Wired contact sensor for detecting open/closed state of garage door
 # 2. Optical range sensor for detecting open/closed state of garage door
 # 3. Emulates a garage door opener button wired to a dry contact relay to open/close the garage door.
-# 4. Implements a Garage Door "Cover" entity that is exposed to Home Assistant that incorporates the state of the garage door
-#    and controls to open/close it.
+# 4. Adds a Garage Door "Cover" entity that is exposed to Home Assistant. The cover entity incorporates the state of the 
+#    garage door and controls to open/close/stop it.
 # 5. Flashes an onboard LED and beeps an onboard piezo sounder as a warning before automatically closing.
 
 ####
@@ -50,6 +50,7 @@ substitutions:
   # hostname on your network is also defined by the name, defaulting to "garage-door-xxxxxx.local". Edit this variable to
   # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
   name: garage-door
+  friendly_name: Garage Door Opener
   project_name: konnected.garage-door-esp8266
   project_version: "0.1.0"
   garage_door_cover_name: Garage Door
@@ -75,6 +76,15 @@ substitutions:
   # GARAGE DOOR CLOSE WARNING DURATION
   # Duration to blink the warning LED and beep the buzzer before the garage door closes.
   garage_door_close_warning_duration: 5s
+
+  warning_beep_pulse_time: 100ms
+  warning_beep_pause_time: 130ms
+  warning_beep_internal_only: "true"
+
+  ####
+  # INTERNAL MAPPINGS
+  warning_beep_pin: D8
+
 
 ####
 # PACKAGES
@@ -148,6 +158,8 @@ packages:
   # WIFI
   # wifi: !include packages/wifi.yaml
   wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
+
+  status_led: !include packages/status-led.yaml
     
 ####
 # DASHBOARD IMPORT

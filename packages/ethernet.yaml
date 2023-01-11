@@ -1,0 +1,12 @@
+ethernet:
+  type: $ethernet_type
+  mdc_pin: GPIO16
+  mdio_pin: GPIO17
+  clk_mode: GPIO0_IN
+  phy_addr: 0
+
+text_sensor:
+  - platform: ethernet_info
+    ip_address:
+      name: $friendly_name Ethernet IP Address
+      entity_category: diagnostic

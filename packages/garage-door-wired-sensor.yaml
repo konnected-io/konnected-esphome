@@ -1,6 +1,6 @@
 binary_sensor:
-  - platform: gpio
-    pin: D9
+  - pin: D9
     device_class: garage_door
     id: garage_door_wired_sensor
     internal: true
+    <<: !include input-zone.yaml

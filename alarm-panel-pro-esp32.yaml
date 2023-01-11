@@ -1,0 +1,240 @@
+####
+##
+## Konnected Alarm Panel Pro (ESP32)
+## Firmware configuration for ESPHome
+##
+## filename: alarm-panel-pro-esp32.yaml
+## GitHub: https://github.com/konnected-io/konnected-esphome
+## Buy Konnected hardware: https://konnected.io
+## Help & Support: https://help@konnected.io (support is provided for purchasers of Konnected hardware)
+##
+## Copyright© 2023 Konnected Inc.
+##
+## Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+## files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+## modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+## is furnished to do so, subject to the following conditions:
+##
+## The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+##
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+## OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+## LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+## IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+##
+####
+
+####
+# GENERAL SETTINGS
+# Customize these variables to your preferences and needs
+# more: https://esphome.io/guides/configuration-types.html#substitutions
+substitutions:
+
+  ####
+  # NAME
+  # By default, the name of the ESPHome device is "alarm-panel-pro-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "alarm-panel-pro-xxxxxx.local". Edit this variable to
+  # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
+  name: alarm-panel-pro
+  friendly_name: Alarm Panel Pro
+  project_name: konnected.alarm-panel-pro-esp32
+  project_version: "0.1.0"
+  ethernet_type: LAN8720 # Alarm Panel Pro up to 1.7
+  # ethernet_type: RTL8201 # Alarm Panel Pro 1.8 and up
+  sensor_debounce_time: 200ms
+  warning_beep_pulse_time: 100ms
+  warning_beep_pause_time: 130ms
+  warning_beep_internal_only: "false"
+
+
+  ####
+  # ZONE MAPPING
+  # Do not edit this section.
+  zone1: GPIO4
+  zone2: GPIO2
+  zone3: GPIO15
+  zone4: GPIO13
+  zone5: GPIO18
+  zone6: GPIO14
+  zone7: GPIO33
+  zone8: GPIO32
+  zone9: GPIO36
+  zone10: GPIO39
+  zone11: GPIO34
+  zone12: GPIO35
+  alarm1: GPIO12
+  alarm2: GPIO5
+  out1: GPIO23
+  out2: GPIO5
+  status_led: GPIO3
+  
+  ####
+  # CONNECTION MAPPINGS
+  warning_beep_pin: $out1
+
+####
+# BINARY SENSOR SETUP
+# A "Binary Sensor" is any type of sensor that has two states, such as open/closed or detected/not-detected.
+# Set up zones for door, window, motion, smoke/fire, CO, water/leak sensors in this section by repeating the configuration
+# block below for each zone.
+binary_sensor:
+
+  - id: zone1
+    name: Zone 1
+    device_class: door
+    pin:
+      number: $zone1
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+  - id: zone2
+    name: Zone 2    
+    device_class: door
+    pin:
+      number: $zone2
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+  - id: zone3
+    name: Zone 3
+    device_class: motion
+    pin:
+      number: $zone3
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+  - id: zone4
+    name: Zone 4
+    device_class: window
+    pin:
+      number: $zone4
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+  - id: zone5
+    name: Zone 5
+    device_class: door
+    pin:
+      number: $zone5
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+  - id: zone6
+    name: Zone 6
+    device_class: window
+    pin:
+      number: $zone6
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+  - id: zone7    
+    name: Zone 7
+    device_class: window
+    pin:
+      number: $zone7
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+  - id: zone8
+    name: Zone 8
+    device_class: window
+    pin:
+      number: $zone8
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+  - id: zone9
+    name: Zone 9
+    pin:
+      number: $zone9
+      mode: INPUT
+    <<: !include packages/input-zone.yaml
+
+  - id: zone10
+    name: Zone 10
+    pin:
+      number: $zone10
+      mode: INPUT
+    <<: !include packages/input-zone.yaml
+
+  - id: zone11
+    name: Zone 11
+    platform: gpio    
+    pin:
+      number: $zone11
+      mode: INPUT
+    <<: !include packages/input-zone.yaml
+
+  - id: zone12
+    name: Zone 12
+    platform: gpio    
+    pin:
+      number: $zone12
+      mode: INPUT
+    <<: !include packages/input-zone.yaml
+
+switch:   
+  - id: alarm1
+    name: Alarm 1
+    pin: $alarm1
+    platform: gpio
+    icon: mdi:bullhorn
+
+  - id: alarm2
+    name: Alarm 2
+    pin: $alarm2
+    platform: gpio
+
+####
+# PACKAGES
+# Each package includes the alarm panel feature
+# Remove or comment out any packages that you do not need or want.
+packages:
+
+  ####
+  # CORE
+  # This package is required and sets up core features.
+  core: !include packages/core-esp32.yaml
+  # core: github://konnected-io/konnected-esphome/packages/core-esp32.yaml@master
+
+  ####
+  # ETHERNET
+  # Enables ethernet connectivity.
+  # ethernet: !include packages/ethernet.yaml
+  
+  ####
+  # WIFI
+  # Enables WiFi connectivity and diagnostics.
+  wifi: !include packages/wifi.yaml
+
+  warning_beep: !include packages/warning-beep.yaml
+  status_led: !include packages/status-led.yaml
+  
+  
+dashboard_import:
+  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-pro-esp32.yaml@master
+  import_full_config: true
+
+####
+# WEB SEVER
+# Enables the built-in web server for viewing the device state, internals and controls via web browser
+# on the same local network as the device.
+web_server:
+  include_internal: true
+
+#### 
+# LOGGER
+# more: https://esphome.io/components/logger.html
+logger:
+
+####
+# NATIVE API for HOME ASSISTANT
+# Enables the native API for Home Assistant
+# more: https://esphome.io/components/api.html
+api:
+
+#### 
+# OTA UPDATES
+# Enables over-the-air updates
+# more: https://esphome.io/components/ota.html
+ota:
