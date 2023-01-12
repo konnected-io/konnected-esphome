@@ -84,6 +84,7 @@ substitutions:
   ####
   # INTERNAL MAPPINGS
   warning_beep_pin: D8
+  status_led: D4
 
 
 ####

@@ -1,0 +1,176 @@
+####
+##
+## Konnected Alarm Panel (ESP8266)
+## Firmware configuration for ESPHome
+##
+## filename: alarm-panel-esp8266.yaml
+## GitHub: https://github.com/konnected-io/konnected-esphome
+## Buy Konnected hardware: https://konnected.io
+## Help & Support: https://help@konnected.io (support is provided for purchasers of Konnected hardware)
+##
+## Copyright© 2023 Konnected Inc.
+##
+## Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+## files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+## modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+## is furnished to do so, subject to the following conditions:
+##
+## The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+##
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+## OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+## LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+## IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+##
+####
+
+####
+# GENERAL SETTINGS
+# Customize these variables to your preferences and needs
+# more: https://esphome.io/guides/configuration-types.html#substitutions
+substitutions:
+
+  ####
+  # NAME
+  # By default, the name of the ESPHome device is "alarm-panel-pro-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "alarm-panel-pro-xxxxxx.local". Edit this variable to
+  # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
+  name: alarm-panel
+  friendly_name: Alarm Panel
+  project_name: konnected.alarm-panel-esp8266
+  project_version: "0.1.0"
+
+  sensor_debounce_time: 200ms
+  warning_beep_pulse_time: 100ms
+  warning_beep_pause_time: 130ms
+  warning_beep_internal_only: "false"
+
+  ####
+  # ZONE MAPPING
+  # Do not edit this section.
+  zone1: D1
+  zone2: D2
+  zone3: D5
+  zone4: D6
+  zone5: D7
+  zone6: D9
+  alarm: D8
+  out: D8
+  status_led: D4
+  
+  ####
+  # CONNECTION MAPPINGS
+  warning_beep_pin: $out
+
+####
+# INPUT ZONES: BINARY SENSOR SETUP
+# A "Binary Sensor" is any type of sensor that has two states, such as open/closed or detected/not-detected.
+# Set up zones for door, window, motion, smoke/fire, CO, water/leak sensors in this section by repeating the configuration
+# block below for each zone.
+binary_sensor:
+
+  - id: zone1
+    name: Zone 1
+    pin:
+      number: $zone1
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+  - id: zone2
+    name: Zone 2    
+    pin:
+      number: $zone2
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+  - id: zone3
+    name: Zone 3
+    pin:
+      number: $zone3
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+  - id: zone4
+    name: Zone 4
+    pin:
+      number: $zone4
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+  - id: zone5
+    name: Zone 5
+    pin:
+      number: $zone5
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+  - id: zone6
+    name: Zone 6
+    pin:
+      number: $zone6
+      mode: INPUT_PULLUP
+    <<: !include packages/input-zone.yaml
+
+switch:   
+  - id: alarm
+    name: Alarm
+    pin: $alarm
+    platform: gpio
+    icon: mdi:bullhorn
+
+####
+# PACKAGES
+# Each package includes the alarm panel feature
+# Remove or comment out any packages that you do not need or want.
+packages:
+
+  ####
+  # CORE
+  # This package is required and sets up core features.
+  core: !include packages/core-esp8266.yaml
+  # core: github://konnected-io/konnected-esphome/packages/core-esp32.yaml@master
+  
+  ####
+  # WIFI
+  # Enables WiFi connectivity and diagnostics.
+  wifi: !include packages/wifi.yaml
+
+  ####
+  # WARNING BEEP
+  # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer. This is 
+  # implemented using a light entity with strobe effect to create a repeated beeping sound.
+  warning_beep: !include packages/warning-beep.yaml
+
+  ####
+  # STATUS LED
+  # Enables the onboard blue status LED as an activity/error indicator
+  status_led: !include packages/status-led.yaml
+  
+  
+dashboard_import:
+  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-esp8266.yaml@master
+  import_full_config: true
+
+####
+# WEB SEVER
+# Enables the built-in web server for viewing the device state, internals and controls via web browser
+# on the same local network as the device.
+web_server:
+  include_internal: true
+
+#### 
+# LOGGER
+# more: https://esphome.io/components/logger.html
+logger:
+
+####
+# NATIVE API for HOME ASSISTANT
+# Enables the native API for Home Assistant
+# more: https://esphome.io/components/api.html
+api:
+
+#### 
+# OTA UPDATES
+# Enables over-the-air updates
+# more: https://esphome.io/components/ota.html
+ota:

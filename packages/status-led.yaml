@@ -1,4 +1,6 @@
 light:
   - platform: status_led
     id: blue_status_led
-    pin: $status_led
+    pin:
+      number: $status_led
+      inverted: $status_led_inverted

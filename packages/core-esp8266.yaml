@@ -7,3 +7,6 @@ esphome:
   project:
     name: $project_name
     version: $project_version
+
+substitutions:
+  status_led_inverted: "true"
