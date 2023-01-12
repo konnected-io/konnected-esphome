@@ -160,7 +160,11 @@ packages:
   # wifi: !include packages/wifi.yaml
   wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
 
-  status_led: !include packages/status-led.yaml
+  ####
+  # STATUS LED
+  # Enables the onboard blue status LED as an activity/error indicator
+  # status_led: !include packages/status-led.yaml
+  status_led: github://konnected-io/konnected-esphome/packages/status-led.yaml@master
     
 ####
 # DASHBOARD IMPORT

@@ -40,6 +40,8 @@ substitutions:
   project_name: konnected.alarm-panel-esp8266
   project_version: "0.1.0"
 
+  ####
+  # SETTINGS
   sensor_debounce_time: 200ms
   warning_beep_pulse_time: 100ms
   warning_beep_pause_time: 130ms
@@ -127,25 +129,27 @@ packages:
   ####
   # CORE
   # This package is required and sets up core features.
-  core: !include packages/core-esp8266.yaml
-  # core: github://konnected-io/konnected-esphome/packages/core-esp32.yaml@master
+  # core: !include packages/core-esp8266.yaml
+  core: github://konnected-io/konnected-esphome/packages/core-esp32.yaml@master
   
   ####
   # WIFI
   # Enables WiFi connectivity and diagnostics.
-  wifi: !include packages/wifi.yaml
+  # wifi: !include packages/wifi.yaml
+  wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
 
   ####
   # WARNING BEEP
   # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer. This is 
   # implemented using a light entity with strobe effect to create a repeated beeping sound.
-  warning_beep: !include packages/warning-beep.yaml
+  # warning_beep: !include packages/warning-beep.yaml
+  warning_beep: github://konnected-io/konnected-esphome/packages/warning-beep.yaml@master
 
   ####
   # STATUS LED
   # Enables the onboard blue status LED as an activity/error indicator
-  status_led: !include packages/status-led.yaml
-  
+  # status_led: !include packages/status-led.yaml
+  status_led: github://konnected-io/konnected-esphome/packages/status-led.yaml@master
   
 dashboard_import:
   package_import_url: github://konnected-io/konnected-esphome/alarm-panel-esp8266.yaml@master

@@ -39,8 +39,8 @@ substitutions:
   friendly_name: Alarm Panel Pro
   project_name: konnected.alarm-panel-pro-esp32
   project_version: "0.1.0"
-  ethernet_type: LAN8720 # Alarm Panel Pro up to 1.7
-  # ethernet_type: RTL8201 # Alarm Panel Pro 1.8 and up
+  # ethernet_type: LAN8720 # Alarm Panel Pro up to 1.7
+  ethernet_type: RTL8201 # Alarm Panel Pro 1.8 and up
   sensor_debounce_time: 200ms
   warning_beep_pulse_time: 100ms
   warning_beep_pause_time: 130ms
@@ -189,26 +189,39 @@ switch:
 # PACKAGES
 # Each package includes the alarm panel feature
 # Remove or comment out any packages that you do not need or want.
+# If you're developing/installing locally, replace the github package line with the local package include above it.
 packages:
 
   ####
   # CORE
   # This package is required and sets up core features.
-  core: !include packages/core-esp32.yaml
-  # core: github://konnected-io/konnected-esphome/packages/core-esp32.yaml@master
+  # core: !include packages/core-esp32.yaml
+  core: github://konnected-io/konnected-esphome/packages/core-esp32.yaml@master
 
   ####
   # ETHERNET
   # Enables ethernet connectivity.
   # ethernet: !include packages/ethernet.yaml
+  ethernet: github://konnected-io/konnected-esphome/packages/ethernet.yaml@master
   
   ####
   # WIFI
   # Enables WiFi connectivity and diagnostics.
-  wifi: !include packages/wifi.yaml
+  # wifi: !include packages/wifi.yaml
+  wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
 
-  warning_beep: !include packages/warning-beep.yaml
-  status_led: !include packages/status-led.yaml
+  ####
+  # WARNING BEEP
+  # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer. This is 
+  # implemented using a light entity with strobe effect to create a repeated beeping sound.
+  # warning_beep: !include packages/warning-beep.yaml
+  warning_beep: github://konnected-io/konnected-esphome/packages/warning-beep.yaml@master
+
+  ####
+  # STATUS LED
+  # Enables the onboard blue status LED as an activity/error indicator
+  # status_led: !include packages/status-led.yaml
+  status_led: github://konnected-io/konnected-esphome/packages/status-led.yaml@master
   
   
 dashboard_import:
