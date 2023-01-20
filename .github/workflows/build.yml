@@ -16,7 +16,7 @@ jobs:
           pip3 install wheel
           pip3 install esphome
           esphome_version=$(esphome version)
-          echo "::set-output esphome_version=esphome_version::$esphome_version"
+          echo "::set-output name=esphome_version::$esphome_version"
       
       - name: Build Alarm Panel ESP8266
         id: build-alarm-panel-esp8266
