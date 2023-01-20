@@ -80,6 +80,7 @@ substitutions:
   warning_beep_pulse_time: 100ms
   warning_beep_pause_time: 130ms
   warning_beep_internal_only: "true"
+  sensor_debounce_time: 200ms
 
   ####
   # INTERNAL MAPPINGS
