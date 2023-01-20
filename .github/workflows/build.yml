@@ -1,0 +1,32 @@
+name: Build
+on: push
+jobs:
+  build-upload:
+    runs-on: ubuntu-latest
+    name: Build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install ESPHome
+        run: | 
+          pip3 install wheel
+          pip3 install esphome
+          esphome_version=$(esphome version)
+          echo "::set-output esphome_version=esphome_version::$esphome_version"
+      
+      - name: Build Alarm Panel ESP8266
+        id: build-alarm-panel-esp8266
+        run: esphome compile alarm-panel-esp8266.yaml
+          
+      - name: Build Alarm Panel ESP32
+        id: build-alarm-panel-pro-esp32
+        run: esphome compile alarm-panel-pro-esp32.yaml
+      
+      - name: Build Garage Door ESP8266
+        id: build-garage-door-esp8266
+        run: esphome compile garage-door-esp8266.yaml
+      
