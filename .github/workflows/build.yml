@@ -21,19 +21,19 @@ jobs:
       - id: alarm-panel-esp8266-version
         uses: jbutcher5/read-yaml@main
         with:
-          file: '../../alarm-panel-esp8266.yaml'
+          file: './alarm-panel-esp8266.yaml'
           key-path: '["substitutions", "project_version"]'
 
       - id: alarm-panel-pro-esp32-version
         uses: jbutcher5/read-yaml@main
         with:
-          file: '../../alarm-panel-pro-esp32.yaml'
+          file: './alarm-panel-pro-esp32.yaml'
           key-path: '["substitutions", "project_version"]'
 
       - id: garage-door-esp8266-version
         uses: jbutcher5/read-yaml@main
         with:
-          file: '../../garage-door-esp8266.yaml'
+          file: './garage-door-esp8266.yaml'
           key-path: '["substitutions", "project_version"]'
 
       - name: Build Alarm Panel ESP8266
@@ -76,7 +76,7 @@ jobs:
           fname=esphome-garage-door-esp8266-${{ steps.garage-door-esp8266-version.outputs.data }}.bin
           cp $build_path/firmware-factory.bin assets/$fname
       
-      - uses: keithweaver/aws-s3-github-action@v1.0.0
+      - uses: keithweaver/aws-s3-github-action@v1
         name: Upload Builds
         with:
           command: cp
