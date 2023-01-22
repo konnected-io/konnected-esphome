@@ -1,0 +1,5 @@
+packages:
+  alarm_panel_esp8266: !include ../alarm-panel-esp8266.yaml
+
+esphome:
+  name_add_mac_suffix: true

@@ -76,7 +76,7 @@ jobs:
           fname=esphome-garage-door-esp8266-${{ steps.garage-door-esp8266-version.outputs.data }}.bin
           cp $build_path/firmware-factory.bin assets/$fname
       
-      - uses: keithweaver/aws-s3-github-action@v1
+      - uses: keithweaver/aws-s3-github-action@v1.0.0
         name: Upload Builds
         with:
           command: cp
