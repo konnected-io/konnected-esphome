@@ -7,7 +7,7 @@ manifest = {
   builds: []
 }
 
-if ENV['ESP8266_IMAGE_URI'].present?
+if ENV['ESP8266_IMAGE_URI']
   manifest.builds << {
     chipFamily: 'ESP8266',
     parts: [
@@ -16,7 +16,7 @@ if ENV['ESP8266_IMAGE_URI'].present?
   }
 end
 
-if ENV['ESP32_IMAGE_URI'].present?
+if ENV['ESP32_IMAGE_URI']
   manifest.builds << {
     chipFamily: 'ESP32',
     parts: [
