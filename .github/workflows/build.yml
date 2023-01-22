@@ -24,7 +24,7 @@ jobs:
           file: './alarm-panel-esp8266.yaml'
           key-path: '["substitutions", "project_version"]'
 
-      - id: alarm-panel-pro-esp32-version
+      - id: alarm-panel-esp32-version
         uses: jbutcher5/read-yaml@main
         with:
           file: './alarm-panel-pro-esp32.yaml'
@@ -49,7 +49,7 @@ jobs:
         run: |
           esphome compile release/alarm-panel-pro-esp32-wifi.yaml
           build_path=release/.esphome/build/alarm-panel-pro/.pioenvs/alarm-panel-pro
-          fname=konnected-esphome-alarm-panel-esp32-wifi-${{ steps.alarm-panel-pro-esp32-version.outputs.data }}.bin
+          fname=konnected-esphome-alarm-panel-esp32-wifi-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
           cp $build_path/firmware-factory.bin assets/$fname
 
       - name: Build Alarm Panel ESP32 (LAN8720)
@@ -57,7 +57,7 @@ jobs:
         run: |
           esphome compile release/alarm-panel-pro-esp32-lan8720.yaml
           build_path=release/.esphome/build/alarm-panel-pro/.pioenvs/alarm-panel-pro
-          fname=konnected-esphome-alarm-panel-esp32-lan8720-${{ steps.alarm-panel-pro-esp32-version.outputs.data }}.bin
+          fname=konnected-esphome-alarm-panel-esp32-lan8720-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
           cp $build_path/firmware-factory.bin assets/$fname
 
       - name: Build Alarm Panel ESP32 (RTL8201)
@@ -65,7 +65,7 @@ jobs:
         run: |
           esphome compile release/alarm-panel-pro-esp32-rtl8201.yaml
           build_path=release/.esphome/build/alarm-panel-pro/.pioenvs/alarm-panel-pro
-          fname=konnected-esphome-alarm-panel-esp32-rtl8201-${{ steps.alarm-panel-pro-esp32-version.outputs.data }}.bin
+          fname=konnected-esphome-alarm-panel-esp32-rtl8201-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
           cp $build_path/firmware-factory.bin assets/$fname
 
       - name: Build Garage Door ESP8266
