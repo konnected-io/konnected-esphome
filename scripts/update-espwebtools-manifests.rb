@@ -8,7 +8,7 @@ manifest = {
 }
 
 if ENV['ESP8266_IMAGE_URI']
-  manifest.builds << {
+  manifest[:builds] << {
     chipFamily: 'ESP8266',
     parts: [
       { path: ENV['ESP8266_IMAGE_URI'], offset: 0 }
@@ -17,7 +17,7 @@ if ENV['ESP8266_IMAGE_URI']
 end
 
 if ENV['ESP32_IMAGE_URI']
-  manifest.builds << {
+  manifest[:builds] << {
     chipFamily: 'ESP32',
     parts: [
       { path: ENV['ESP32_IMAGE_URI'], offset: 0 }
