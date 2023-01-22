@@ -39,13 +39,16 @@ substitutions:
   friendly_name: Alarm Panel Pro
   project_name: konnected.alarm-panel-pro-esp32
   project_version: "0.1.0"
+
+  # ETHERNET CONFIG
+  # Uncomment one of the two lines below depending on your hardware version.
   # ethernet_type: LAN8720 # Alarm Panel Pro up to 1.7
-  ethernet_type: RTL8201 # Alarm Panel Pro 1.8 and up
+  # ethernet_type: RTL8201 # Alarm Panel Pro 1.8 and up
+
   sensor_debounce_time: 200ms
   warning_beep_pulse_time: 100ms
   warning_beep_pause_time: 130ms
   warning_beep_internal_only: "false"
-
 
   ####
   # ZONE MAPPING
@@ -212,15 +215,15 @@ packages:
 
   ####
   # ETHERNET
-  # Enables ethernet connectivity.
+  # Enables ethernet connectivity. Uncomment below to enable ethernet.
   # ethernet: !include packages/ethernet.yaml
-  ethernet: github://konnected-io/konnected-esphome/packages/ethernet.yaml@master
+  # ethernet: github://konnected-io/konnected-esphome/packages/ethernet.yaml@master
   
   ####
   # WIFI
-  # Enables WiFi connectivity and diagnostics.
+  # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
   # wifi: !include packages/wifi.yaml
-  wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
+  # wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
 
   ####
   # WARNING BEEP
