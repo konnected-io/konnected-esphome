@@ -95,8 +95,8 @@ jobs:
           MANIFEST_NAME: Konnected Alarm Panel for ESPHome (WiFi)
           MANIFEST_FNAME: esphome-alarm-panel-wifi.json
           MANIFEST_VERSION: "${{ steps.alarm-panel-esp8266-version.outputs.data }} / ${{ steps.alarm-panel-esp32-version.outputs.data }}"
-          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp8266-${{ steps.alarm-panel-esp8266-version.outputs.data }}.bin
-          ESP8266_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-wifi-${{ steps.alarm-panel-pro-esp32-version.outputs.data }}.bin
+          ESP8266_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp8266-${{ steps.alarm-panel-esp8266-version.outputs.data }}.bin
+          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-wifi-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
 
       - name: Build Manifest for Garage Door
         run: |
