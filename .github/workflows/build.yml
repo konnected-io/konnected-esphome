@@ -114,7 +114,7 @@ jobs:
           MANIFEST_NAME: Konnected Alarm Panel for ESPHome (LAN8720)
           MANIFEST_FNAME: esphome-alarm-panel-lan8720.json
           MANIFEST_VERSION: "${{ steps.alarm-panel-esp32-version.outputs.data }}"
-          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-lan8720-${{ steps.alarm-panel-pro-esp32-version.outputs.data }}.bin
+          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-lan8720-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
 
       - name: Build Manifest for Alarm Panel / RTL8201
         run: |
@@ -123,7 +123,7 @@ jobs:
           MANIFEST_NAME: Konnected Alarm Panel for ESPHome (RTL8201)
           MANIFEST_FNAME: esphome-alarm-panel-rtl8201.json
           MANIFEST_VERSION: "${{ steps.alarm-panel-esp32-version.outputs.data }}"
-          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-rtl8201-${{ steps.alarm-panel-pro-esp32-version.outputs.data }}.bin
+          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-rtl8201-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
 
       - uses: keithweaver/aws-s3-github-action@v1.0.0
         name: Upload Manifests
