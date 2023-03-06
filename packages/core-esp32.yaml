@@ -1,10 +1,14 @@
 esphome:
   name: $name
-  platform: ESP32
-  board: wesp32
   project:
     name: $project_name
     version: $project_version
+
+esp32:  
+  board: wesp32
+  framework:
+    type: arduino
+    version: recommended
 
 substitutions:
   status_led_inverted: "false"

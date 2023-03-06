@@ -1,0 +1,514 @@
+####
+##
+## Konnected Alarm Panel Pro (ESP32) Local Alarm
+## Firmware configuration for ESPHome
+##
+## filename: alarm-panel-pro-esp32-local-alarm.yaml
+## GitHub: https://github.com/konnected-io/konnected-esphome
+## Buy Konnected hardware: https://konnected.io
+## Help & Support: https://help@konnected.io (support is provided for purchasers of Konnected hardware)
+##
+## Inspired by and adapted from:
+##   https://github.com/jesserockz/esphome-configs/blob/main/alarm.yaml
+## 
+## Originally licensed under MIT License with the following copyright notice:
+## Copyright© 2022 Jesse Hills
+##
+## Copyright© 2023 Konnected Inc.
+##
+## Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+## files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+## modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+## is furnished to do so, subject to the following conditions:
+##
+## The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+##
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+## OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+## LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+## IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+##
+
+substitutions:
+  name: alarm-panel-pro
+  friendly_name: Alarm Panel Pro
+  project_name: konnected.alarm-panel-pro-esp32-local
+  project_version: "0.1.0"
+
+  sensor_debounce_time: 200ms
+  warning_beep_pulse_time: 100ms
+  warning_beep_pause_time: 130ms
+  warning_beep_internal_only: "false"
+
+  #### 
+  # ALARM CONFIG
+  alarm_code: !secret alarm_master_code
+  disarmed_state: '0'
+  arming_state: '1'
+  armed_away_state: '2'
+  armed_home_state: '3'
+  armed_night_state: '4'
+  pending_state: '5'
+  triggered_state: '6'
+
+  # yamllint disable-line rule:line-length
+  state_strings: '{"disarmed", "arming", "armed_away", "armed_home", "armed_night", "pending", "triggered"}'
+
+  ####
+  # ZONE MAPPING
+  # Do not edit this section.
+  zone1: GPIO4
+  zone2: GPIO2
+  zone3: GPIO15
+  zone4: GPIO13
+  zone5: GPIO18
+  zone6: GPIO14
+  zone7: GPIO33
+  zone8: GPIO32
+  zone9: GPIO36
+  zone10: GPIO39
+  zone11: GPIO34
+  zone12: GPIO35
+  alarm1: GPIO12
+  alarm2: GPIO5
+  out1: GPIO23
+  out2: GPIO5
+  status_led: GPIO3
+
+  ####
+  # CONNECTION MAPPINGS
+  warning_beep_pin: $out1
+
+######### Exposed to HA ##########
+
+# sensor.alarm_state
+#   - disarmed
+#   - arming
+#   - armed_away
+#   - armed_home
+#   - armed_night
+#   - pending
+#   - triggered
+
+# service.esphome_${name}_arm
+# service.esphome_${name}_arm_away
+
+# service.esphome_${name}_disarm
+#   data:
+#     code: "XXXXXXX"
+
+##################################
+
+####
+# INPUT ZONE COMMON SETTINGS
+# This snippet defines a YAML Ancor called input_zone_common
+# which is applied to each binary sensor (input zone) below
+.input_zone_common: &input_zone_common
+  platform: gpio   
+  filters:
+    - delayed_on_off: $sensor_debounce_time
+  on_state:
+    then:
+      - script.execute: evaluate_alarm
+      - light.turn_on: blue_status_led
+      - delay: 100ms
+      - light.turn_off: blue_status_led
+
+####
+# BINARY SENSOR SETUP
+# A "Binary Sensor" is any type of sensor that has two states, such as open/closed or detected/not-detected.
+# Set up zones for door, window, motion, smoke/fire, CO, water/leak sensors in this section by repeating the configuration
+# block below for each zone.
+binary_sensor:
+
+  - id: zone1
+    name: Zone 1
+    device_class: door
+    pin:
+      number: $zone1
+      mode: INPUT_PULLUP
+    <<: *input_zone_common
+
+  - id: zone2
+    name: Zone 2    
+    device_class: door
+    pin:
+      number: $zone2
+      mode: INPUT_PULLUP
+    <<: *input_zone_common
+
+  - id: zone3
+    name: Zone 3
+    device_class: motion
+    pin:
+      number: $zone3
+      mode: INPUT_PULLUP
+    <<: *input_zone_common
+
+  - id: zone4
+    name: Zone 4
+    device_class: window
+    pin:
+      number: $zone4
+      mode: INPUT_PULLUP
+    <<: *input_zone_common
+
+  - id: zone5
+    name: Zone 5
+    device_class: door
+    pin:
+      number: $zone5
+      mode: INPUT_PULLUP
+    <<: *input_zone_common
+
+  - id: zone6
+    name: Zone 6
+    device_class: window
+    pin:
+      number: $zone6
+      mode: INPUT_PULLUP
+    <<: *input_zone_common
+
+  - id: zone7    
+    name: Zone 7
+    device_class: window
+    pin:
+      number: $zone7
+      mode: INPUT_PULLUP
+    <<: *input_zone_common
+
+  - id: zone8
+    name: Zone 8
+    device_class: window
+    pin:
+      number: $zone8
+      mode: INPUT_PULLUP
+    <<: *input_zone_common
+
+switch:   
+  - id: alarm1
+    name: Alarm 1
+    pin: $alarm1
+    platform: gpio
+    icon: mdi:bullhorn
+
+  - id: alarm2
+    name: Alarm 2
+    pin: $alarm2
+    platform: gpio
+    icon: mdi:bullhorn
+
+  - platform: template
+    name: ${friendly_name} Trigger Siren
+    id: trigger_siren
+    icon: mdi:bullhorn
+    optimistic: true
+    entity_category: config
+    restore_state: true
+
+####
+# STATE MACHINE
+# The logic of armed and disarmed states and transitions is defined here
+external_components:
+  source: github://muxa/esphome-state-machine
+  components:
+    - state_machine
+
+state_machine:
+  diagram: mermaid
+  initial_state: 'disarmed'
+  states:
+    - name: 'disarmed'
+
+    - name: 'arming'
+      on_enter:
+        - light.turn_on:
+            id: warning_beep
+            effect: strobe
+        - delay: !lambda return id(arming_timeout).state * 1000;
+        - state_machine.transition: arm_away
+      on_leave:
+        - light.turn_off: warning_beep       
+
+    - name: 'armed_away'
+    - name: 'armed_home'
+    - name: 'armed_night'
+
+    - name: 'pending'
+      on_enter:
+        - light.turn_on:
+            id: warning_beep
+            effect: strobe
+        - delay: !lambda return id(pending_timeout).state * 1000;
+        - state_machine.transition: trigger
+      on_leave:
+        - light.turn_off: warning_beep
+
+    - name: 'triggered'
+      on_enter:
+        - if:
+            condition:
+              switch.is_on: trigger_siren
+            then:
+              - switch.turn_on: alarm1
+        - light.turn_on:
+            id: warning_beep
+            effect: strobe
+
+        - delay: !lambda return id(trigger_timeout).state * 60 * 1000;
+        - state_machine.transition: arm_away
+      on_leave:
+        - switch.turn_off: alarm1
+        - light.turn_off: warning_beep
+
+  inputs:
+    - name: arm_away
+      transitions:
+        - disarmed -> arming
+        - arming -> armed_away
+        - triggered -> armed_away
+
+    - name: arm_home
+      transitions:
+        - disarmed -> armed_home
+
+    - name: arm_night
+      transitions:
+        - disarmed -> armed_night
+
+    - name: disarm
+      transitions:
+        - arming -> disarmed
+        - armed_away -> disarmed
+        - armed_home -> disarmed
+        - armed_night -> disarmed
+        - pending -> disarmed
+        - triggered -> disarmed
+
+    - name: trip
+      transitions:
+        - armed_away -> pending
+        - armed_home -> pending
+        - armed_night -> pending
+
+    - name: trigger
+      transitions:
+        - armed_away -> triggered
+        - armed_home -> triggered
+        - armed_night -> triggered
+        - pending -> triggered
+
+    - name: failed_code
+      on_input:
+        - lambda: id(incorrect_codes) += 1;
+        - if:
+            condition:
+              lambda: return id(incorrect_codes) >= 3;
+            then:
+              - state_machine.transition: trigger
+script:
+  - id: evaluate_alarm
+    then:
+      - if:
+          condition:
+            and:
+              - or:
+                  - state_machine.state: armed_away
+                  - state_machine.state: armed_home
+                  - state_machine.state: armed_night
+              - or:
+                  - lambda: return id(zone1).state;
+                  - lambda: return id(zone2).state;
+                  - lambda: return id(zone3).state;
+                  - lambda: return id(zone4).state;
+                  - lambda: return id(zone5).state;
+                  - lambda: return id(zone6).state;
+                  - lambda: return id(zone7).state;
+                  - lambda: return id(zone8).state;
+          then:
+            - state_machine.transition: trip
+
+globals:
+  - id: alarm_state_global
+    type: 'uint8_t'
+    restore_value: true
+    initial_value: '0'
+  - id: incorrect_codes
+    type: 'uint8_t'
+    restore_value: true
+    initial_value: '0'
+
+sensor:
+  - platform: template
+    id: alarm_state
+    update_interval: 1s
+    lambda: return id(alarm_state_global);
+    filters:
+      - delta: 1
+    on_value:
+      - text_sensor.template.publish:
+          id: alarm_state_text
+          state: !lambda |-
+            static std::array<std::string, 7> strings = ${state_strings};
+            int y = (int) x;
+            return strings[y];
+
+  - platform: template
+    id: incorrect_codes_sensor
+    name: '${friendly_name} Incorrect Codes'
+    lambda: return id(incorrect_codes);
+    update_interval: never
+
+text_sensor:
+  - platform: state_machine
+    id: alarm_state_text
+    name: ${friendly_name} State
+
+  - platform: template
+    id: ready_state
+    name: ${friendly_name} Ready
+    disabled_by_default: true
+
+button:
+  - platform: template
+    name: Arm Away
+    on_press:
+      then:
+        - state_machine.transition: arm_away
+
+  - platform: template
+    name: Disarm
+    on_press:
+      then:
+        - state_machine.transition: disarm
+
+
+number:
+  - platform: template
+    id: arming_timeout
+    name: ${friendly_name} Arming Timeout
+    restore_value: true
+    initial_value: 60
+    unit_of_measurement: seconds
+    min_value: 0
+    max_value: 300
+    step: 1
+    mode: box
+    optimistic: true
+    entity_category: config
+
+  - platform: template
+    id: pending_timeout
+    name: ${friendly_name} Pending Timeout
+    restore_value: true
+    initial_value: 60
+    unit_of_measurement: seconds
+    min_value: 0
+    max_value: 300
+    step: 1
+    mode: box
+    optimistic: true
+    entity_category: config
+
+  - platform: template
+    id: trigger_timeout
+    name: ${friendly_name} Trigger Timeout
+    restore_value: true
+    initial_value: 5
+    unit_of_measurement: minutes
+    min_value: 1
+    max_value: 20
+    step: 1
+    mode: box
+    optimistic: true
+    entity_category: config
+
+
+####
+# PACKAGES
+# Each package includes the alarm panel feature
+# Remove or comment out any packages that you do not need or want.
+# If you're developing/installing locally, replace the github package line with the local package include above it.
+packages:
+
+  ####
+  # CORE
+  # This package is required and sets up core features.
+  core: !include packages/core-esp32.yaml
+  # core: github://konnected-io/konnected-esphome/packages/core-esp32.yaml@master
+
+  ####
+  # ETHERNET
+  # Enables ethernet connectivity. Uncomment below to enable ethernet.
+  # ethernet: !include packages/ethernet.yaml
+  # ethernet: github://konnected-io/konnected-esphome/packages/ethernet.yaml@master
+  
+  ####
+  # WIFI
+  # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
+  # wifi: !include packages/wifi.yaml
+  wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
+
+  ####
+  # WARNING BEEP
+  # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer. This is 
+  # implemented using a light entity with strobe effect to create a repeated beeping sound.
+  # warning_beep: !include packages/warning-beep.yaml
+  warning_beep: github://konnected-io/konnected-esphome/packages/warning-beep.yaml@master
+
+  ####
+  # STATUS LED
+  # Enables the onboard blue status LED as an activity/error indicator
+  # status_led: !include packages/status-led.yaml
+  status_led: github://konnected-io/konnected-esphome/packages/status-led.yaml@master
+  
+  
+dashboard_import:
+  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-pro-esp32.yaml@master
+  import_full_config: true
+
+####
+# WEB SEVER
+# Enables the built-in web server for viewing the device state, internals and controls via web browser
+# on the same local network as the device.
+web_server:
+  include_internal: true
+
+#### 
+# LOGGER
+# more: https://esphome.io/components/logger.html
+logger:
+  logs:
+    sensor: INFO
+
+####
+# NATIVE API for HOME ASSISTANT
+# Enables the native API for Home Assistant
+# more: https://esphome.io/components/api.html
+api:
+  services:
+    - service: arm
+      then:
+        - state_machine.transition: arm_away
+    - service: arm_away
+      then:
+        - state_machine.transition: arm_away
+
+    - service: disarm
+      variables:
+        code: string
+      then:
+        - if:
+            condition:
+              lambda: return code == "${alarm_code}";
+            then:
+              - state_machine.transition: disarm
+            else:
+              - state_machine.transition: failed_code
+
+
+#### 
+# OTA UPDATES
+# Enables over-the-air updates
+# more: https://esphome.io/components/ota.html
+ota:
