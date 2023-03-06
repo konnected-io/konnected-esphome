@@ -211,8 +211,8 @@ packages:
   ####
   # CORE
   # This package is required and sets up core features.
-  core: !include packages/core-esp32.yaml
-  # core: github://konnected-io/konnected-esphome/packages/core-esp32.yaml@master
+  # core: !include packages/core-esp32.yaml
+  core: github://konnected-io/konnected-esphome/packages/core-esp32.yaml@master
 
   ####
   # ETHERNET
