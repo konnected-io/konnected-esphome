@@ -1,4 +1,6 @@
 i2c:
+  sda: $sda
+  scl: $scl
   scan: True
 
 sensor:

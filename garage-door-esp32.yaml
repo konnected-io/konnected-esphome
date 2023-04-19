@@ -1,9 +1,9 @@
 ####
 ##
-## Konnected Garage Door Opener (ESP8266)
+## Konnected Garage Door Opener (ESP32)
 ## Firmware configuration for ESPHome
 ##
-## filename: garage-door-esp8266.yaml
+## filename: garage-door-esp32.yaml
 ## GitHub: https://github.com/konnected-io/konnected-esphome
 ## Buy Konnected hardware: https://konnected.io
 ## Help & Support: https://help@konnected.io (support is provided for purchasers of Konnected hardware)
@@ -51,7 +51,7 @@ substitutions:
   # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
   name: garage-door
   friendly_name: Garage Door Opener
-  project_name: konnected.garage-door-esp8266
+  project_name: konnected.garage-door-esp32
   project_version: "0.1.0"
   garage_door_cover_name: Garage Door
   switch_name: Switch
@@ -84,14 +84,14 @@ substitutions:
 
   ####
   # INTERNAL MAPPINGS
-  door_control_pin: D5
-  wired_sensor_pin: D9
-  warning_beep_pin: D8
-  warning_leds_pin: D7
-  output_switch_pin: D6
-  status_led: D4
-  sda: GPIO4
-  scl: GPIO5
+  door_control_pin: GPIO1
+  wired_sensor_pin: GPIO5
+  warning_beep_pin: GPIO4
+  warning_leds_pin: GPIO3
+  output_switch_pin: GPIO2
+  status_led: GPIO18
+  sda: GPIO6
+  scl: GPIO7
 
 
 ####
@@ -103,8 +103,8 @@ packages:
   ####
   # CORE
   # This package is required and sets up core features.
-  # core: !include packages/core-esp8266.yaml
-  core: github://konnected-io/konnected-esphome/packages/core-esp8266.yaml@master
+  core: !include packages/core-esp32-s3.yaml
+  # core: github://konnected-io/konnected-esphome/packages/core-esp8266.yaml@master
 
   ####
   # GARAGE DOOR COVER
@@ -121,72 +121,65 @@ packages:
   #
   # 3. WIRED & RANGE SENSORS - Include this line.
   # garage_door_cover: !include packages/garage-door-cover-wired-and-range.yaml
-  garage_door_cover: github://konnected-io/konnected-esphome/packages/garage-door-cover-wired-and-range.yaml@master
+  garage_door_cover: github://konnected-io/konnected-esphome/packages/garage-door-cover-wired.yaml@master
 
   ####
   # GARAGE DOOR WIRED SENSOR
   # Enables a wired contact sensor for reporting the open or closed state of the garage door
   # via the physical INPUT terminals.
-  # garage_door_wired_sensor: !include packages/garage-door-wired-sensor.yaml
-  garage_door_wired_sensor: github://konnected-io/konnected-esphome/packages/garage-door-wired-sensor.yaml@master
+  garage_door_wired_sensor: !include packages/garage-door-wired-sensor.yaml
+  # garage_door_wired_sensor: github://konnected-io/konnected-esphome/packages/garage-door-wired-sensor.yaml@master
 
   ####
   # GARAGE DOOR RANGE SENSOR
   # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
   # the open/closed state of an overhead garage door.
   # vl53l0x_range_sensor: !include packages/vl53l0x-range-sensor.yaml
-  vl53l0x_range_sensor: github://konnected-io/konnected-esphome/packages/vl53l0x-range-sensor.yaml@master
+  # vl53l0x_range_sensor: github://konnected-io/konnected-esphome/packages/vl53l0x-range-sensor.yaml@master
 
   ####
   # GARAGE DOOR OPENER BUTTON
   # Enables the garage door opener relay labeled DOOR on the Konnected Garage Door Opener as a button entity. When
   # pressed, the relay will close the dry contact, simulating a physical press of the garage door opener wall button.
-  # garage_door_opener_button: !include packages/garage-door-opener-button.yaml
-  garage_door_opener_button: github://konnected-io/konnected-esphome/packages/garage-door-opener-button.yaml@master
+  garage_door_opener_button: !include packages/garage-door-opener-button.yaml
+  # garage_door_opener_button: github://konnected-io/konnected-esphome/packages/garage-door-opener-button.yaml@master
 
   ####
   # SWITCH
   # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
-  # switch: !include packages/switch.yaml
-  switch: github://konnected-io/konnected-esphome/packages/switch.yaml@master
+  switch: !include packages/switch.yaml
+  # switch: github://konnected-io/konnected-esphome/packages/switch.yaml@master
 
   ####
   # WARNING LED
   # Enables the onboard warning LED light, with strobe effect. Used to visually warn of garage door automatic closing.
-  # warning_led: !include packages/warning-led.yaml
-  warning_led: github://konnected-io/konnected-esphome/packages/warning-led.yaml@master
+  warning_led: !include packages/warning-led.yaml
+  # warning_led: github://konnected-io/konnected-esphome/packages/warning-led.yaml@master
 
   ####
   # WARNING BEEP
   # Enables a repeating beep using the onboard piezo buzzer. Used to audibly warn of a garage door automatic closing.
-  # warning_beep: !include packages/warning-beep.yaml
-  warning_beep: github://konnected-io/konnected-esphome/packages/warning-beep.yaml@master
+  warning_beep: !include packages/warning-beep.yaml
+  # warning_beep: github://konnected-io/konnected-esphome/packages/warning-beep.yaml@master
 
   ####
   # WIFI
-  # wifi: !include packages/wifi.yaml
-  wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
+  wifi: !include packages/wifi-esp32.yaml
+  # wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
 
   ####
   # STATUS LED
   # Enables the onboard blue status LED as an activity/error indicator
-  # status_led: !include packages/status-led.yaml
-  status_led: github://konnected-io/konnected-esphome/packages/status-led.yaml@master
+  status_led: !include packages/status-led.yaml
+  # status_led: github://konnected-io/konnected-esphome/packages/status-led.yaml@master
     
 ####
 # DASHBOARD IMPORT
 # Enables automatic discovery and upgrades via ESPHome Dashboard
 # more: https://esphome.io/guides/getting_started_hassio.html
 dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/garage-door-esp8266.yaml@master
+  package_import_url: github://konnected-io/konnected-esphome/garage-door-esp32.yaml@master
   import_full_config: true
-
-####
-# WEB SEVER
-# Enables the built-in web server for viewing the device state, internals and controls via web browser
-# on the same local network as the device.
-web_server:
-  include_internal: true
 
 #### 
 # LOGGER

@@ -1,0 +1,14 @@
+esphome:
+  name: $name
+  project:
+    name: $project_name
+    version: $project_version
+
+esp32:  
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+    version: recommended
+
+substitutions:
+  status_led_inverted: "false"

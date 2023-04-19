@@ -1,5 +1,5 @@
 switch:
   - platform: gpio
-    pin: D6
+    pin: $output_switch_pin
     name: $switch_name
 

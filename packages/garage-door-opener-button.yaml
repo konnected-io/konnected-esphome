@@ -1,7 +1,7 @@
 output:
   - id: garage_door_opener_output
     platform: gpio
-    pin: D5
+    pin: $door_control_pin
 
 button:
   - platform: output

@@ -1,7 +1,7 @@
 output:
   - id: warning_led_output
     platform: gpio
-    pin: D7
+    pin: $warning_leds_pin
     
 light:
   - id: warning_led
