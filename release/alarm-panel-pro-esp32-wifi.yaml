@@ -1,5 +1,5 @@
 packages:
-  alarm_panel_pro_esp32: !include ../alarm-panel-pro-esp32.yaml
+  alarm_panel_pro_esp32: !include ../alarm-panel-pro-esp32-1.yaml
   wifi: !include ../packages/wifi.yaml
 
 esphome:

@@ -3,7 +3,7 @@
 ## Konnected Alarm Panel Pro (ESP32)
 ## Firmware configuration for ESPHome
 ##
-## filename: alarm-panel-pro-esp32.yaml
+## filename: alarm-panel-pro-esp32-1.yaml
 ## GitHub: https://github.com/konnected-io/konnected-esphome
 ## Buy Konnected hardware: https://konnected.io
 ## Help & Support: https://help@konnected.io (support is provided for purchasers of Konnected hardware)
@@ -35,14 +35,14 @@ substitutions:
   # By default, the name of the ESPHome device is "alarm-panel-pro-xxxxxx" where xxxxxx is a unique identifier. The device's
   # hostname on your network is also defined by the name, defaulting to "alarm-panel-pro-xxxxxx.local". Edit this variable to
   # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
-  name: alarm-panel-pro
-  friendly_name: Alarm Panel Pro
+  name: konnected2
+  friendly_name: Alarm Panel Pro 2
   project_name: konnected.alarm-panel-pro-esp32
   project_version: "0.1.0"
 
   # ETHERNET CONFIG
   # Uncomment one of the two lines below depending on your hardware version.
-  # ethernet_type: LAN8720 # Alarm Panel Pro up to 1.7
+  ethernet_type: LAN8720 # Alarm Panel Pro up to 1.7
   # ethernet_type: RTL8201 # Alarm Panel Pro 1.8 and up
 
   sensor_debounce_time: 200ms
@@ -95,94 +95,96 @@ substitutions:
 binary_sensor:
 
   - id: zone1
-    name: Zone 1
-    device_class: door
+    name: Rumpus
+    device_class: motion
     pin:
       number: $zone1
       mode: INPUT_PULLUP
     <<: *input_zone_common
 
   - id: zone2
-    name: Zone 2    
-    device_class: door
+    name: Part Armed
+    device_class: power
     pin:
       number: $zone2
       mode: INPUT_PULLUP
     <<: *input_zone_common
 
   - id: zone3
-    name: Zone 3
-    device_class: motion
+    name: Burglar Alarm
+    device_class: light
     pin:
       number: $zone3
       mode: INPUT_PULLUP
     <<: *input_zone_common
 
   - id: zone4
-    name: Zone 4
-    device_class: window
+    name: Armed
+    device_class: door
     pin:
       number: $zone4
       mode: INPUT_PULLUP
     <<: *input_zone_common
 
   - id: zone5
-    name: Zone 5
-    device_class: door
+    name: Master Bedroom
+    device_class: motion
     pin:
       number: $zone5
       mode: INPUT_PULLUP
     <<: *input_zone_common
 
   - id: zone6
-    name: Zone 6
-    device_class: window
+    name: Natasha Office
+    device_class: motion
     pin:
       number: $zone6
       mode: INPUT_PULLUP
     <<: *input_zone_common
 
   - id: zone7    
-    name: Zone 7
-    device_class: window
+    name: Walk In Wardrobe
+    device_class: motion
     pin:
       number: $zone7
       mode: INPUT_PULLUP
     <<: *input_zone_common
 
   - id: zone8
-    name: Zone 8
-    device_class: window
+    name: Manhole
+    device_class: opening
     pin:
       number: $zone8
       mode: INPUT_PULLUP
     <<: *input_zone_common
 
   - id: zone9
-    name: Zone 9
+    name: Unused 9
+    device_class: motion
     pin:
       number: $zone9
       mode: INPUT
     <<: *input_zone_common
 
   - id: zone10
-    name: Zone 10
+    name: Unused 10
+    device_class: power
     pin:
       number: $zone10
       mode: INPUT
     <<: *input_zone_common
 
   - id: zone11
-    name: Zone 11
-    platform: gpio    
+    name: Unused 11
+    device_class: light
     pin:
       number: $zone11
       mode: INPUT
     <<: *input_zone_common
 
   - id: zone12
-    name: Zone 12
-    platform: gpio    
+    name: Siren Tamper
+    device_class: tamper
     pin:
       number: $zone12
       mode: INPUT
@@ -195,10 +197,24 @@ switch:
     platform: gpio
     icon: mdi:bullhorn
 
+
   - id: alarm2
-    name: Alarm 2
+    name: Garage Open/Close
     pin: $alarm2
     platform: gpio
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - delay: 1000ms
+      - switch.turn_off: alarm2
+
+  - id: alarm3
+    name: Part Arm on/Off
+    pin: $out1
+    platform: gpio
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - delay: 1000ms
+      - switch.turn_off: alarm3
 
 ####
 # PACKAGES
@@ -216,8 +232,8 @@ packages:
   ####
   # ETHERNET
   # Enables ethernet connectivity. Uncomment below to enable ethernet.
-  # ethernet: !include packages/ethernet.yaml
-  # ethernet: github://konnected-io/konnected-esphome/packages/ethernet.yaml@master
+  ethernet: !include packages/ethernet.yaml
+  #ethernet: github://konnected-io/konnected-esphome/packages/ethernet.yaml@master
   
   ####
   # WIFI
@@ -229,8 +245,8 @@ packages:
   # WARNING BEEP
   # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer. This is 
   # implemented using a light entity with strobe effect to create a repeated beeping sound.
-  # warning_beep: !include packages/warning-beep.yaml
-  warning_beep: github://konnected-io/konnected-esphome/packages/warning-beep.yaml@master
+  #warning_beep: !include packages/warning-beep.yaml
+  #warning_beep: github://konnected-io/konnected-esphome/packages/warning-beep.yaml@master
 
   ####
   # STATUS LED
@@ -240,7 +256,7 @@ packages:
   
   
 dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-pro-esp32.yaml@master
+  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-pro-esp32-1.yaml@master
   import_full_config: true
 
 ####

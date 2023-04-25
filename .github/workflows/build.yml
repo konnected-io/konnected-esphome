@@ -27,7 +27,7 @@ jobs:
       - id: alarm-panel-esp32-version
         uses: jbutcher5/read-yaml@main
         with:
-          file: './alarm-panel-pro-esp32.yaml'
+          file: './alarm-panel-pro-esp32-1.yaml'
           key-path: '["substitutions", "project_version"]'
 
       - id: garage-door-esp8266-version

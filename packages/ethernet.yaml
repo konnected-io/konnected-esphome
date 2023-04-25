@@ -1,5 +1,6 @@
 ethernet:
   type: $ethernet_type
+  domain: .sethkor.com
   mdc_pin: GPIO16
   mdio_pin: GPIO17
   clk_mode: GPIO0_IN
