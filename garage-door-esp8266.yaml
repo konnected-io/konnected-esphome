@@ -52,7 +52,7 @@ substitutions:
   name: garage-door
   friendly_name: Garage Door Opener
   project_name: konnected.garage-door-esp8266
-  project_version: "0.1.0"
+  project_version: "0.1.1"
   garage_door_cover_name: Garage Door
   switch_name: Switch
 
@@ -121,7 +121,7 @@ packages:
   #
   # 3. WIRED & RANGE SENSORS - Include this line.
   # garage_door_cover: !include packages/garage-door-cover-wired-and-range.yaml
-  garage_door_cover: github://konnected-io/konnected-esphome/packages/garage-door-cover-wired-and-range.yaml@master
+  garage_door_cover: github://konnected-io/konnected-esphome/packages/garage-door-cover-range.yaml@master
 
   ####
   # GARAGE DOOR WIRED SENSOR

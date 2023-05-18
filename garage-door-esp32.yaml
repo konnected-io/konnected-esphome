@@ -121,57 +121,57 @@ packages:
   #
   # 3. WIRED & RANGE SENSORS - Include this line.
   # garage_door_cover: !include packages/garage-door-cover-wired-and-range.yaml
-  garage_door_cover: github://konnected-io/konnected-esphome/packages/garage-door-cover-wired.yaml@master
+  garage_door_cover: github://konnected-io/konnected-esphome/packages/garage-door-cover-range.yaml@master
 
   ####
   # GARAGE DOOR WIRED SENSOR
   # Enables a wired contact sensor for reporting the open or closed state of the garage door
   # via the physical INPUT terminals.
-  garage_door_wired_sensor: !include packages/garage-door-wired-sensor.yaml
-  # garage_door_wired_sensor: github://konnected-io/konnected-esphome/packages/garage-door-wired-sensor.yaml@master
+  # garage_door_wired_sensor: !include packages/garage-door-wired-sensor.yaml
+  garage_door_wired_sensor: github://konnected-io/konnected-esphome/packages/garage-door-wired-sensor.yaml@master
 
   ####
   # GARAGE DOOR RANGE SENSOR
   # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
   # the open/closed state of an overhead garage door.
   # vl53l0x_range_sensor: !include packages/vl53l0x-range-sensor.yaml
-  # vl53l0x_range_sensor: github://konnected-io/konnected-esphome/packages/vl53l0x-range-sensor.yaml@master
+  vl53l0x_range_sensor: github://konnected-io/konnected-esphome/packages/vl53l0x-range-sensor.yaml@master
 
   ####
   # GARAGE DOOR OPENER BUTTON
   # Enables the garage door opener relay labeled DOOR on the Konnected Garage Door Opener as a button entity. When
   # pressed, the relay will close the dry contact, simulating a physical press of the garage door opener wall button.
-  garage_door_opener_button: !include packages/garage-door-opener-button.yaml
-  # garage_door_opener_button: github://konnected-io/konnected-esphome/packages/garage-door-opener-button.yaml@master
+  # garage_door_opener_button: !include packages/garage-door-opener-button.yaml
+  garage_door_opener_button: github://konnected-io/konnected-esphome/packages/garage-door-opener-button.yaml@master
 
   ####
   # SWITCH
   # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
-  switch: !include packages/switch.yaml
-  # switch: github://konnected-io/konnected-esphome/packages/switch.yaml@master
+  # switch: !include packages/switch.yaml
+  switch: github://konnected-io/konnected-esphome/packages/switch.yaml@master
 
   ####
   # WARNING LED
   # Enables the onboard warning LED light, with strobe effect. Used to visually warn of garage door automatic closing.
-  warning_led: !include packages/warning-led.yaml
-  # warning_led: github://konnected-io/konnected-esphome/packages/warning-led.yaml@master
+  # warning_led: !include packages/warning-led.yaml
+  warning_led: github://konnected-io/konnected-esphome/packages/warning-led.yaml@master
 
   ####
   # WARNING BEEP
   # Enables a repeating beep using the onboard piezo buzzer. Used to audibly warn of a garage door automatic closing.
-  warning_beep: !include packages/warning-beep.yaml
-  # warning_beep: github://konnected-io/konnected-esphome/packages/warning-beep.yaml@master
+  # warning_beep: !include packages/warning-beep.yaml
+  warning_beep: github://konnected-io/konnected-esphome/packages/warning-beep.yaml@master
 
   ####
   # WIFI
-  wifi: !include packages/wifi-esp32.yaml
-  # wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
+  # wifi: !include packages/wifi-esp32.yaml
+  wifi: github://konnected-io/konnected-esphome/packages/wifi-esp32.yaml@master
 
   ####
   # STATUS LED
   # Enables the onboard blue status LED as an activity/error indicator
-  status_led: !include packages/status-led.yaml
-  # status_led: github://konnected-io/konnected-esphome/packages/status-led.yaml@master
+  # status_led: !include packages/status-led.yaml
+  status_led: github://konnected-io/konnected-esphome/packages/status-led.yaml@master
     
 ####
 # DASHBOARD IMPORT
@@ -197,3 +197,6 @@ api:
 # Enables over-the-air updates
 # more: https://esphome.io/components/ota.html
 ota:
+
+web_server:
+  include_internal: true

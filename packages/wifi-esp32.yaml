@@ -3,6 +3,7 @@ wifi:
   ap:
 
 improv_serial:
+captive_portal:
 
 # esp32_improv:
 #   authorizer: false
