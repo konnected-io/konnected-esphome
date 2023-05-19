@@ -25,6 +25,13 @@ sensor:
     id: range_sensor
     entity_category: diagnostic
     
+api:
+  services:
+    - service: calibrate_open_garage
+      then:
+        - number.set:
+            id: open_garage_door_distance_from_ceiling
+            value: !lambda return id(range_sensor).state;
 
 binary_sensor:
   - platform: template
