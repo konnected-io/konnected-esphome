@@ -32,7 +32,7 @@ binary_sensor:
     internal: true
     lambda: |-
       float calibrated_distance = id(open_garage_door_distance_from_ceiling).state;
-      if (std::isnan(id(range_sensor).state) || id(range_sensor).state > calibratedsired_distance + $open_garage_door_distance_margin_of_error) {
+      if (std::isnan(id(range_sensor).state) || id(range_sensor).state > calibrated_distance + $open_garage_door_distance_margin_of_error) {
         return false;
       } else if (id(range_sensor).state > calibrated_distance - $open_garage_door_distance_margin_of_error){
         return true;
