@@ -190,7 +190,7 @@ api:
       then:
         - number.set:
             id: open_garage_door_distance_from_ceiling
-            value: !lambda "return id(range_sensor).state;"
+            value: !lambda return id(range_sensor).state;
 
 #### 
 # OTA UPDATES
