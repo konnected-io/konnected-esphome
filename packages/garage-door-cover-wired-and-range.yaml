@@ -19,8 +19,7 @@ cover:
           effect: strobe
       - delay: $garage_door_close_warning_duration
       - button.press: garage_door_opener_button
-    stop_action:
-      - button.press: garage_door_opener_button
-    on_closed:
       - light.turn_off: warning_led
       - light.turn_off: warning_beep
+    stop_action:
+      - button.press: garage_door_opener_button

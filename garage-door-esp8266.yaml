@@ -52,7 +52,7 @@ substitutions:
   name: garage-door
   friendly_name: Garage Door Opener
   project_name: konnected.garage-door-esp8266
-  project_version: "0.1.1"
+  project_version: "0.2.0"
   garage_door_cover_name: Garage Door
   switch_name: Switch
 
@@ -60,12 +60,6 @@ substitutions:
   # GARAGE DOOR OPENER MOMENTARY DURATION
   # Duration to make the relay contact closure for the garage door opener button circuit. 
   garage_door_opener_momentary_duration: 300ms
-
-  ####
-  # OPEN GARAGE DOOR DISTANCE FROM CEILING
-  # The optical laser range sensor works to detect the open/closed state of the garage by looking down from the ceiling
-  # to detect the rolled-up garage door in front of it. Enter the distance (in meters) measured when the garage door is fully open.
-  open_garage_door_distance_from_ceiling: "0.68"
 
   ####
   # OPEN GARAGE DOOR DISTANCE MARGIN OF ERROR
@@ -198,6 +192,12 @@ logger:
 # Enables the native API for Home Assistant
 # more: https://esphome.io/components/api.html
 api:
+  services:
+    - service: calibrate_open_garage
+      then:
+        - number.set:
+            id: open_garage_door_distance_from_ceiling
+            value: !lambda "return id(range_sensor).state;"
 
 #### 
 # OTA UPDATES

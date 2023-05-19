@@ -62,12 +62,6 @@ substitutions:
   garage_door_opener_momentary_duration: 300ms
 
   ####
-  # OPEN GARAGE DOOR DISTANCE FROM CEILING
-  # The optical laser range sensor works to detect the open/closed state of the garage by looking down from the ceiling
-  # to detect the rolled-up garage door in front of it. Enter the distance (in meters) measured when the garage door is fully open.
-  open_garage_door_distance_from_ceiling: "0.68"
-
-  ####
   # OPEN GARAGE DOOR DISTANCE MARGIN OF ERROR
   # The margin of error (+/-) in meters from the value above to consider the garage door in the open position.
   open_garage_door_distance_margin_of_error: "0.1"
@@ -191,6 +185,12 @@ logger:
 # Enables the native API for Home Assistant
 # more: https://esphome.io/components/api.html
 api:
+  services:
+    - service: calibrate_open_garage
+      then:
+        - number.set:
+            id: open_garage_door_distance_from_ceiling
+            value: !lambda "return id(range_sensor).state;"
 
 #### 
 # OTA UPDATES
