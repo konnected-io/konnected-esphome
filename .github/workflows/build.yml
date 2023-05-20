@@ -4,6 +4,10 @@ jobs:
   build-upload:
     runs-on: ubuntu-latest
     name: Build
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -71,7 +75,7 @@ jobs:
       - name: Build Garage Door ESP8266
         id: build-garage-door-esp8266
         run: |
-          esphome compile garage-door-esp8266.yaml
+          esphome compile release/garage-door-esp8266.yaml
           build_path=.esphome/build/garage-door/.pioenvs/garage-door
           fname=konnected-esphome-garage-door-esp8266-${{ steps.garage-door-esp8266-version.outputs.data }}.bin
           cp $build_path/firmware-factory.bin assets/$fname
@@ -124,14 +128,12 @@ jobs:
           MANIFEST_FNAME: esphome-alarm-panel-rtl8201.json
           MANIFEST_VERSION: "${{ steps.alarm-panel-esp32-version.outputs.data }}"
           ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-rtl8201-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
-
-      - uses: keithweaver/aws-s3-github-action@v1.0.0
-        name: Upload Manifests
+      
+      - name: Deploy
+        uses: lbertenasco/s3-deploy@v1
         with:
-          command: cp
-          source: manifests/
-          destination: s3://install-konnected/manifests/
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_region: us-east-1
-          flags: --recursive --acl public-read
+          folder: manifests
+          bucket: install-konnected
+          dist-id: E2FDL2RANMI9J7
+          invalidation: /manifests/*
+
