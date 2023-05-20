@@ -25,4 +25,4 @@ if ENV['ESP32_IMAGE_URI']
   }
 end
 
-File.write("manifests/#{ENV['MANIFEST_FNAME']}", JSON.dump(manifest))
+File.write("install-konnected/manifests/#{ENV['MANIFEST_FNAME']}", JSON.dump(manifest))

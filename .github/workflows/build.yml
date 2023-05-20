@@ -132,7 +132,7 @@ jobs:
       - name: Deploy
         uses: lbertenasco/s3-deploy@v1
         with:
-          folder: manifests
+          folder: install-konnected
           bucket: install-konnected
           dist-id: E2FDL2RANMI9J7
           invalidation: /manifests/*
