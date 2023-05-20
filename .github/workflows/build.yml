@@ -76,9 +76,9 @@ jobs:
         id: build-garage-door-esp8266
         run: |
           esphome compile release/garage-door-esp8266.yaml
-          build_path=.esphome/build/garage-door/.pioenvs/garage-door
+          build_path=release/.esphome/build/garage-door/.pioenvs/garage-door
           fname=konnected-esphome-garage-door-esp8266-${{ steps.garage-door-esp8266-version.outputs.data }}.bin
-          cp $build_path/firmware.bin assets/$fname
+          cp $build_path/firmware-factory.bin assets/$fname
       
       - uses: keithweaver/aws-s3-github-action@v1.0.0
         name: Upload Builds
