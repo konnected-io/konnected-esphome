@@ -91,7 +91,7 @@ jobs:
           aws_region: us-east-2
           flags: --recursive --acl public-read
 
-      - run: mkdir manifests
+      - run: mkdir -p install-konnected/manifests
       - name: Build Manifest for Alarm Panel / WiFi
         run: |
           ruby ./scripts/update-espwebtools-manifests.rb
