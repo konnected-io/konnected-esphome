@@ -173,7 +173,7 @@ packages:
 # more: https://esphome.io/guides/getting_started_hassio.html
 dashboard_import:
   package_import_url: github://konnected-io/konnected-esphome/garage-door-esp32.yaml@master
-  import_full_config: true
+  import_full_config: false
 
 #### 
 # LOGGER

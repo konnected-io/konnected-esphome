@@ -208,41 +208,40 @@ switch:
 # If you're developing/installing locally, replace the github package line with the local package include above it.
 packages:
 
-  ####
-  # CORE
-  # This package is required and sets up core features.
-  # core: !include packages/core-esp32.yaml
-  core: github://konnected-io/konnected-esphome/packages/core-esp32.yaml@master
+  remote_package:
+    url: http://github.com/konnected-io/konnected-esphome
+    ref: master
+    refresh: 5min
+    files:
 
-  ####
-  # ETHERNET
-  # Enables ethernet connectivity. Uncomment below to enable ethernet.
-  # ethernet: !include packages/ethernet.yaml
-  # ethernet: github://konnected-io/konnected-esphome/packages/ethernet.yaml@master
-  
-  ####
-  # WIFI
-  # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
-  # wifi: !include packages/wifi.yaml
-  wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
+      ####
+      # CORE
+      # This package is required and sets up core features.
+      # core: !include packages/core-esp32.yaml
+      - packages/core-esp32.yaml
 
-  ####
-  # WARNING BEEP
-  # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer. This is 
-  # implemented using a light entity with strobe effect to create a repeated beeping sound.
-  # warning_beep: !include packages/warning-beep.yaml
-  warning_beep: github://konnected-io/konnected-esphome/packages/warning-beep.yaml@master
+      ####
+      # WIFI
+      # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
+      # wifi: !include packages/wifi.yaml
+      - packages/wifi.yaml
 
-  ####
-  # STATUS LED
-  # Enables the onboard blue status LED as an activity/error indicator
-  # status_led: !include packages/status-led.yaml
-  status_led: github://konnected-io/konnected-esphome/packages/status-led.yaml@master
-  
+      ####
+      # WARNING BEEP
+      # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer. This is 
+      # implemented using a light entity with strobe effect to create a repeated beeping sound.
+      # warning_beep: !include packages/warning-beep.yaml
+      - packages/warning-beep.yaml
+
+      ####
+      # STATUS LED
+      # Enables the onboard blue status LED as an activity/error indicator
+      # status_led: !include packages/status-led.yaml
+      - packages/status-led.yaml
   
 dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-pro-esp32.yaml@master
-  import_full_config: true
+  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-pro-esp32-wifi.yaml@master
+  import_full_config: false
 
 ####
 # WEB SEVER
