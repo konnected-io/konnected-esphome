@@ -87,85 +87,88 @@ substitutions:
   sda: GPIO6
   scl: GPIO7
 
-
 ####
 # PACKAGES
 # Each package includes a Garage Door Opener feature described
 # Remove or comment out any packages that you do not need or want.
 packages:
 
-  ####
-  # CORE
-  # This package is required and sets up core features.
-  core: !include packages/core-esp32-s3.yaml
-  # core: github://konnected-io/konnected-esphome/packages/core-esp8266.yaml@master
+  remote_package:
+    url: http://github.com/konnected-io/konnected-esphome
+    ref: master
+    refresh: 5min
+    files:
 
-  ####
-  # GARAGE DOOR COVER
-  # The Garage Door Cover is the main user interface entity representing a garage door in Home Assistant.
-  # more: https://www.home-assistant.io/integrations/cover/
-  #
-  # CHOOSE ONE of the following cover packages depending on the sensors used to determine the open/closed state of the door.
-  #
-  # 1. WIRED SENSOR ONLY - Include this line and remove or comment out the vl53l0x_range_sensor package below.
-  # garage_door_cover: !include packages/garage-door-cover-wired.yaml
-  #
-  # 2. RANGE SENSOR ONLY - Include this line and remove or comment out the garage_door_wired_sensor package below.
-  # garage_door_cover: !include packages/garage-door-cover-range.yaml
-  #
-  # 3. WIRED & RANGE SENSORS - Include this line.
-  # garage_door_cover: !include packages/garage-door-cover-wired-and-range.yaml
-  garage_door_cover: github://konnected-io/konnected-esphome/packages/garage-door-cover-range.yaml@master
+      ####
+      # CORE
+      # This package is required and sets up core features.
+      # core: !include packages/core-esp32.yaml
+      - packages/core-esp32-s3.yaml
 
-  ####
-  # GARAGE DOOR WIRED SENSOR
-  # Enables a wired contact sensor for reporting the open or closed state of the garage door
-  # via the physical INPUT terminals.
-  # garage_door_wired_sensor: !include packages/garage-door-wired-sensor.yaml
-  garage_door_wired_sensor: github://konnected-io/konnected-esphome/packages/garage-door-wired-sensor.yaml@master
+      ####
+      # GARAGE DOOR COVER
+      # The Garage Door Cover is the main user interface entity representing a garage door in Home Assistant.
+      # more: https://www.home-assistant.io/integrations/cover/
+      #
+      # CHOOSE ONE of the following cover packages depending on the sensors used to determine the open/closed state of the door.
+      #
+      # 1. WIRED SENSOR ONLY - Include this line and remove or comment out the vl53l0x_range_sensor package below.
+      # - packages/garage-door-cover-wired.yaml
+      #
+      # 2. RANGE SENSOR ONLY - Include this line and remove or comment out the garage_door_wired_sensor package below.
+      # - packages/garage-door-cover-range.yaml
+      #
+      # 3. WIRED & RANGE SENSORS - Include this line.
+      # - packages/garage-door-cover-wired-and-range.yaml
+      - packages/garage-door-cover-range.yaml
 
-  ####
-  # GARAGE DOOR RANGE SENSOR
-  # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
-  # the open/closed state of an overhead garage door.
-  # vl53l0x_range_sensor: !include packages/vl53l0x-range-sensor.yaml
-  vl53l0x_range_sensor: github://konnected-io/konnected-esphome/packages/vl53l0x-range-sensor.yaml@master
+      ####
+      # GARAGE DOOR WIRED SENSOR
+      # Enables a wired contact sensor for reporting the open or closed state of the garage door
+      # via the physical INPUT terminals.
+      - packages/garage-door-wired-sensor.yaml
 
-  ####
-  # GARAGE DOOR OPENER BUTTON
-  # Enables the garage door opener relay labeled DOOR on the Konnected Garage Door Opener as a button entity. When
-  # pressed, the relay will close the dry contact, simulating a physical press of the garage door opener wall button.
-  # garage_door_opener_button: !include packages/garage-door-opener-button.yaml
-  garage_door_opener_button: github://konnected-io/konnected-esphome/packages/garage-door-opener-button.yaml@master
+      ####
+      # GARAGE DOOR RANGE SENSOR
+      # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
+      # the open/closed state of an overhead garage door.    
+      - packages/vl53l0x-range-sensor.yaml
 
-  ####
-  # SWITCH
-  # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
-  # switch: !include packages/switch.yaml
-  switch: github://konnected-io/konnected-esphome/packages/switch.yaml@master
+      ####
+      # GARAGE DOOR OPENER BUTTON
+      # Enables the garage door opener relay labeled DOOR on the Konnected Garage Door Opener as a button entity. When
+      # pressed, the relay will close the dry contact, simulating a physical press of the garage door opener wall button.
+      - packages/garage-door-opener-button.yaml
 
-  ####
-  # WARNING LED
-  # Enables the onboard warning LED light, with strobe effect. Used to visually warn of garage door automatic closing.
-  # warning_led: !include packages/warning-led.yaml
-  warning_led: github://konnected-io/konnected-esphome/packages/warning-led.yaml@master
+      ####
+      # SWITCH
+      # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
+      # switch: !include packages/switch.yaml
+      - packages/switch.yaml
 
-  ####
-  # WARNING BEEP
-  # Enables a repeating beep using the onboard piezo buzzer. Used to audibly warn of a garage door automatic closing.
-  # warning_beep: !include packages/warning-beep.yaml
-  warning_beep: github://konnected-io/konnected-esphome/packages/warning-beep.yaml@master
+      ####
+      # WARNING LED
+      # Enables the onboard warning LED light, with strobe effect. Used to visually warn of garage door automatic closing.
+      # warning_led: !include packages/warning-led.yaml
+      - packages/warning-led.yaml
 
-  ####
-  # WIFI
-  # wifi: !include packages/wifi-esp32.yaml
-  wifi: github://konnected-io/konnected-esphome/packages/wifi-esp32.yaml@master
+      ####
+      # WIFI
+      # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
+      # wifi: !include packages/wifi.yaml
+      - packages/wifi.yaml
 
-  ####
-  # STATUS LED
-  # Enables the onboard blue status LED as an activity/error indicator
-  # status_led: !include packages/status-led.yaml
-  status_led: github://konnected-io/konnected-esphome/packages/status-led.yaml@master
+      ####
+      # WARNING BEEP
+      # Enables a repeating beep using the onboard piezo buzzer. Used to audibly warn of a garage door automatic closing.
+      # warning_beep: !include packages/warning-beep.yaml
+      - packages/warning-beep.yaml
+
+      ####
+      # STATUS LED
+      # Enables the onboard blue status LED as an activity/error indicator
+      # status_led: !include packages/status-led.yaml
+      - packages/status-led.yaml
     
 ####
 # DASHBOARD IMPORT
