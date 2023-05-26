@@ -40,6 +40,12 @@ jobs:
           file: './garage-door-esp8266.yaml'
           key-path: '["substitutions", "project_version"]'
 
+      - id: garage-door-esp32-version
+        uses: jbutcher5/read-yaml@main
+        with:
+          file: './garage-door-esp32.yaml'
+          key-path: '["substitutions", "project_version"]'
+  
       - name: Build Alarm Panel ESP8266
         id: build-alarm-panel-esp8266
         run: | 
@@ -80,6 +86,14 @@ jobs:
           fname=konnected-esphome-garage-door-esp8266-${{ steps.garage-door-esp8266-version.outputs.data }}.bin
           cp $build_path/firmware-factory.bin assets/$fname
       
+      - name: Build Garage Door ESP32
+        id: build-garage-door-esp32
+        run: |
+          esphome compile release/garage-door-esp32.yaml
+          build_path=release/.esphome/build/garage-door/.pioenvs/garage-door
+          fname=konnected-esphome-garage-door-esp32-${{ steps.garage-door-esp32-version.outputs.data }}.bin
+          cp $build_path/firmware-factory.bin assets/$fname
+  
       - uses: keithweaver/aws-s3-github-action@v1.0.0
         name: Upload Builds
         with:
@@ -110,6 +124,7 @@ jobs:
           MANIFEST_FNAME: esphome-garage-door-wifi.json
           MANIFEST_VERSION: "${{ steps.garage-door-esp8266-version.outputs.data }}"
           ESP8266_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-garage-door-esp8266-${{ steps.garage-door-esp8266-version.outputs.data }}.bin
+          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-garage-door-esp32-${{ steps.garage-door-esp32-version.outputs.data }}.bin
 
       - name: Build Manifest for Alarm Panel / LAN8720
         run: |

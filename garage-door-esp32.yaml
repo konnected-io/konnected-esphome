@@ -52,7 +52,7 @@ substitutions:
   name: garage-door
   friendly_name: Garage Door Opener
   project_name: konnected.garage-door-esp32
-  project_version: "0.1.0"
+  project_version: "0.2.0"
   garage_door_cover_name: Garage Door
   switch_name: Switch
 
