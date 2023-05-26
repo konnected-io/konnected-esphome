@@ -37,8 +37,8 @@ substitutions:
   # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
   name: alarm-panel-pro
   friendly_name: Alarm Panel Pro
-  project_name: konnected.alarm-panel-pro-esp32
-  project_version: "0.1.0"
+  project_name: konnected.alarm-panel-pro-esp32-wifi
+  project_version: "0.2.0"
 
   # ETHERNET CONFIG
   # Uncomment one of the two lines below depending on your hardware version.
@@ -224,7 +224,7 @@ packages:
   # WIFI
   # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
   # wifi: !include packages/wifi.yaml
-  # wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
+  wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
 
   ####
   # WARNING BEEP

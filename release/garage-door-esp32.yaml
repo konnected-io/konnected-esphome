@@ -1,5 +1,2 @@
 packages:
   garage_door_esp32: !include ../garage-door-esp32.yaml
-
-esphome:
-  name_add_mac_suffix: true
