@@ -1,5 +1,10 @@
 name: Build
-on: push
+
+on: 
+  push:
+  release:
+    types: [created]
+
 jobs:
   build-upload:
     runs-on: ubuntu-latest
@@ -105,8 +110,27 @@ jobs:
           aws_region: us-east-2
           flags: --recursive --acl public-read
 
+      - name: Get release
+        if: github.event.release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.3
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Upload asset to release
+        if: github.event.release
+        uses: bgpat/release-asset-action@03b0c30db1c4031ce3474740b0e4275cd7e126a3
+        with:
+          pattern: "assets/*"
+          release-url: ${{ steps.get_release.outputs.upload_url }}
+          allow-overwrite: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          
       - run: mkdir -p install-konnected/manifests
+        if: github.event.release  
+
       - name: Build Manifest for Alarm Panel / WiFi
+        if: github.event.release  
         run: |
           ruby ./scripts/update-espwebtools-manifests.rb
         env:
@@ -117,6 +141,7 @@ jobs:
           ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-wifi-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
 
       - name: Build Manifest for Garage Door
+        if: github.event.release  
         run: |
           ruby ./scripts/update-espwebtools-manifests.rb
         env:
@@ -127,6 +152,7 @@ jobs:
           ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-garage-door-esp32-${{ steps.garage-door-esp32-version.outputs.data }}.bin
 
       - name: Build Manifest for Alarm Panel / LAN8720
+        if: github.event.release  
         run: |
           ruby ./scripts/update-espwebtools-manifests.rb
         env:
@@ -136,6 +162,7 @@ jobs:
           ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-lan8720-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
 
       - name: Build Manifest for Alarm Panel / RTL8201
+        if: github.event.release  
         run: |
           ruby ./scripts/update-espwebtools-manifests.rb
         env:
@@ -145,6 +172,7 @@ jobs:
           ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-rtl8201-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
       
       - name: Deploy
+        if: github.event.release  
         uses: lbertenasco/s3-deploy@v1
         with:
           folder: install-konnected

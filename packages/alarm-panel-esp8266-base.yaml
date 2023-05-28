@@ -8,7 +8,7 @@ substitutions:
   name: alarm-panel
   friendly_name: Alarm Panel
   project_name: konnected.alarm-panel-esp8266
-  project_version: "0.2.0"
+  project_version: "0.3.0"
 
   ####
   # SETTINGS
@@ -35,4 +35,8 @@ substitutions:
   warning_beep_pin: $out
 
 packages:
-  core-esp8266: github://konnected-io/konnected-esphome/packages/core-esp8266.yaml@master
+  url: http://github.com/konnected-io/konnected-esphome
+    ref: master
+    refresh: 5min
+    files:
+      - packages/core-esp8266.yaml

@@ -45,4 +45,8 @@ substitutions:
   warning_beep_pin: $out1
 
 packages:
-  core-esp32: github://konnected-io/konnected-esphome/packages/core-esp32.yaml@master
+  url: http://github.com/konnected-io/konnected-esphome
+    ref: master
+    refresh: 5min
+    files:
+      - packages/core-esp32.yaml
