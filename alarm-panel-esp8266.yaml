@@ -33,36 +33,36 @@ packages:
   remote_package:
     url: http://github.com/konnected-io/konnected-esphome
     ref: master
-    refresh: 5min
+    refresh: 5m
     files:
 
-    ####
-    # CORE
-    # This package is required and sets up core features.
-    - packages/alarm-panel-esp8266-base.yaml
-    - packages/alarm-panel/zone1.yaml
-    - packages/alarm-panel/zone2.yaml
-    - packages/alarm-panel/zone3.yaml
-    - packages/alarm-panel/zone4.yaml
-    - packages/alarm-panel/zone5.yaml
-    - packages/alarm-panel/zone6.yaml
-    - packages/alarm-panel/alarm.yaml
-  
-    ####
-    # WIFI
-    # Enables WiFi connectivity and diagnostics.
-    - wifi.yaml
+      ####
+      # CORE
+      # This package is required and sets up core features.
+      - packages/alarm-panel-esp8266-base.yaml
+      - packages/alarm-panel/zone1.yaml
+      - packages/alarm-panel/zone2.yaml
+      - packages/alarm-panel/zone3.yaml
+      - packages/alarm-panel/zone4.yaml
+      - packages/alarm-panel/zone5.yaml
+      - packages/alarm-panel/zone6.yaml
+      - packages/alarm-panel/alarm.yaml
+    
+      ####
+      # WIFI
+      # Enables WiFi connectivity and diagnostics.
+      - packages/wifi.yaml
 
-    ####
-    # WARNING BEEP
-    # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer. This is 
-    # implemented using a light entity with strobe effect to create a repeated beeping sound.
-    - packages/warning-beep.yaml
+      ####
+      # WARNING BEEP
+      # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer. This is 
+      # implemented using a light entity with strobe effect to create a repeated beeping sound.
+      - packages/warning-beep.yaml
 
-    ####
-    # STATUS LED
-    # Enables the onboard blue status LED as an activity/error indicator
-    - packages/status-led.yaml
+      ####
+      # STATUS LED
+      # Enables the onboard blue status LED as an activity/error indicator
+      - packages/status-led.yaml
   
 dashboard_import:
   package_import_url: github://konnected-io/konnected-esphome/alarm-panel-esp8266.yaml@master
