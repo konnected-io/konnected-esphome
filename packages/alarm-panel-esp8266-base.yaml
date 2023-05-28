@@ -36,7 +36,7 @@ substitutions:
 
 packages:
   url: http://github.com/konnected-io/konnected-esphome
-    ref: master
-    refresh: 5min
-    files:
-      - packages/core-esp8266.yaml
+  ref: master
+  refresh: 5min
+  files:
+    - packages/core-esp8266.yaml
