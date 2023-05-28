@@ -1,0 +1,15 @@
+binary_sensor:
+
+  - id: zone4
+    name: Zone 4    
+    pin:
+      number: $zone4
+      mode: INPUT_PULLUP
+    platform: gpio   
+    filters:
+      - delayed_on_off: $sensor_debounce_time
+    on_state:
+      then:
+        - light.turn_on: blue_status_led
+        - delay: 100ms
+        - light.turn_off: blue_status_led
