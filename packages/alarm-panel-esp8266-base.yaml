@@ -1,0 +1,38 @@
+substitutions:
+
+  ####
+  # NAME
+  # By default, the name of the ESPHome device is "alarm-panel-pro-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "alarm-panel-pro-xxxxxx.local". Edit this variable to
+  # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
+  name: alarm-panel
+  friendly_name: Alarm Panel
+  project_name: konnected.alarm-panel-esp8266
+  project_version: "0.2.0"
+
+  ####
+  # SETTINGS
+  sensor_debounce_time: 200ms
+  warning_beep_pulse_time: 100ms
+  warning_beep_pause_time: 130ms
+  warning_beep_internal_only: "false"
+
+  ####
+  # ZONE MAPPING
+  # Do not edit this section.
+  zone1: D1
+  zone2: D2
+  zone3: D5
+  zone4: D6
+  zone5: D7
+  zone6: D9
+  alarm: D8
+  out: D8
+  status_led: D4
+  
+  ####
+  # CONNECTION MAPPINGS
+  warning_beep_pin: $out
+
+packages:
+  core-esp8266: github://konnected-io/konnected-esphome/packages/core-esp8266.yaml@master
