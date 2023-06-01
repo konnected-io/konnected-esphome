@@ -38,134 +38,73 @@
 #    garage door and controls to open/close/stop it.
 # 5. Flashes an onboard LED and beeps an onboard piezo sounder as a warning before automatically closing.
 
-####
-# GENERAL SETTINGS
-# Customize these variables to your preferences and needs
-# more: https://esphome.io/guides/configuration-types.html#substitutions
-substitutions:
-
-  ####
-  # NAME
-  # By default, the name of the ESPHome device is "garage-door-xxxxxx" where xxxxxx is a unique identifier. The device's
-  # hostname on your network is also defined by the name, defaulting to "garage-door-xxxxxx.local". Edit this variable to
-  # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
-  name: garage-door
-  friendly_name: Garage Door Opener
-  project_name: konnected.garage-door-esp8266
-  project_version: "0.2.2"
-  garage_door_cover_name: Garage Door
-  switch_name: Switch
-
-  ####
-  # GARAGE DOOR OPENER MOMENTARY DURATION
-  # Duration to make the relay contact closure for the garage door opener button circuit. 
-  garage_door_opener_momentary_duration: 300ms
-
-  ####
-  # OPEN GARAGE DOOR DISTANCE MARGIN OF ERROR
-  # The margin of error (+/-) in meters from the value above to consider the garage door in the open position.
-  open_garage_door_distance_margin_of_error: "0.1"
-
-  ####
-  # GARAGE DOOR CLOSE WARNING DURATION
-  # Duration to blink the warning LED and beep the buzzer before the garage door closes.
-  garage_door_close_warning_duration: 5s
-
-  warning_beep_pulse_time: 100ms
-  warning_beep_pause_time: 130ms
-  warning_beep_internal_only: "true"
-  sensor_debounce_time: 200ms
-
-  ####
-  # INTERNAL MAPPINGS
-  door_control_pin: D5
-  wired_sensor_pin: D9
-  warning_beep_pin: D8
-  warning_leds_pin: D7
-  output_switch_pin: D6
-  status_led: D4
-  sda: GPIO4
-  scl: GPIO5
-
-
-####
-# PACKAGES
-# Each package includes a Garage Door Opener feature described
-# Remove or comment out any packages that you do not need or want.
 packages:
 
-  ####
-  # CORE
-  # This package is required and sets up core features.
-  # core: !include packages/core-esp8266.yaml
-  core: github://konnected-io/konnected-esphome/packages/core-esp8266.yaml@master
+  remote_package:
+    url: http://github.com/konnected-io/konnected-esphome
+    ref: master
+    files:
+      ####
+      # BASE
+      # This package is required
+      - packages/garage-door-esp8266-base.yaml
 
-  ####
-  # GARAGE DOOR COVER
-  # The Garage Door Cover is the main user interface entity representing a garage door in Home Assistant.
-  # more: https://www.home-assistant.io/integrations/cover/
-  #
-  # CHOOSE ONE of the following cover packages depending on the sensors used to determine the open/closed state of the door.
-  #
-  # 1. WIRED SENSOR ONLY - Include this line and remove or comment out the vl53l0x_range_sensor package below.
-  # garage_door_cover: !include packages/garage-door-cover-wired.yaml
-  #
-  # 2. RANGE SENSOR ONLY - Include this line and remove or comment out the garage_door_wired_sensor package below.
-  # garage_door_cover: !include packages/garage-door-cover-range.yaml
-  #
-  # 3. WIRED & RANGE SENSORS - Include this line.
-  # garage_door_cover: !include packages/garage-door-cover-wired-and-range.yaml
-  garage_door_cover: github://konnected-io/konnected-esphome/packages/garage-door-cover-range.yaml@master
+      ####
+      # GARAGE DOOR COVER
+      # The Garage Door Cover is the main user interface entity representing a garage door in Home Assistant.
+      # more: https://www.home-assistant.io/integrations/cover/
+      # CHOOSE ONE of the following cover packages depending on the sensors used to determine the open/closed state of the door.
+      #
+      # 1. RANGE SENSOR ONLY - Include this line and remove or comment out the garage_door_wired_sensor package below.
+      - packages/garage-door-cover-range.yaml
+      #
+      # 2. WIRED SENSOR ONLY - Include this line and remove or comment out the vl53l0x_range_sensor package below.
+      # - packages/garage-door-cover-wired.yaml
+      #
+      # 3. WIRED & RANGE SENSORS - Include this line.
+      # - packages/garage-door-cover-wired-and-range.yaml
 
-  ####
-  # GARAGE DOOR WIRED SENSOR
-  # Enables a wired contact sensor for reporting the open or closed state of the garage door
-  # via the physical INPUT terminals.
-  # garage_door_wired_sensor: !include packages/garage-door-wired-sensor.yaml
-  garage_door_wired_sensor: github://konnected-io/konnected-esphome/packages/garage-door-wired-sensor.yaml@master
+      ####
+      # GARAGE DOOR WIRED SENSOR
+      # Enables a wired contact sensor for reporting the open or closed state of the garage door
+      # via the physical INPUT terminals.
+      - packages/garage-door-wired-sensor.yaml
 
-  ####
-  # GARAGE DOOR RANGE SENSOR
-  # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
-  # the open/closed state of an overhead garage door.
-  # vl53l0x_range_sensor: !include packages/vl53l0x-range-sensor.yaml
-  vl53l0x_range_sensor: github://konnected-io/konnected-esphome/packages/vl53l0x-range-sensor.yaml@master
+      ####
+      # GARAGE DOOR RANGE SENSOR
+      # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
+      # the open/closed state of an overhead garage door.
+      - packages/vl53l0x-range-sensor.yaml
 
-  ####
-  # GARAGE DOOR OPENER BUTTON
-  # Enables the garage door opener relay labeled DOOR on the Konnected Garage Door Opener as a button entity. When
-  # pressed, the relay will close the dry contact, simulating a physical press of the garage door opener wall button.
-  # garage_door_opener_button: !include packages/garage-door-opener-button.yaml
-  garage_door_opener_button: github://konnected-io/konnected-esphome/packages/garage-door-opener-button.yaml@master
+      ####
+      # GARAGE DOOR OPENER BUTTON
+      # Enables the garage door opener relay labeled DOOR on the Konnected Garage Door Opener as a button entity. When
+      # pressed, the relay will close the dry contact, simulating a physical press of the garage door opener wall button.
+      - packages/garage-door-opener-button.yaml
 
-  ####
-  # SWITCH
-  # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
-  # switch: !include packages/switch.yaml
-  switch: github://konnected-io/konnected-esphome/packages/switch.yaml@master
+      ####
+      # SWITCH
+      # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
+      - packages/switch.yaml
 
-  ####
-  # WARNING LED
-  # Enables the onboard warning LED light, with strobe effect. Used to visually warn of garage door automatic closing.
-  # warning_led: !include packages/warning-led.yaml
-  warning_led: github://konnected-io/konnected-esphome/packages/warning-led.yaml@master
+      ####
+      # WARNING LED
+      # Enables the onboard warning LED light, with strobe effect. Used to visually warn of garage door automatic closing.
+      - packages/warning-led.yaml
 
-  ####
-  # WARNING BEEP
-  # Enables a repeating beep using the onboard piezo buzzer. Used to audibly warn of a garage door automatic closing.
-  # warning_beep: !include packages/warning-beep.yaml
-  warning_beep: github://konnected-io/konnected-esphome/packages/warning-beep.yaml@master
+      ####
+      # WARNING BEEP
+      # Enables a repeating beep using the onboard piezo buzzer. Used to audibly warn of a garage door automatic closing.
+      - packages/warning-beep.yaml
 
-  ####
-  # WIFI
-  # wifi: !include packages/wifi.yaml
-  wifi: github://konnected-io/konnected-esphome/packages/wifi.yaml@master
+      ####
+      # WIFI
+      - packages/wifi.yaml
 
-  ####
-  # STATUS LED
-  # Enables the onboard blue status LED as an activity/error indicator
-  # status_led: !include packages/status-led.yaml
-  status_led: github://konnected-io/konnected-esphome/packages/status-led.yaml@master
+      ####
+      # STATUS LED
+      # Enables the onboard blue status LED as an activity/error indicator
+      - packages/status-led.yaml
     
 ####
 # DASHBOARD IMPORT

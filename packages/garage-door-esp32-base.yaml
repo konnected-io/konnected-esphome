@@ -1,0 +1,55 @@
+####
+# GENERAL SETTINGS
+# Customize these variables to your preferences and needs
+# more: https://esphome.io/guides/configuration-types.html#substitutions
+substitutions:
+
+  ####
+  # NAME
+  # By default, the name of the ESPHome device is "garage-door-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "garage-door-xxxxxx.local". Edit this variable to
+  # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
+  name: garage-door
+  friendly_name: Garage Door Opener
+  project_name: konnected.garage-door-esp32
+  project_version: "0.3.0"
+  garage_door_cover_name: Garage Door
+  switch_name: Switch
+
+  ####
+  # GARAGE DOOR OPENER MOMENTARY DURATION
+  # Duration to make the relay contact closure for the garage door opener button circuit. 
+  garage_door_opener_momentary_duration: 300ms
+
+  ####
+  # OPEN GARAGE DOOR DISTANCE MARGIN OF ERROR
+  # The margin of error (+/-) in meters from the value above to consider the garage door in the open position.
+  open_garage_door_distance_margin_of_error: "0.1"
+
+  ####
+  # GARAGE DOOR CLOSE WARNING DURATION
+  # Duration to blink the warning LED and beep the buzzer before the garage door closes.
+  garage_door_close_warning_duration: 5s
+
+  warning_beep_pulse_time: 100ms
+  warning_beep_pause_time: 130ms
+  warning_beep_internal_only: "true"
+  sensor_debounce_time: 200ms
+
+  ####
+  # INTERNAL MAPPINGS
+  door_control_pin: GPIO1
+  wired_sensor_pin: GPIO5
+  warning_beep_pin: GPIO4
+  warning_leds_pin: GPIO3
+  output_switch_pin: GPIO2
+  status_led: GPIO18
+  sda: GPIO6
+  scl: GPIO7
+
+packages:
+
+  remote_package:
+    url: http://github.com/konnected-io/konnected-esphome
+    ref: master
+    file: packages/core-esp32-s3.yaml
