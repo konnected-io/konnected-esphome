@@ -4,7 +4,7 @@
 ## Firmware configuration for ESPHome
 ##
 ## filename: alarm-panel-pro-esp32.yaml
-## GitHub: https://github.com/konnected-io/konnected-esphome
+## GitHub: https://github.com/georgesdib/konnected-esphome
 ## Buy Konnected hardware: https://konnected.io
 ## Help & Support: https://help@konnected.io (support is provided for purchasers of Konnected hardware)
 ##
@@ -42,7 +42,7 @@ substitutions:
 packages:
 
   remote_package:
-    url: http://github.com/konnected-io/konnected-esphome
+    url: http://github.com/georgesdib/konnected-esphome
     ref: master
     refresh: 5min
     files:
@@ -90,7 +90,7 @@ packages:
   
   
 dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-pro-esp32-ethernet.yaml@master
+  package_import_url: github://georgesdib/konnected-esphome/alarm-panel-pro-esp32-ethernet.yaml@master
   import_full_config: false
 
 ####
