@@ -5,6 +5,7 @@ binary_sensor:
     pin:
       number: $zone12
       mode: INPUT
+      inverted: $zone12_inverted
     platform: gpio   
     filters:
       - delayed_on_off: $sensor_debounce_time

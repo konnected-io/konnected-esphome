@@ -10,3 +10,15 @@ esphome:
 
 substitutions:
   status_led_inverted: "true"
+  zone1_inverted: "false"
+  zone2_inverted: "false"
+  zone3_inverted: "false"
+  zone4_inverted: "false"
+  zone5_inverted: "false"
+  zone6_inverted: "false"
+  zone7_inverted: "false"
+  zone8_inverted: "false"
+  zone9_inverted: "false"
+  zone10_inverted: "false"
+  zone11_inverted: "false"
+  zone12_inverted: "false"
