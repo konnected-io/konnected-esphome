@@ -108,7 +108,7 @@ jobs:
         with:
           command: cp
           source: assets/
-          destination: s3://georgesdib/builds/esphome/
+          destination: s3://konnected-io/builds/esphome/
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: us-east-2
@@ -141,8 +141,8 @@ jobs:
           MANIFEST_NAME: Konnected Alarm Panel for ESPHome (WiFi)
           MANIFEST_FNAME: esphome-alarm-panel-wifi.json
           MANIFEST_VERSION: "${{ steps.alarm-panel-esp8266-version.outputs.data }} / ${{ steps.alarm-panel-esp32-version.outputs.data }}"
-          ESP8266_IMAGE_URI: https://georgesdib.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp8266-${{ steps.alarm-panel-esp8266-version.outputs.data }}.bin
-          ESP32_IMAGE_URI: https://georgesdib.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-wifi-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
+          ESP8266_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp8266-${{ steps.alarm-panel-esp8266-version.outputs.data }}.bin
+          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-wifi-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
 
       - name: Build Manifest for Garage Door
         if: github.event.release  
@@ -152,8 +152,8 @@ jobs:
           MANIFEST_NAME: Konnected Garage Door for ESPHome (WiFi)
           MANIFEST_FNAME: esphome-garage-door-wifi.json
           MANIFEST_VERSION: "${{ steps.garage-door-esp8266-version.outputs.data }}"
-          ESP8266_IMAGE_URI: https://georgesdib.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-garage-door-esp8266-${{ steps.garage-door-esp8266-version.outputs.data }}.bin
-          ESP32_IMAGE_URI: https://georgesdib.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-garage-door-esp32-${{ steps.garage-door-esp32-version.outputs.data }}.bin
+          ESP8266_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-garage-door-esp8266-${{ steps.garage-door-esp8266-version.outputs.data }}.bin
+          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-garage-door-esp32-${{ steps.garage-door-esp32-version.outputs.data }}.bin
 
       - name: Build Manifest for Alarm Panel / LAN8720
         if: github.event.release  
@@ -163,7 +163,7 @@ jobs:
           MANIFEST_NAME: Konnected Alarm Panel for ESPHome (LAN8720)
           MANIFEST_FNAME: esphome-alarm-panel-lan8720.json
           MANIFEST_VERSION: "${{ steps.alarm-panel-esp32-version.outputs.data }}"
-          ESP32_IMAGE_URI: https://georgesdib.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-lan8720-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
+          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-lan8720-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
 
       - name: Build Manifest for Alarm Panel / RTL8201
         if: github.event.release  
@@ -173,7 +173,7 @@ jobs:
           MANIFEST_NAME: Konnected Alarm Panel for ESPHome (RTL8201)
           MANIFEST_FNAME: esphome-alarm-panel-rtl8201.json
           MANIFEST_VERSION: "${{ steps.alarm-panel-esp32-version.outputs.data }}"
-          ESP32_IMAGE_URI: https://georgesdib.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-rtl8201-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
+          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/konnected-esphome-alarm-panel-esp32-rtl8201-${{ steps.alarm-panel-esp32-version.outputs.data }}.bin
       
       - name: Deploy
         if: github.event.release  
