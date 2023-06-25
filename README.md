@@ -72,6 +72,9 @@ Possible values (ESP8266): `$zone1` thru `$zone5` or `$out`
 
 Possible values (ESP32): `$zone1` thru `$zone8` or `$alarm1`, `alarm2`, `$out1`, `$out2`
 
+#### `zone_inverted`
+`$zone1_inverted` through `$zone12_inverted` can be used to invert the respective zone.
+
 ### Packages
 The firmware configuration is organized into _packages_ of functionality for different device features. These are defined in the `packages` folder of this repository.
 
