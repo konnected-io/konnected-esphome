@@ -19,7 +19,7 @@ number:
 
 sensor:
   - platform: vl53l0x
-    update_interval: 5s
+    update_interval: $range_sensor_polling_time
     long_range: true
     accuracy_decimals: 2
     id: range_sensor
@@ -46,3 +46,5 @@ binary_sensor:
       } else {
         return {};
       }
+    filters:
+      delayed_off: $range_sensor_debounce_time

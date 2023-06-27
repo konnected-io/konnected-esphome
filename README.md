@@ -11,6 +11,9 @@ openers into your smart home.
 1. Discover the Konnected device in [Home Assistant > Settings > Devices & Services](https://my.home-assistant.io/redirect/integrations)
 1. (Optional) Discover the device and customize the firmware in ESPHome Dashboard ([see ESPHome add-on](https://my.home-assistant.io/redirect/supervisor_store/)).
 
+## Changes and Release Notes
+See [releases](/konnected-io/konnected-esphome/releases) for release notes and downloadable pre-built flashable images.
+
 ## Made for ESPHome
 Konnected's products are made with ESP32 and ESP8266 microcontrollers with integrated USB interfaces, and are completely open to end-user servicing and customization, making them ideal products for ESPHome firmware. Since 2023, Konnected maintains and distributes ESPHome configuration recipies for all products. These firmwares are for Home Assistant users who want a plug-and-play solution. More advanced users can import Konnected's ESPHome configurations into their ESPHome Dashboard and easily customize, build, and update their device(s) with a few simple edits of the well-commented configuration files and packages provided by Konnected.
 
@@ -39,7 +42,9 @@ This firmware config will also run on a NodeMCU module and Konnected's v1 (2018-
 
 
 ### `garage-door-esp8266.yaml`
-**__Coming Soon!__** A garage door opener based on the ESP8266.
+A [smart garage door opener](https://konnected.io/products/smart-garage-door-opener) based on the ESP8266.
+
+![https://konnected.io/products/smart-garage-door-opener](https://konnected.io/cdn/shop/files/GDOProductImages_2_1.png?v=1683919623&width=600)
 
 ## Customization
 
