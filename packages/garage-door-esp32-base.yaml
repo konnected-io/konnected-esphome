@@ -12,7 +12,7 @@ substitutions:
   name: garage-door
   friendly_name: Garage Door Opener
   project_name: konnected.garage-door-esp32
-  project_version: "0.3.0"
+  project_version: "0.3.1"
   garage_door_cover_name: Garage Door
   switch_name: Switch
 
@@ -35,6 +35,8 @@ substitutions:
   warning_beep_pause_time: 130ms
   warning_beep_internal_only: "true"
   sensor_debounce_time: 200ms
+  range_sensor_polling_time: 2500ms
+  range_sensor_debounce_time: 3s
 
   ####
   # INTERNAL MAPPINGS
