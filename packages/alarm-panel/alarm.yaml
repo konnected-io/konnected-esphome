@@ -1,7 +1,7 @@
 switch:   
 
-  - id: alarm
-    name: Alarm
+  - id: siren
+    name: Siren
     pin: $alarm
     platform: gpio
     icon: mdi:bullhorn

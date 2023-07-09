@@ -80,7 +80,10 @@ Possible values (ESP32): `$zone1` thru `$zone8` or `$alarm1`, `alarm2`, `$out1`,
 ### Packages
 The firmware configuration is organized into _packages_ of functionality for different device features. These are defined in the `packages` folder of this repository.
 
-Commment-out or remove package lines from this file that you don't want or need. For example, if you do not want a warning beep entity created, comment-out the `warning_beep` package by putting a `#` at the front of the line.
+Commment-out or remove package lines from this file that you don't want or need. For example, if you do not want a warning beep entity created, comment-out the `warning_beep` package by putting a `#` at the front of the line. See Konnected's support pages for more information:
+  * [Customizing ESPHome firmware on Konnected Alarm Panel 6-zone models (ESP8266)](https://support.konnected.io/esphome-on-the-konnected-alarm-panel-esp8266)
+  * [Customizing ESPHome firmware on Konnected Alarm Panel Pro (ESP32)](https://support.konnected.io/esphome-customization-on-the-konnected-alarm-panel-pro-esp32)
+  * [ESPHome firmeware on Konnected Garage Door Opener](https://support.konnected.io/esphome-customization-on-the-konnected-alarm-panel-pro-esp32)
 
 To customize functionality from packages, copy and paste the package contents (from Github) into your device configuration file and comment-out or remove the package import line. Then you can customize the functionality that came from this package for your device.
 

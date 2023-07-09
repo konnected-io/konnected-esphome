@@ -26,7 +26,7 @@
 
 ####
 # PACKAGES
-# Each package includes the alarm panel feature
+# Each package includes an alarm panel feature
 # Remove or comment out any packages that you do not need or want.
 packages:
 
@@ -63,7 +63,7 @@ packages:
       # STATUS LED
       # Enables the onboard blue status LED as an activity/error indicator
       - packages/status-led.yaml
-  
+
 dashboard_import:
   package_import_url: github://konnected-io/konnected-esphome/alarm-panel-esp8266.yaml@master
   import_full_config: false
