@@ -6,6 +6,7 @@ binary_sensor:
       number: $zone11
       mode: INPUT
     platform: gpio   
+    device_class: $zone11_device_class
     filters:
       - delayed_on_off: $sensor_debounce_time
     on_state:
