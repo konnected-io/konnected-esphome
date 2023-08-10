@@ -1,0 +1,12 @@
+button:
+  - platform: template
+    id: pre_close_warning
+    name: $friendly_name Pre-close Warning
+    on_press:
+      then:
+        - light.turn_on:
+            id: warning_led
+            effect: strobe
+        - button.press: warning_tone
+        - delay: $garage_door_close_warning_duration
+        - light.turn_off: warning_led

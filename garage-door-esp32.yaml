@@ -106,10 +106,11 @@ packages:
       - packages/wifi.yaml
 
       ####
-      # WARNING BEEP
-      # Enables a repeating beep using the onboard piezo buzzer. Used to audibly warn of a garage door automatic closing.
-      # warning_beep: !include packages/warning-beep.yaml
-      - packages/warning-beep.yaml
+      # PRE-CLOSE WARNING
+      # Enables a pleasant and customizable pre-close warning tone  using the onboard piezo buzzer. Used to audibly 
+      # warn of a garage door automatic closing.    
+      - packages/buzzer-rtttl.yaml
+      - packages/pre-close-warning-tones.yaml
 
       ####
       # STATUS LED

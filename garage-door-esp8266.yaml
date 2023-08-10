@@ -93,9 +93,10 @@ packages:
       - packages/warning-led.yaml
 
       ####
-      # WARNING BEEP
+      # PRE-CLOSE WARNING
       # Enables a repeating beep using the onboard piezo buzzer. Used to audibly warn of a garage door automatic closing.
       - packages/warning-beep.yaml
+      - packages/pre-close-warning.yaml
 
       ####
       # WIFI
@@ -105,7 +106,7 @@ packages:
       # STATUS LED
       # Enables the onboard blue status LED as an activity/error indicator
       - packages/status-led.yaml
-    
+
 ####
 # DASHBOARD IMPORT
 # Enables automatic discovery and upgrades via ESPHome Dashboard
