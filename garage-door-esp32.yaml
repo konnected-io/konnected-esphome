@@ -117,7 +117,13 @@ packages:
       # Enables the onboard blue status LED as an activity/error indicator
       # status_led: !include packages/status-led.yaml
       - packages/status-led.yaml
-    
+
+<<: !include packages/gdo-self-test.yaml
+
+esp32:  
+  framework:
+    type: esp-idf
+
 ####
 # DASHBOARD IMPORT
 # Enables automatic discovery and upgrades via ESPHome Dashboard
@@ -136,12 +142,24 @@ logger:
 # Enables the native API for Home Assistant
 # more: https://esphome.io/components/api.html
 api:
+  services:
+    - service: play_rtttl
+      variables:
+        song_str: string
+      then:
+        - rtttl.play:
+            rtttl: !lambda 'return song_str;'
 
 #### 
 # OTA UPDATES
 # Enables over-the-air updates
 # more: https://esphome.io/components/ota.html
 ota:
+
+improv_serial:
+
+esp32_improv:
+  authorizer: false
 
 web_server:
   include_internal: true
