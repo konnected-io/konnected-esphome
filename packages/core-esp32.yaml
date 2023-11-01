@@ -3,7 +3,13 @@ esphome:
   name_add_mac_suffix: true
   project:
     name: $project_name
-    version: $project_version
+    version: $project_version 
+  on_boot:
+    priority: 800
+    then:
+      - text_sensor.template.publish:
+          id: device_id
+          state: !lambda 'return get_mac_address();'
 
 esp32:  
   board: wesp32
@@ -13,3 +19,14 @@ esp32:
 
 substitutions:
   status_led_inverted: "false"
+
+text_sensor:
+  - platform: template
+    name: $friendly_name Device ID
+    id: device_id
+    entity_category: diagnostic
+    update_interval: never
+    
+sensor:
+  - platform: uptime
+    name: $friendly_name Uptime

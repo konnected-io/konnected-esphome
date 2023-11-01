@@ -6,6 +6,12 @@ esphome:
     version: $project_version
   platformio_options:
     board_build.flash_mode: dio
+  on_boot:
+    priority: 800
+    then:
+      - text_sensor.template.publish:
+          id: device_id
+          state: !lambda 'return get_mac_address();'
 
 esp32:  
   board: esp32-s3-devkitc-1
@@ -15,3 +21,14 @@ esp32:
 
 substitutions:
   status_led_inverted: "false"
+
+text_sensor:
+  - platform: template
+    name: $friendly_name Device ID
+    id: device_id
+    entity_category: diagnostic
+    update_interval: never
+
+sensor:
+  - platform: uptime
+    name: $friendly_name Uptime

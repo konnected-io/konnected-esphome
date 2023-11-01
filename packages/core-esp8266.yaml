@@ -7,6 +7,23 @@ esphome:
   project:
     name: $project_name
     version: $project_version
+  on_boot:
+    priority: 800
+    then:
+      - text_sensor.template.publish:
+          id: device_id
+          state: !lambda 'return get_mac_address();'
 
 substitutions:
   status_led_inverted: "true"
+
+text_sensor:
+  - platform: template
+    name: $friendly_name Device ID
+    id: device_id
+    entity_category: diagnostic
+    update_interval: never
+    
+sensor:
+  - platform: uptime
+    name: $friendly_name Uptime
