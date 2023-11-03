@@ -7,7 +7,7 @@ esphome:
   platformio_options:
     board_build.flash_mode: dio
   on_boot:
-    priority: 800
+    priority: 800.0
     then:
       - text_sensor.template.publish:
           id: device_id
@@ -32,3 +32,9 @@ text_sensor:
 sensor:
   - platform: uptime
     name: $friendly_name Uptime
+    entity_category: diagnostic
+
+switch:
+  - platform: restart
+    name: $friendly_name Restart
+    entity_category: diagnostic

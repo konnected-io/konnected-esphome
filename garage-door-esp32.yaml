@@ -44,6 +44,8 @@
 # Remove or comment out any packages that you do not need or want.
 packages:
 
+  self-test: !include packages/gdo-self-test.yaml
+
   remote_package:
     url: http://github.com/konnected-io/konnected-esphome
     ref: master
@@ -118,8 +120,6 @@ packages:
       # status_led: !include packages/status-led.yaml
       - packages/status-led.yaml
 
-<<: !include packages/gdo-self-test.yaml
-
 esp32:  
   framework:
     type: esp-idf
@@ -136,6 +136,13 @@ dashboard_import:
 # LOGGER
 # more: https://esphome.io/components/logger.html
 logger:
+  level: DEBUG
+  logs:
+    ledc.output: INFO
+    vl53l0x: INFO
+    sensor: INFO
+    json: INFO
+    api: DEBUG
 
 ####
 # NATIVE API for HOME ASSISTANT
