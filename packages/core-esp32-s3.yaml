@@ -37,4 +37,3 @@ sensor:
 switch:
   - platform: restart
     name: $friendly_name Restart
-    entity_category: diagnostic

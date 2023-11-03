@@ -4,7 +4,7 @@ binary_sensor:
       mode: INPUT_PULLUP
     device_class: garage_door
     id: garage_door_wired_sensor
-    internal: true
+    name: $friendly_name Wired Sensor
     platform: gpio   
     filters:
       - delayed_on_off: $sensor_debounce_time

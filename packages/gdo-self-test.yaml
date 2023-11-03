@@ -40,6 +40,7 @@ button:
   - platform: factory_reset
     name: Factory Reset
     entity_category: diagnostic
+    internal: true
 
 script:
   - id: script_self_test
