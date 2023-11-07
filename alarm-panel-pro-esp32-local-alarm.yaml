@@ -204,7 +204,7 @@ switch:
     icon: mdi:bullhorn
     optimistic: true
     entity_category: config
-    restore_state: true
+    restore_mode: RESTORE_DEFAULT_OFF
 
 ####
 # STATE MACHINE
