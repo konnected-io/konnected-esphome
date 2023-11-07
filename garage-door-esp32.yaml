@@ -44,8 +44,6 @@
 # Remove or comment out any packages that you do not need or want.
 packages:
 
-  self-test: !include packages/gdo-self-test.yaml
-
   remote_package:
     url: http://github.com/konnected-io/konnected-esphome
     ref: master
@@ -120,6 +118,11 @@ packages:
       # status_led: !include packages/status-led.yaml
       - packages/status-led.yaml
 
+      ####
+      # SELF-TEST
+      # Self test script used to validate the hardware post-assembly
+      - packages/gdo-self-test.yaml
+
 esp32:  
   framework:
     type: esp-idf
@@ -150,6 +153,8 @@ logger:
 # more: https://esphome.io/components/api.html
 api:
   services:
+    
+    # Call the play_rtttl service to play any RTTTL song in the garage
     - service: play_rtttl
       variables:
         song_str: string

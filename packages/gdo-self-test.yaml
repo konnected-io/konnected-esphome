@@ -1,7 +1,18 @@
+substitutions:
+  rtttl_boop: boop:d=32,o=5,b=100:d#
+  rtttl_gotit: got_it:d=32,o=5,b=100:d#,a#,be
+  rtttl_success: success:d=4,o=6,b=160:8e6,16f6,16g6,8a6,8g6,8e6,8g6,8a6
+
 globals:
+  # QC OK means the self-test has passed at least once
   - id: qcok
     type: bool
     restore_value: true
+  
+  # True when self test is active
+  - id: self_test
+    type: bool
+
 
 esphome:
   on_boot:
@@ -45,6 +56,12 @@ button:
 script:
   - id: script_self_test
     then:
+      
+      ###
+      # Initialize Self-test
+      - globals.set:
+          id: self_test
+          value: 'true'
       - lambda: id(button_self_test_stop).set_internal(false);
       - lambda: ESP_LOGI("Konnected-GDO-Test","Starting Self-Test");
       - rtttl.play: scale_up:d=32,o=5,b=100:c,c#,d#,e,f#,g#,a#,b
@@ -52,77 +69,93 @@ script:
           condition:
             not:
               rtttl.is_playing
+      - script.execute: script_boop
       - lambda: ESP_LOGI("Konnected-GDO-Test","Setting range calibration to 30cm");
       - number.set:
           id: open_garage_door_distance_from_ceiling
           value: 0.3
-      - lambda: ESP_LOGI("Konnected-GDO-Test","##########\n###\n### Hold an object 30cm above the sensor.\n###\n");
-      - while:
+
+      ###
+      # Test ToF sensor detection at 30cm
+      - lambda: ESP_LOGI("Konnected-GDO-Test","Hold an object 30cm above the sensor.");
+      - wait_until:
           condition: 
-            not:
-              binary_sensor.is_on: garage_door_range_sensor
-          then:
-            - logger.log:
-                level: INFO
-                format: "ToF Sensor Got Distance: %.2f m"
-                args: [ 'id(range_sensor).state']
-            - rtttl.play: boop:d=32,o=5,b=100:d#
-            - delay: 1s
+            binary_sensor.is_on: garage_door_range_sensor
+          timeout: 60s
+      - logger.log:
+          level: INFO
+          format: "ToF Sensor Got Distance: %.2f m"
+          args: [ 'id(range_sensor).state']
       - lambda: ESP_LOGI("Konnected-GDO-Test","Got it!");
-      - rtttl.play: got_it:d=32,o=5,b=100:d#,a#,be
+      - wait_until:
+          condition:
+            not:
+              rtttl.is_playing
+      - rtttl.play: $rtttl_gotit
       - light.turn_on: warning_led
       - delay: 500ms
       - light.turn_off: warning_led
-      - lambda: ESP_LOGI("Konnected-GDO-Test","##########\n###\n### Now cover the sensor.\n###\n");
-      - while:
+
+      ###
+      # Test ToF sensor detection at 0cm
+      - lambda: ESP_LOGI("Konnected-GDO-Test","Now cover the sensor.");
+      - wait_until:
           condition: 
-            or:
-              - lambda: return (std::isnan(id(range_sensor).state));
-              - sensor.in_range:
-                  id: range_sensor
-                  above: 0.05
-          then:
-            - logger.log:
-                level: INFO
-                format: "ToF Sensor Got Distance: %.2f m"
-                args: [ 'id(range_sensor).state']
-            - rtttl.play: boop:d=32,o=5,b=100:d#
-            - delay: 1s
+            - sensor.in_range:
+                id: range_sensor
+                below: 0.05
+          timeout: 60s        
+      - logger.log:
+          level: INFO
+          format: "ToF Sensor Got Distance: %.2f m"
+          args: [ 'id(range_sensor).state']
       - lambda: ESP_LOGI("Konnected-GDO-Test","Got it!");
-      - rtttl.play: got_it:d=32,o=5,b=100:d#,a#,be
+      - wait_until:
+          condition:
+            not:
+              rtttl.is_playing
+      - rtttl.play: $rtttl_gotit
       - light.turn_on: warning_led
       - delay: 500ms
       - light.turn_off: warning_led
               
-      - lambda: ESP_LOGI("Konnected-GDO-Test","##########\n###\n### Testing wired input is OPEN\n###\n");
+      ###
+      # Test IN and DOOR relay
+      - lambda: ESP_LOGI("Konnected-GDO-Test","Testing wired input is OPEN");
       - wait_until: 
           condition:
             binary_sensor.is_on: garage_door_wired_sensor
-
-      - lambda: ESP_LOGI("Konnected-GDO-Test","##########\n###\n### Next, connect IN terminals to DOOR terminals to test the relay\n###\n");
+          timeout: 60s
+      - lambda: ESP_LOGI("Konnected-GDO-Test","Next, connect IN terminals to DOOR terminals to test the relay");
       - output.turn_on: garage_door_opener_output
-      - while:
+      - wait_until:
           condition:
-            - binary_sensor.is_on: garage_door_wired_sensor
-          then:
-            - rtttl.play: boop:d=32,o=5,b=100:d#
-            - delay: 1s
+            - binary_sensor.is_off: garage_door_wired_sensor
+          timeout: 60s
 
-      - lambda: ESP_LOGI("Konnected-GDO-Test","##########\n###\n### Nice! Relay and input worked!\n###\n");
-      - rtttl.play: got_it:d=32,o=5,b=100:d#,a#,be
+      ###
+      # Success and cleanup
+      - lambda: ESP_LOGI("Konnected-GDO-Test","Nice! Relay and input worked!");
+      - globals.set:
+          id: self_test
+          value: 'false'
+      - globals.set:
+          id: qcok
+          value: 'true'
+      - rtttl.play: $rtttl_gotit
       - output.turn_off: garage_door_opener_output
       - light.turn_on: warning_led
       - delay: 500ms
       - light.turn_off: warning_led
-      - rtttl.play: success:d=4,o=6,b=160:8e6,16f6,16g6,8a6,8g6,8e6,8g6,8a6,
-      - globals.set:
-          id: qcok
-          value: 'true'
+      - rtttl.play: $rtttl_success
 
   - id: script_self_test_stop
     then:
       - lambda: !lambda |-
           ESP_LOGI("Konnected-GDO-Test", "qcok: %d", id(qcok));
+      - globals.set:
+          id: self_test
+          value: 'false'
       - globals.set:
           id: qcok
           value: 'true'
@@ -132,3 +165,12 @@ script:
       - script.stop: script_self_test
       - lambda: id(button_self_test_stop).set_internal(true);
 
+  - id: script_boop
+    then:
+      - while:
+          condition: 
+            lambda: return id(self_test);
+          then:
+            - rtttl.play: boop:d=32,o=5,b=100:d#
+            - delay: 1s
+          
