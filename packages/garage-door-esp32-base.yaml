@@ -12,7 +12,7 @@ substitutions:
   name: garage-door
   friendly_name: Garage Door Opener
   project_name: konnected.garage-door-esp32
-  project_version: "0.4.1"
+  project_version: "0.4.2"
   garage_door_cover_name: Garage Door
   switch_name: Switch
 
@@ -24,7 +24,7 @@ substitutions:
   ####
   # OPEN GARAGE DOOR DISTANCE MARGIN OF ERROR
   # The margin of error (+/-) in meters from the value above to consider the garage door in the open position.
-  open_garage_door_distance_margin_of_error: "0.1"
+  open_garage_door_distance_margin_of_error: "0.06"
 
   ####
   # GARAGE DOOR CLOSE WARNING DURATION

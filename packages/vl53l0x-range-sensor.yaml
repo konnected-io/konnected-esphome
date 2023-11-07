@@ -1,3 +1,9 @@
+globals:
+  - id: gdo_err_margin
+    type: float
+    restore_value: true
+    initial_value: $open_garage_door_distance_margin_of_error
+
 i2c:
   sda: $sda
   scl: $scl
@@ -40,9 +46,9 @@ binary_sensor:
     internal: true
     lambda: |-
       float calibrated_distance = id(open_garage_door_distance_from_ceiling).state;
-      if (std::isnan(id(range_sensor).state) || id(range_sensor).state > calibrated_distance + $open_garage_door_distance_margin_of_error) {
+      if (std::isnan(id(range_sensor).state) || id(range_sensor).state > calibrated_distance + id(gdo_err_margin)) {
         return false;
-      } else if (id(range_sensor).state > calibrated_distance - $open_garage_door_distance_margin_of_error){
+      } else if (id(range_sensor).state > calibrated_distance - id(gdo_err_margin)){
         return true;
       } else {
         return {};
