@@ -1,6 +1,7 @@
 substitutions:
   rtttl_boop: boop:d=32,o=5,b=100:d#
   rtttl_gotit: got_it:d=32,o=5,b=100:d#,a#,be
+  rtttl_scaleup: scale_up:d=32,o=5,b=100:c,c#,d#,e,f#,g#,a#,b
   rtttl_success: success:d=4,o=6,b=160:8e6,16f6,16g6,8a6,8g6,8e6,8g6,8a6
 
 globals:
@@ -48,6 +49,15 @@ button:
       then:
         - script.execute: script_self_test_stop
 
+  - platform: template
+    id: button_fcc_test_start
+    name: ~FCC TEST STart
+    entity_category: diagnostic
+    internal: True
+    on_press:
+      then:
+        - script.execute: script_fcc_test
+
   - platform: factory_reset
     name: Factory Reset
     entity_category: diagnostic
@@ -64,7 +74,7 @@ script:
           value: 'true'
       - lambda: id(button_self_test_stop).set_internal(false);
       - lambda: ESP_LOGI("Konnected-GDO-Test","Starting Self-Test");
-      - rtttl.play: scale_up:d=32,o=5,b=100:c,c#,d#,e,f#,g#,a#,b
+      - rtttl.play: $rtttl_scaleup
       - wait_until:
           condition:
             not:
@@ -174,3 +184,22 @@ script:
             - rtttl.play: boop:d=32,o=5,b=100:d#
             - delay: 1s
           
+  # Script to put the device in non-transmission mode and cycle thru
+  # all   
+  - id: script_fcc_test
+    then:
+     # TODO: disable API timeout
+      - wifi.disable:
+      - repeat:
+          count: 10000
+          then:
+            - rtttl.play: $rtttl_scaleup
+            - light.turn_on: warning_led
+            - delay: 500ms
+            - light.turn_off: warning_led
+            - button.press: garage_door_opener_button
+            - switch.turn_on: output_switch
+            - delay: 300ms
+            - switch.turn_off: output_switch
+            - delay: 1s
+     

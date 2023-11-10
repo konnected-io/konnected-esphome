@@ -2,4 +2,5 @@ switch:
   - platform: gpio
     pin: $output_switch_pin
     name: $switch_name
+    id: output_switch
 
