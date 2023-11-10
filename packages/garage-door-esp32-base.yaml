@@ -49,9 +49,9 @@ substitutions:
   sda: GPIO6
   scl: GPIO7
 
-packages:
+# packages:
 
-  remote_package:
-    url: http://github.com/konnected-io/konnected-esphome
-    ref: master
-    file: packages/core-esp32-s3.yaml
+#   remote_package:
+#     url: http://github.com/konnected-io/konnected-esphome
+#     ref: master
+#     file: packages/core-esp32-s3.yaml

@@ -3,8 +3,8 @@ binary_sensor:
       number: $wired_sensor_pin
       mode: INPUT_PULLUP
     device_class: garage_door
-    id: garage_door_wired_sensor
-    name: $friendly_name Wired Sensor
+    id: garage_door_input
+    name: Wired Sensor
     platform: gpio   
     filters:
       - delayed_on_off: $sensor_debounce_time

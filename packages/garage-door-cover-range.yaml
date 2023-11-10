@@ -1,6 +1,7 @@
 cover:
   - platform: template
     name: $garage_door_cover_name
+    id: garage_door
     device_class: garage
     lambda: |-
       if (id(garage_door_range_sensor).state) {

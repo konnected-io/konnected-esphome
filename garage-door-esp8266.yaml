@@ -55,7 +55,7 @@ packages:
       # more: https://www.home-assistant.io/integrations/cover/
       # CHOOSE ONE of the following cover packages depending on the sensors used to determine the open/closed state of the door.
       #
-      # 1. RANGE SENSOR ONLY - Include this line and remove or comment out the garage_door_wired_sensor package below.
+      # 1. RANGE SENSOR ONLY - Include this line and remove or comment out the garage_door_input package below.
       - packages/garage-door-cover-range.yaml
       #
       # 2. WIRED SENSOR ONLY - Include this line and remove or comment out the vl53l0x_range_sensor package below.

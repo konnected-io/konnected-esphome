@@ -1,7 +1,7 @@
 button:
   - platform: template
     id: pre_close_warning
-    name: $friendly_name Pre-close Warning
+    name: Pre-close Warning
     internal: true
     on_press:
       then:

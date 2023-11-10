@@ -134,13 +134,13 @@ script:
       - lambda: ESP_LOGI("Konnected-GDO-Test","Testing wired input is OPEN");
       - wait_until: 
           condition:
-            binary_sensor.is_on: garage_door_wired_sensor
+            binary_sensor.is_on: garage_door_input
           timeout: 60s
       - lambda: ESP_LOGI("Konnected-GDO-Test","Next, connect IN terminals to DOOR terminals to test the relay");
       - output.turn_on: garage_door_opener_output
       - wait_until:
           condition:
-            - binary_sensor.is_off: garage_door_wired_sensor
+            - binary_sensor.is_off: garage_door_input
           timeout: 60s
 
       ###

@@ -11,7 +11,7 @@ i2c:
 
 number:
   - platform: template
-    name: $friendly_name Sensor calibration
+    name: Sensor calibration
     id: open_garage_door_distance_from_ceiling
     icon: mdi:ruler
     entity_category: config
@@ -25,7 +25,7 @@ number:
 
 sensor:
   - platform: vl53l0x
-    name: $friendly_name Sensor distance
+    name: Sensor distance
     update_interval: $range_sensor_polling_time
     long_range: true
     accuracy_decimals: 2

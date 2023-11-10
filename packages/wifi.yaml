@@ -8,14 +8,14 @@ captive_portal:
 
 sensor:
   - platform: wifi_signal
-    name: $friendly_name WiFi Signal RSSI
+    name: WiFi Signal RSSI
     id: wifi_signal_db
     entity_category: diagnostic
 
   - platform: copy
     source_id: wifi_signal_db
     id: wifi_signal_pct
-    name: $friendly_name WiFi Signal %
+    name: WiFi Signal %
     filters:
       - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
     unit_of_measurement: "%"
@@ -24,7 +24,7 @@ sensor:
 text_sensor:
   - platform: wifi_info
     ip_address:
-      name: $friendly_name IP Address
+      name: IP Address
       entity_category: diagnostic
   
     

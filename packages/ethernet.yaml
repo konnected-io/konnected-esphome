@@ -8,5 +8,5 @@ ethernet:
 text_sensor:
   - platform: ethernet_info
     ip_address:
-      name: $friendly_name Ethernet IP Address
+      name: Ethernet IP Address
       entity_category: diagnostic
