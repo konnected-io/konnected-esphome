@@ -1,6 +1,6 @@
 # Konnected for ESPHome
 This repository houses the officially supported [ESPHome firmware](https://esphome.io) configuration files and recipes for [Konnected](https://konnected.io)
-products. Konnected is a U.S. based maker of IoT hardware and software that integrates traditional wired alarm systems and (coming soon!) garage door
+products. Konnected is a U.S. based maker of IoT hardware and software that integrates traditional wired alarm systems and garage door
 openers into your smart home.
 
 ## Quick Start
@@ -42,9 +42,14 @@ This firmware config will also run on a NodeMCU module and Konnected's v1 (2018-
 
 
 ### `garage-door-esp8266.yaml`
-A [smart garage door opener](https://konnected.io/products/smart-garage-door-opener) based on the ESP8266.
+A [smart garage door opener](https://konnected.io/products/smart-garage-door-opener) based on the ESP8266 (model: GDOv1-S).
 
 ![https://konnected.io/products/smart-garage-door-opener](https://konnected.io/cdn/shop/files/GDOProductImages_2_1.png?v=1683919623&width=600)
+
+### `garage-door-esp32.yaml`
+An improved [smart garage door opener retrofit](https://konnected.io/products/smart-garage-door-opener) based on the ESP32-S3-Mini (GDOv2-S).
+
+(coming soon)
 
 ## Customization
 
@@ -56,7 +61,7 @@ Customize your ESPHome based firmware to your own needs by making simple edits t
 A unique name for this device. If you have multiple Konnected panels, choose a different name for each. The name can only include lowercase letters, numbers, and hyphens.
 
 #### `friendly_name`
-A more friendly looking name, for example "Alarm Panel" used as a prefix on some of the sensors. i.e. "Alarm Panel IP Address". If you have multiple Konnected devices, choose a different friendly name for each.
+A human-readable name, for example "Alarm Panel", used to identify the device in Home Assistant front-end. If you have multiple Konnected devices, it's recommended to set a different friendly name for each.
 
 #### `sensor_debounce_time`
 Sensors use a [debouncing](https://esphome.io/components/binary_sensor/gpio.html#debouncing-values) filter to prevent transient sensor state changes or flickers from triggering a false sensor event. Default: `200ms`
