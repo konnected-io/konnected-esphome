@@ -14,5 +14,5 @@ light:
             - state: true
               duration: $warning_beep_pulse_time
             - state: false
-              duration: $warning_beep_pulse_time
+              duration: $warning_beep_pause_time
     internal: $warning_beep_internal_only
