@@ -37,6 +37,7 @@ substitutions:
   sensor_debounce_time: 200ms
   range_sensor_polling_time: 2500ms
   range_sensor_debounce_time: 3s
+  blink_on_state: "true"
 
   ####
   # INTERNAL MAPPINGS

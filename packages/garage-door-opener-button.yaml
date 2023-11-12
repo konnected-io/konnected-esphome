@@ -9,3 +9,9 @@ button:
     output: garage_door_opener_output
     duration: $garage_door_opener_momentary_duration
     internal: true
+    on_press:
+      - if:
+          condition:
+            lambda: return id(blink_on_state);
+          then:
+            - script.execute: blink_status_led
