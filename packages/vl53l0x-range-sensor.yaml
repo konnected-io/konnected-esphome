@@ -1,7 +1,7 @@
 globals:
   - id: gdo_err_margin
     type: float
-    restore_value: true
+    restore_value: yes
     initial_value: $open_garage_door_distance_margin_of_error
 
 i2c:

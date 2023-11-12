@@ -1,7 +1,7 @@
 globals:
-  id: blink_on_state
-  type: bool
-  initial_value: $blink_on_state
+  - id: blink_on_state
+    type: bool
+    initial_value: $blink_on_state
 
 light:
   - platform: status_led

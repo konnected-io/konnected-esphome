@@ -47,6 +47,7 @@ packages:
   remote_package:
     url: http://github.com/konnected-io/konnected-esphome
     ref: master
+    refresh: 5min
     files:
 
       ####

@@ -52,7 +52,7 @@ packages:
   
       # Required packages:
       - packages/alarm-panel-esp32-base.yaml
-      # - packages/status-led.yaml      
+      - packages/status-led.yaml      
 
       # Keep either the wifi.yaml or ethernet.yaml package below (not both)
       # - packages/wifi.yaml
