@@ -1,0 +1,33 @@
+esphome:
+  on_boot:
+    priority: 200
+    then:
+      - lambda: !lambda |-
+          ESP_LOGI("Konnected-FCC-Test", "Disabling WiFi");
+      - script.execute: script_self_test_stop
+      - script.execute: script_fcc_test
+
+
+packages:
+  gdo: !include garage-door-esp32.yaml
+
+script:
+  # Script to put the device in non-transmission mode and cycle thru
+  # all   
+  - id: script_fcc_test
+    then:
+     # TODO: disable API timeout
+      - wifi.disable:
+      - repeat:
+          count: 10000
+          then:
+            - rtttl.play: $rtttl_scaleup
+            - light.turn_on: warning_led
+            - delay: 500ms
+            - light.turn_off: warning_led
+            - button.press: garage_door_opener_button
+            - switch.turn_on: output_switch
+            - delay: 300ms
+            - switch.turn_off: output_switch
+            - delay: 1s
+     
