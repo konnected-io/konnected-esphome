@@ -7,13 +7,22 @@ esphome:
       - script.execute: script_self_test_stop
       - script.execute: script_fcc_test
 
-
 packages:
   gdo: !include garage-door-esp32.yaml
 
+button:
+  - platform: template
+    id: button_fcc_test_start
+    name: ~FCC TEST STart
+    entity_category: diagnostic
+    internal: True
+    on_press:
+      then:
+        - script.execute: script_fcc_test
+
 script:
   # Script to put the device in non-transmission mode and cycle thru
-  # all   
+  # all device functions
   - id: script_fcc_test
     then:
      # TODO: disable API timeout

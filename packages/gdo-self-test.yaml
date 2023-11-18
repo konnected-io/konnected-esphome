@@ -49,15 +49,6 @@ button:
       then:
         - script.execute: script_self_test_stop
 
-  - platform: template
-    id: button_fcc_test_start
-    name: ~FCC TEST STart
-    entity_category: diagnostic
-    internal: True
-    on_press:
-      then:
-        - script.execute: script_fcc_test
-
   - platform: factory_reset
     name: Factory Reset
     entity_category: diagnostic
