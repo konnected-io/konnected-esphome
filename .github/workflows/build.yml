@@ -177,10 +177,11 @@ jobs:
       
       - name: Deploy
         if: github.event.release  
-        uses: lbertenasco/s3-deploy@v1
+        uses: reggionick/s3-deploy@v4
         with:
           folder: install-konnected
           bucket: install-konnected
+          bucket-region: us-east-1
           dist-id: E2FDL2RANMI9J7
           invalidation: /manifests/*
 
