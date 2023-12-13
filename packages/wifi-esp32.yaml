@@ -5,8 +5,8 @@ wifi:
 improv_serial:
 captive_portal:
 
-# esp32_improv:
-#   authorizer: false
+esp32_improv:
+  authorizer: false
 
 sensor:
   - platform: wifi_signal

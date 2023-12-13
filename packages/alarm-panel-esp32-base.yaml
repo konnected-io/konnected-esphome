@@ -12,7 +12,7 @@ substitutions:
   name: alarm-panel-pro
   friendly_name: Alarm Panel Pro
   project_name: konnected.alarm-panel-pro-esp32-wifi
-  project_version: "0.3.2"
+  project_version: "0.4.0"
 
   sensor_debounce_time: 200ms
   warning_beep_pulse_time: 100ms
