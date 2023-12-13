@@ -1,0 +1,20 @@
+## DO NOT USE!            ##  
+## THIS DOESN'T WORK YET! ##
+##
+## See: https://github.com/esphome/feature-requests/issues/1019
+
+substitutions:
+  mqtt_addr: a35zoibvcdzyfb-ats.iot.us-east-1.amazonaws.com
+  # mqtt_addr: t1alk0zqpysstg.deviceadvisor.iot.us-east-1.amazonaws.com
+
+mqtt:
+  broker: $mqtt_addr
+  port: 8883
+  # idf_send_async: true
+  certificate_authority: !secret ca_cert
+  certificate: !secret certificate
+  key: !secret private_key
+  discovery_unique_id_generator: mac
+  # skip_cert_cn_check: true
+  discovery: false
+  log_topic: false
