@@ -1,0 +1,286 @@
+openapi: 3.1.0
+info:
+  title: Garage Door Opener REST API
+  summary: Local REST based API for the Konnected Garage Door Opener
+  description: This API is built on ESPHome firmware for Konnected's Garage Door Opener products, models GDOv1-S and GDOv2-S. For more details and API options, see https://esphome.io/web-api/#api-rest.
+  version: 1.0.0
+  termsOfService: https://konnected.io/terms
+  contact:
+      name: Konnected Support
+      url: https://support.konnected.io
+      email: help@konnected.io
+servers:
+  - url: http://{localIP}
+    description: Device on local network    
+    variables:
+      localIp:
+        default: 192.168.1.100
+      port:        
+        default: '80'
+paths:
+  /cover/garage_door:
+    get:
+      summary: Garage Door State
+      description: The garage door *cover* represents the current state of the garage door and current operation.
+      responses:
+        '200':
+          description: Garage door state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  state:
+                    type: string
+                    description: Binary state of the garage door (`OPEN` or `CLOSED`)
+                  current_operation:
+                    type: string
+                    description: Current operational state of the garage door (`IDLE`, `OPENING` or `CLOSING`)
+                  value:
+                    type: integer
+                    description: Numerical representation of the current state (1 means open, 0 means closed)
+                  id:
+                    type: string
+                    description: ESPHome object_id
+  /cover/garage_door/open:
+    post:
+      summary: Open Command
+      description: Send an open command to the garage door.
+  /cover/garage_door/close:
+    post:
+      summary: Close Command
+      description: Send a close command to the garage door.
+  /cover/garage_door/stop:
+    post:
+      summary: Stop Command
+      description: Send a stop command to the garage door.
+  /binary_sensor/wired_sensor:
+    get:
+      summary: Wired Input State
+      description: Reads the state of the device's wired input zone. This may be used for a wired contact to detect the garage door state (when used with the Garage Door *cover*), or used for something else like a wired PIR motion sensor or button/switch.
+      responses:
+        '200':
+          description: Wired input state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+  /switch/str_output:
+    get:
+      summary: STR Output State
+      description: Current state of the optional STR (12V Strobe) output
+      responses:
+        '200':
+          description: STR output state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+  /switch/str_output/turn_on:
+    post:
+      summary: Turn on STR Output
+      description: Turns on the STR (12V strobe) output on the device. The red LED illuminates to indicate the strobe is on.
+      responses:
+        '200':
+          description: Turn-on request received
+
+  /switch/str_output/turn_off:
+    post:
+      summary: Turn off STR Output
+      description: Turns off the STR (12V strobe) output on the device.
+      responses:
+        '200':
+          description: Turn-off request received
+  /switch/str_output/toggle:
+    post:
+      summary: Toggle the STR Output
+      description: Toggles the STR (12V strobe) output on the device. The red LED illuminates when the STR output is energized.
+      responses:
+        '200':
+          description: Toggle request received
+  /binary_sensor/garage_door_range_sensor:
+    get:
+      summary: Garage Door State determined by optical laser sensor
+      description: Returns a binary state (`ON` means open, `OFF` means closed) of the garage door based on the reading of the optical laser range sensor compared to the open garage door calibration distance.
+      responses:
+        '200':
+          description: Garage door state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+  /number/sensor_calibration:
+    get:
+      summary: Calibrated distance of the open garage door
+      description: This value is used as the known distance between the ceiling-mounted device and the rolled-up garage door.
+      responses:
+        '200':
+          description: Calibrated value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: number
+                    description: Calibrated distance in meters as a floating point number.
+                  state:
+                    type: string
+                    description: Human readable string representation of the calibrated distance
+  /number/sensor_calibration/set:  
+    post:
+      summary: Set calibrated distance of the open garage door
+      description: To determine the open or closed state of the garage door, `value` to the known distance between the ceiling-mounted device and the rolled-up garage door.
+      parameters:
+        - in: query
+          name: value
+          required: True
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Calibrated value set
+  /sensor/sensor_distance:
+    get:
+      summary: Distance measurement of the optical laser sensor
+      description: Current state of the optical laser sensor measurement in meters, representing the distance of a solid object in front of the sensor
+      responses:
+        '200':
+          description: Optical laser sensor distance reading
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: number
+                    description: Distance reading expressed as a floating point number
+                  state:
+                    type: string
+                    description: Human readable string representation of the measured distance with units
+  /sensor/wifi_signal_rssi:
+    get:
+      summary: Wi-Fi signal strength RSSI
+      description: Signal strength of the Wi-Fi connection (RSSI) expressed in dBm
+      responses:
+        '200':
+          description: Wi-Fi signal strength (RSSI)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: number
+                    description: RSSI expressed as a negative integer
+                  state:
+                    type: string
+                    description: Human readable string representation of the RSSI with units
+  /sensor/wifi_signal__:
+    get:
+      summary: Wi-Fi signal strength %
+      description: Signal strength of the Wi-Fi connection (RSSI) converted to a percentage
+      responses:
+        '200':
+          description: Wi-Fi signal strength (%)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: number
+                    description: Signal strength expressed as a percentage value (0 - 100)
+                  state:
+                    type: string
+                    description: Human readable string representation of the signal strength percentage
+  /sensor/uptime:
+    get:
+      summary: Uptime
+      description: Time elapsed since last boot of the device, in seconds.
+      responses:
+        '200':
+          description: Uptime
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: number
+                    description: Number of seconds since last boot
+                  state:
+                    type: string
+                    description: Human readable string representation of the seconds since boot, with units
+  /button/pre_close_warning/press:
+    post:
+      summary: Trigger the pre-close warning
+      description: For safety, the device makes an audible and visual warning before automatically closing the garage door. POST to this endpoint (no params) to trigger the warning. Note, it is not necessary to trigger this from your application before closing, the firmware already handles that.
+  /button/play_sound/press:
+    post:
+      summary: Plays the pre-configured pre-close warning sound
+      description: Trigger the pre-close warning sound only. 
+  /button/garage_door_opener_button/press:
+    post:
+      summary: Trigger the garage door opener button
+      description: Manually trigger the internal relay to "press" the garage door opener button, regardless of the current state or intended state.
+  /button/restart/press:
+    post:
+      summary: Restart/reboot the device
+      description: Trigger the software to reboot, re-connect to Wi-Fi, and re-establish a connection
+  /button/factory_reset/press:
+    post:
+      summary: Reset with Factory Default Settings
+      description: Resets the device and restores all settings. WARNING! Device will disconnect from Wi-Fi and will go offline! You must set-up WiFi again in close proximity to the device.
+  /button/_test_script_start/press:
+    post:
+      summary: Start the Self-Test
+      description: Starts the pre-flight functional self-test.
+  /button/_test_stop/press:
+    post:
+      summary: Stop the Self-Test
+      description: Stops the self-test script.
+
+components:
+  schemas:
+    binary_sensor:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ESPHome object_id
+        state:
+          type: string
+          description: Binary state of the input (`ON` or `OFF`)
+        value:
+          type: boolean
+          description: Boolean representation of the input state (*true* means ON)
+    sensor:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ESPHome object_id
+        state:
+          type: string
+          description: Human readable state of the sensor displayed with units. For example `0.5 m` or `92 %`.
+        value:
+          type: number
+          description: Numerical representation of the sensor
+
+
