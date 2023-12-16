@@ -6,15 +6,15 @@ substitutions:
 
   ####
   # NAME
-  # By default, the name of the ESPHome device is "garage-door-xxxxxx" where xxxxxx is a unique identifier. The device's
-  # hostname on your network is also defined by the name, defaulting to "garage-door-xxxxxx.local". Edit this variable to
+  # By default, the name of the ESPHome device is "konnected-GDOv2-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "konnected-GDOv2-xxxxxx.local". Edit this variable to
   # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
-  name: garage-door
+  name: konnected-GDOv2
   friendly_name: Garage Door Opener
   project_name: konnected.garage-door-esp32
   project_version: "0.4.2"
   garage_door_cover_name: Garage Door
-  switch_name: Switch
+  switch_name: STR output
 
   ####
   # GARAGE DOOR OPENER MOMENTARY DURATION
@@ -24,7 +24,7 @@ substitutions:
   ####
   # OPEN GARAGE DOOR DISTANCE MARGIN OF ERROR
   # The margin of error (+/-) in meters from the value above to consider the garage door in the open position.
-  open_garage_door_distance_margin_of_error: "0.06"
+  open_garage_door_distance_margin_of_error: "0.05"
 
   ####
   # GARAGE DOOR CLOSE WARNING DURATION

@@ -54,4 +54,4 @@ binary_sensor:
         return {};
       }
     filters:
-      delayed_off: $range_sensor_debounce_time
+      delayed_on_off: $range_sensor_debounce_time

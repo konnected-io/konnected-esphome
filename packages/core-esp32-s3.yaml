@@ -35,6 +35,7 @@ sensor:
     name: Uptime
     entity_category: diagnostic
 
-switch:
+button:
   - platform: restart
     name: Restart
+    entity_category: config
