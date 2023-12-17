@@ -6,13 +6,13 @@ substitutions:
 
   ####
   # NAME
-  # By default, the name of the ESPHome device is "konnected-GDOv2-xxxxxx" where xxxxxx is a unique identifier. The device's
-  # hostname on your network is also defined by the name, defaulting to "konnected-GDOv2-xxxxxx.local". Edit this variable to
+  # By default, the name of the ESPHome device is "garage-door-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "garage-door-xxxxxx.local". Edit this variable to
   # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
-  name: konnected-GDOv2
+  name: garage-door
   friendly_name: Garage Door Opener
   project_name: konnected.garage-door-esp32
-  project_version: "0.4.2"
+  project_version: "0.4.3"
   garage_door_cover_name: Garage Door
   switch_name: STR output
 
