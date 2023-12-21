@@ -3,7 +3,7 @@ output:
     platform: gpio
     pin:
       number: $warning_beep_pin
-      allow_other_uses: true
+      allow_other_uses: $warning_beep_shared
 
 
 light: 
