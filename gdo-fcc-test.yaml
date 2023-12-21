@@ -8,7 +8,90 @@ esphome:
       - script.execute: script_fcc_test
 
 packages:
-  gdo: !include garage-door-esp32.yaml
+
+  remote_package:
+    url: http://github.com/konnected-io/konnected-esphome
+    ref: master
+    refresh: 5min
+    files:
+
+      ####
+      # BASE
+      # This package is required and sets up core features.
+      - packages/garage-door-esp32-base.yaml
+
+      ####
+      # GARAGE DOOR COVER
+      # The Garage Door Cover is the main user interface entity representing a garage door in Home Assistant.
+      # more: https://www.home-assistant.io/integrations/cover/
+      # CHOOSE ONE of the following cover packages depending on the sensors used to determine the open/closed state of the door.
+      #
+      # 1. RANGE SENSOR ONLY - Include this line and remove or comment out the garage_door_wired_sensor package below.
+      - packages/garage-door-cover-range.yaml
+      #
+      # 2. WIRED SENSOR ONLY - Include this line and remove or comment out the vl53l0x_range_sensor package below.
+      # - packages/garage-door-cover-wired.yaml
+      #
+      # 3. WIRED & RANGE SENSORS - Include this line.
+      # - packages/garage-door-cover-wired-and-range.yaml
+
+      ####
+      # GARAGE DOOR WIRED SENSOR
+      # Enables a wired contact sensor for reporting the open or closed state of the garage door
+      # via the physical INPUT terminals.
+      - packages/garage-door-wired-sensor.yaml
+
+      ####
+      # GARAGE DOOR RANGE SENSOR
+      # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
+      # the open/closed state of an overhead garage door.    
+      - packages/vl53l0x-range-sensor.yaml
+
+      ####
+      # GARAGE DOOR OPENER BUTTON
+      # Enables the garage door opener relay labeled DOOR on the Konnected Garage Door Opener as a button entity. When
+      # pressed, the relay will close the dry contact, simulating a physical press of the garage door opener wall button.
+      - packages/garage-door-opener-button.yaml
+
+      ####
+      # SWITCH
+      # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
+      # switch: !include packages/switch.yaml
+      - packages/switch.yaml
+
+      ####
+      # WARNING LED
+      # Enables the onboard warning LED light, with strobe effect. Used to visually warn of garage door automatic closing.
+      # warning_led: !include packages/warning-led.yaml
+      - packages/warning-led.yaml
+
+      ####
+      # WIFI
+      # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
+      # wifi: !include packages/wifi.yaml
+      - packages/wifi.yaml
+
+      ####
+      # PRE-CLOSE WARNING
+      # Enables a pleasant and customizable pre-close warning tone  using the onboard piezo buzzer. Used to audibly 
+      # warn of a garage door automatic closing.    
+      - packages/buzzer-rtttl.yaml
+      - packages/pre-close-warning-tones.yaml
+
+      ####
+      # STATUS LED
+      # Enables the onboard blue status LED as an activity/error indicator
+      # status_led: !include packages/status-led.yaml
+      - packages/status-led.yaml
+
+      ####
+      # SELF-TEST
+      # Self test script used to validate the hardware post-assembly
+      - packages/gdo-self-test.yaml
+
+esp32:  
+  framework:
+    type: esp-idf
 
 button:
   - platform: template
@@ -26,6 +109,7 @@ script:
   - id: script_fcc_test
     then:
      # TODO: disable API timeout
+     # disable bluetooth
       - wifi.disable:
       - repeat:
           count: 10000
@@ -38,5 +122,36 @@ script:
             - switch.turn_on: output_switch
             - delay: 300ms
             - switch.turn_off: output_switch
-            - delay: 1s
+            - delay: 3s
      
+
+#### 
+# LOGGER
+# more: https://esphome.io/components/logger.html
+logger:
+  level: DEBUG
+  logs:
+    ledc.output: INFO
+    vl53l0x: DEBUG
+    sensor: INFO
+    json: INFO
+    api: DEBUG
+
+api:
+  reboot_timeout: 0s
+  services:
+  
+  # Call the play_rtttl service to play any RTTTL song in the garage
+  - service: play_rtttl
+    variables:
+      song_str: string
+    then:
+      - rtttl.play:
+          rtttl: !lambda 'return song_str;'
+
+ota:
+
+improv_serial:
+
+web_server:
+  include_internal: true
