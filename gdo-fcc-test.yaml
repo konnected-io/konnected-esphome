@@ -153,6 +153,7 @@ script:
 # more: https://esphome.io/components/logger.html
 logger:
   level: DEBUG
+  hardware_uart: UART0
   logs:
     ledc.output: INFO
     vl53l0x: DEBUG
