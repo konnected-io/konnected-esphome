@@ -2,8 +2,10 @@ switch:
 
   - id: siren
     name: Siren
-    pin: $alarm
+    pin: 
+      number: $alarm
+      allow_other_uses: true
     platform: gpio
     icon: mdi:bullhorn
-    allow_other_uses: true
+    
 
