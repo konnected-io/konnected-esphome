@@ -2,6 +2,7 @@ output:
   - id: buzzer_output
     platform: gpio
     pin: $warning_beep_pin
+    allow_other_uses: true
 
 light: 
   - id: warning_beep

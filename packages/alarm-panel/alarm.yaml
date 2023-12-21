@@ -5,4 +5,5 @@ switch:
     pin: $alarm
     platform: gpio
     icon: mdi:bullhorn
+    allow_other_uses: true
 

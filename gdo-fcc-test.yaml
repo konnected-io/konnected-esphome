@@ -1,3 +1,5 @@
+substitutions:
+  garage_door_opener_momentary_duration: 10s
 esphome:
   on_boot:
     priority: 200
@@ -108,21 +110,42 @@ script:
   # all device functions
   - id: script_fcc_test
     then:
-     # TODO: disable API timeout
-     # disable bluetooth
       - wifi.disable:
       - repeat:
           count: 10000
           then:
             - rtttl.play: $rtttl_scaleup
-            - light.turn_on: warning_led
-            - delay: 500ms
+            - delay: 1s
+            - rtttl.play: beep:d=8,o=6,b=100:d
+            - delay: 600ms
+            
+            - lambda: ESP_LOGI("Konnected-FCC-Test", "Blinking Warning LED");
+            - light.turn_on:
+                id: warning_led
+                effect: strobe
+            - delay: 5s
             - light.turn_off: warning_led
+            - delay: 500ms
+            - repeat:
+                count: 2
+                then:
+                  - rtttl.play: beep:d=8,o=6,b=100:d
+                  - delay: 600ms
+            
+            - lambda: ESP_LOGI("Konnected-FCC-Test", "Activating GDO trigger relay");
             - button.press: garage_door_opener_button
+            - delay: $garage_door_opener_momentary_duration
+            - repeat:
+                count: 3
+                then:
+                  - rtttl.play: beep:d=8,o=6,b=100:d
+                  - delay: 600ms
+
+            - lambda: ESP_LOGI("Konnected-FCC-Test", "Activating STR output");
             - switch.turn_on: output_switch
-            - delay: 300ms
+            - delay: 10s
             - switch.turn_off: output_switch
-            - delay: 3s
+            - delay: 10s
      
 
 #### 
