@@ -266,10 +266,10 @@ components:
           description: ESPHome object_id
         state:
           type: string
-          description: Binary state of the input (`ON` or `OFF`)
+          description: Binary state of the input (`ON` or `OFF`). ON means open or detected, and OFF means closed or not detected.
         value:
           type: boolean
-          description: Boolean representation of the input state (*true* means ON)
+          description: Boolean representation of the input state (*true* means ON or OPEN)
     sensor:
       type: object
       properties:

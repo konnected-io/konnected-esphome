@@ -1,0 +1,281 @@
+openapi: 3.1.0
+info:
+  title: Alarm Panel REST API
+  summary: Local REST based API for the Konnected Alarm Panel and Alarm Panel Pro
+  description: This API is built on ESPHome firmware for Konnected's Alarm Panel products. For more details and API options, see https://esphome.io/web-api/#api-rest.
+  version: 1.0.0
+  termsOfService: https://konnected.io/terms
+  contact:
+      name: Konnected Support
+      url: https://support.konnected.io
+      email: help@konnected.io
+servers:
+  - url: http://{localIP}
+    description: Device on local network    
+    variables:
+      localIp:
+        default: 192.168.1.100
+      port:        
+        default: '80'
+paths:
+  /binary_sensor/{zone}:
+    get:
+      summary: Zone state
+      description: |
+        Reads the state of a binary sensor zone. A *binary sensor* is an input that has two states: open/closed, on/off, detected/not-detected. All door/window sensors, motion sensors, smoke/CO sensors, water/leak sensors and glass-break sensors are binary sensors.
+        
+        By default, all numbered zones on the Alarm Panel are configured as binary sensors named as follows:
+        
+        1. `zone_1`
+        1. `zone_2`
+        1. `zone_3`
+        1. `zone_4`
+        1. `zone_5`
+        1. `zone_6`
+        1. `zone_7` *Alarm Panel Pro only*
+        1. `zone_8` *Alarm Panel Pro only*
+        1. `zone_9` *Alarm Panel Pro only*
+        1. `zone_10` *Alarm Panel Pro only*
+        1. `zone_11` *Alarm Panel Pro only*
+        1. `zone_12` *Alarm Panel Pro only*
+      parameters:
+        - in: path
+          name: zone
+          required: True
+          schema:
+            type: string
+          description: The zone ID  
+      responses:
+        '200':
+          description: Binary sensor state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+  /switch/{output}:
+    get:
+      summary: Output state
+      description: |
+        Reads the state of an Alarm Panel output. By default, the 6-zone alarm panels have an output named `siren` that activates the 12V ALRM output on the Alarm Panel boards and the OUT outputs on the Add-on boards.
+
+        The Alarm Panel Pro default firmware has two outputs named `alarm_1` and `alarm_2` corresponding to ALRM1 and ALRM2 switched outputs on the panel. The toggle switch on the panel can be used to control OUT2, a 3.3V trigger output instead of the 12V ALRM2 output.
+      parameters:
+        - in: path
+          name: output
+          required: True
+          schema:
+            type: string
+          description: The output ID  
+      responses:
+        '200':
+          description: Switch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+  /switch/{output}/turn_on:
+    post:
+      summary: Turn on an output
+      parameters:
+        - in: path
+          name: output
+          required: True
+          schema:
+            type: string
+          description: The output ID  
+
+  /switch/{output}/turn_off:
+    post:
+      summary: Turn off an output
+      parameters:
+        - in: path
+          name: output
+          required: True
+          schema:
+            type: string
+          description: The output ID  
+
+  /switch/{output}/toggle:
+    post:
+      summary: Toggle an output
+      parameters:
+        - in: path
+          name: output
+          required: True
+          schema:
+            type: string
+          description: The output ID  
+
+  /light/warning_beep:
+    get:
+      summary: Warning Beep
+      description: |
+        The *warning beep* is implemeneted as a light in ESPHome so that built-in strobe effects can be used to make a repeating beep. In reality it's not actually a light. This endpoint simply controls an output that can be attached to a buzzer, sounder or light.
+
+        By default, on the 6-zone Alarm Panels, the *warning beep* output is the same as the ALRM or OUT switched output. On the Alarm Panel Pro, OUT1 is used as the *warning beep* output.
+      responses:
+        '200':
+          description: Switch
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  state:
+                    type: string
+                    description: Human readable string representation of the output, `ON` or `OFF`
+  /light/warning_beep/turn_on:
+    post:
+      summary: Turn on the warning beep
+      description: Turns on the warning beep output with an optional effect or duration.
+      parameters:
+        - in: query
+          name: effect
+          required: False
+          schema:
+            type: string
+            enum: ['Strobe', 'None']
+        - in: query
+          name: flash
+          required: False
+          schema:
+            type: number
+
+      responses:
+        '200':
+          description: Warning beep was turned on
+  /light/warning_beep/turn_off:
+    post:
+      summary: Turn off the warning beep
+      responses:
+        '200':
+          description: Warning beep was turned off
+
+
+  /sensor/wifi_signal_rssi:
+    get:
+      summary: Wi-Fi signal strength RSSI
+      description: Signal strength of the Wi-Fi connection (RSSI) expressed in dBm
+      responses:
+        '200':
+          description: Wi-Fi signal strength (RSSI)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: number
+                    description: RSSI expressed as a negative integer
+                  state:
+                    type: string
+                    description: Human readable string representation of the RSSI with units
+  /sensor/wifi_signal__:
+    get:
+      summary: Wi-Fi signal strength %
+      description: Signal strength of the Wi-Fi connection (RSSI) converted to a percentage
+      responses:
+        '200':
+          description: Wi-Fi signal strength (%)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: number
+                    description: Signal strength expressed as a percentage value (0 - 100)
+                  state:
+                    type: string
+                    description: Human readable string representation of the signal strength percentage
+  /sensor/uptime:
+    get:
+      summary: Uptime
+      description: Time elapsed since last boot of the device, in seconds.
+      responses:
+        '200':
+          description: Uptime
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: number
+                    description: Number of seconds since last boot
+                  state:
+                    type: string
+                    description: Human readable string representation of the seconds since boot, with units
+  /button/restart/press:
+    post:
+      summary: Restart/reboot the device
+      description: Trigger the software to reboot, re-connect to Wi-Fi (or Ethernet), and re-establish a connection
+  /text_sensor/device_id:
+    get:
+      summary: Device ID
+      description: Unique ID of the device. Also its MAC address.
+      responses:
+        '200':
+          description: Device ID / MAC
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: string
+                    description: 12-character Device ID
+                  state:
+                    type: string
+                    description: 12-character Device ID
+  /text_sensor/ip_address:
+    get:
+      summary: IP Address
+      description: Current IP address of the device
+      responses:
+        '200':
+          description: IP Address
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: string
+                    description: IPv4 address
+                  state:
+                    type: string
+                    description: IPv4 address
+
+components:
+  schemas:
+    binary_sensor:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ESPHome object_id
+        state:
+          type: string
+          description: Binary state of the input (`ON` or `OFF`). ON means open or detected, and OFF means closed or not detected.
+        value:
+          type: boolean
+          description: Boolean representation of the input state (*true* means ON or OPEN)
