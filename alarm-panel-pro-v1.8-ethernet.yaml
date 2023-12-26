@@ -1,9 +1,9 @@
 ####
 ##
-## Konnected Alarm Panel Pro (ESP32)
+## Konnected Alarm Panel Pro v1.8 (ESP32)
 ## Firmware configuration for ESPHome
 ##
-## filename: alarm-panel-pro-esp32.yaml
+## filename: alarm-panel-pro-v1.8-ethernet.yaml
 ## GitHub: https://github.com/konnected-io/konnected-esphome
 ## Buy Konnected hardware: https://konnected.io
 ## Help & Support: https://help@konnected.io (support is provided for purchasers of Konnected hardware)
@@ -37,8 +37,12 @@ substitutions:
   # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
   name: alarm-panel-pro
   friendly_name: Alarm Panel Pro
-  project_name: konnected.alarm-panel-pro-wifi
+  project_name: konnected.alarm-panel-pro-ethernet
   project_version: "1.0.0"
+
+  # ETHERNET CONFIG
+  # On the Alarm Panel Pro v1.5, v1.6 and v1.7 use LAN8720. On the v1.8 set this variable to RTL8201.
+  ethernet_type: RTL8201
 
   sensor_debounce_time: 200ms
   warning_beep_pulse_time: 100ms
@@ -91,9 +95,9 @@ packages:
       - packages/core-esp32.yaml
 
       ####
-      # WIFI
-      # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
-      - packages/wifi.yaml
+      # ETHERNET
+      # Enables ethernet connectivity.
+      - packages/ethernet.yaml
 
       ####
       # STATUS LED
@@ -125,9 +129,10 @@ packages:
       # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer. This is 
       # implemented using a light entity with strobe effect to create a repeated beeping sound.
       - packages/warning-beep.yaml
-
+  
+  
 dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-pro-esp32-wifi.yaml@master
+  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-pro-v1.8-ethernet.yaml@master
   import_full_config: false
 
 ####

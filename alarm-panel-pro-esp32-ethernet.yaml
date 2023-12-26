@@ -1,6 +1,6 @@
 ####
 ##
-## Konnected Alarm Panel Pro (ESP32)
+## Konnected Alarm Panel Pro v1.5, v1.6, v1.7 (ESP32)
 ## Firmware configuration for ESPHome
 ##
 ## filename: alarm-panel-pro-esp32.yaml
@@ -29,10 +29,52 @@
 # Customize these variables to your preferences and needs
 # more: https://esphome.io/guides/configuration-types.html#substitutions
 substitutions:
+
+  ####
+  # NAME
+  # By default, the name of the ESPHome device is "alarm-panel-pro-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "alarm-panel-pro-xxxxxx.local". Edit this variable to
+  # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
+  name: alarm-panel-pro
+  friendly_name: Alarm Panel Pro
+  project_name: konnected.alarm-panel-pro-ethernet
+  project_version: "1.0.0"
+
   # ETHERNET CONFIG
-  # Uncomment one of the two lines below depending on your hardware version.
-  ethernet_type: LAN8720 # Alarm Panel Pro up to 1.7
-  # ethernet_type: RTL8201 # Alarm Panel Pro 1.8 and up
+  # On the Alarm Panel Pro v1.5, v1.6 and v1.7 use LAN8720. On the v1.8 set this variable to RTL8201.
+  ethernet_type: LAN8720
+
+  sensor_debounce_time: 200ms
+  warning_beep_pulse_time: 100ms
+  warning_beep_pause_time: 130ms
+  warning_beep_internal_only: "false"
+  warning_beep_shared: "false"
+  blink_on_state: "true"
+
+  ####
+  # ZONE MAPPING
+  # Do not edit this section.
+  zone1: GPIO4
+  zone2: GPIO2
+  zone3: GPIO15
+  zone4: GPIO13
+  zone5: GPIO18
+  zone6: GPIO14
+  zone7: GPIO33
+  zone8: GPIO32
+  zone9: GPIO36
+  zone10: GPIO39
+  zone11: GPIO34
+  zone12: GPIO35
+  alarm1: GPIO12
+  alarm2: GPIO5
+  out1: GPIO23
+  out2: GPIO5
+  status_led: GPIO3
+  
+  ####
+  # CONNECTION MAPPINGS
+  warning_beep_pin: $out1
 
 ####
 # PACKAGES
@@ -50,7 +92,7 @@ packages:
       ####
       # CORE
       # This package is required and sets up core features.
-      - packages/alarm-panel-esp32-base.yaml
+      - packages/core-esp32.yaml
 
       ####
       # ETHERNET

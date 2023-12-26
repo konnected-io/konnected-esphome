@@ -1,2 +1,0 @@
-packages:
-  garage_door_esp32: !include ../garage-door-esp32.yaml

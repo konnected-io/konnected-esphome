@@ -1,2 +1,0 @@
-packages:
-  garage_door_esp8266: !include ../garage-door-esp8266.yaml

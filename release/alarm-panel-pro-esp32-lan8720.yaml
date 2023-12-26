@@ -1,6 +1,0 @@
-substitutions:
-  ethernet_type: LAN8720
-
-packages:
-  alarm_panel_pro_esp32: !include ../alarm-panel-pro-esp32-ethernet.yaml
-
