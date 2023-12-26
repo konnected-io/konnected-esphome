@@ -211,19 +211,10 @@ logger:
     api: DEBUG
 
 ####
-# NATIVE API for HOME ASSISTANT
-# Enables the native API for Home Assistant
+# NATIVE API
+# Enables the native ESPHome API
 # more: https://esphome.io/components/api.html
 api:
-  services:
-    
-    # Call the play_rtttl service to play any RTTTL song in the garage
-    - service: play_rtttl
-      variables:
-        song_str: string
-      then:
-        - rtttl.play:
-            rtttl: !lambda 'return song_str;'
 
 #### 
 # OTA UPDATES
