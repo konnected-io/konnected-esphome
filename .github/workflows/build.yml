@@ -72,9 +72,9 @@ jobs:
         run: | 
           esphome compile alarm-panel-esp8266.yaml
           build_path=.esphome/build/alarm-panel/.pioenvs/alarm-panel
-          fname=konnected-esphome-alarm-panel-esp8266-${{ steps.alarm-panel-esp8266-version.outputs.data }}.bin
-          echo "fname=$(fname)" >> $GITHUB_OUTPUT
+          fname=konnected-esphome-alarm-panel-esp8266-${{ steps.alarm-panel-esp8266-version.outputs.data }}.bin          
           cp $build_path/firmware-factory.bin assets/$fname
+          echo "fname=$fname" >> $GITHUB_OUTPUT
           
       - name: Build Alarm Panel Pro v1.x (WiFi)
         id: build-alarm-panel-pro-esp32-wifi
@@ -82,8 +82,8 @@ jobs:
           esphome compile alarm-panel-pro-esp32-wifi.yaml
           build_path=.esphome/build/alarm-panel-pro/.pioenvs/alarm-panel-pro
           fname=konnected-esphome-alarm-panel-pro-v1-wifi-${{ steps.alarm-panel-pro-wifi-version.outputs.data }}.bin
-          echo "fname=$(fname)" >> $GITHUB_OUTPUT
           cp $build_path/firmware-factory.bin assets/$fname
+          echo "fname=$fname" >> $GITHUB_OUTPUT
 
       - name: Build Alarm Panel Pro v1.x (Ethernet)
         id: build-alarm-panel-pro-esp32-lan8720
@@ -91,35 +91,35 @@ jobs:
           esphome compile alarm-panel-pro-esp32-ethernet.yaml
           build_path=.esphome/build/alarm-panel-pro/.pioenvs/alarm-panel-pro
           fname=konnected-esphome-alarm-panel-pro-v1-ethernet-${{ steps.alarm-panel-pro-ethernet-version.outputs.data }}.bin
-          echo "fname=$(fname)" >> $GITHUB_OUTPUT
           cp $build_path/firmware-factory.bin assets/$fname
+          echo "fname=$fname" >> $GITHUB_OUTPUT
 
       - name: Build Alarm Panel Pro v1.8 (Ethernet)
         id: build-alarm-panel-pro-esp32-rtl8201
         run: |
           esphome compile alarm-panel-pro-v1.8-ethernet.yaml
           build_path=.esphome/build/alarm-panel-pro/.pioenvs/alarm-panel-pro
-          fname=konnected-esphome-alarm-panel-pro-v1.8-ethernet-${{ steps.alarm-panel-pro-v18-ethernet-version.outputs.data }}.bin
-          echo "fname=$(fname)" >> $GITHUB_OUTPUT
+          fname=konnected-esphome-alarm-panel-pro-v1.8-ethernet-${{ steps.alarm-panel-pro-v18-ethernet-version.outputs.data }}.bin          
           cp $build_path/firmware-factory.bin assets/$fname
+          echo "fname=$fname" >> $GITHUB_OUTPUT
 
       - name: Build Garage Door GDOv1-S
         id: build-garage-door-gdov1-s
         run: |
           esphome compile garage-door-GDOv1-S.yaml
           build_path=.esphome/build/garage-door/.pioenvs/garage-door
-          fname=konnected-esphome-garage-door-GDOv1-S-${{ steps.garage-door-gdov1-s-version.outputs.data }}.bin
-          echo "fname=$(fname)" >> $GITHUB_OUTPUT
+          fname=konnected-esphome-garage-door-GDOv1-S-${{ steps.garage-door-gdov1-s-version.outputs.data }}.bin          
           cp $build_path/firmware-factory.bin assets/$fname
+          echo "fname=$fname" >> $GITHUB_OUTPUT
       
       - name: Build Garage Door GDOv2-S
         id: build-garage-door-gdov2-s
         run: |
           esphome compile garage-door-GDOv2-S.yaml
           build_path=.esphome/build/garage-door/.pioenvs/garage-door
-          fname=konnected-esphome-garage-door-GDOv2-S-${{ steps.garage-door-gdov2-s-version.outputs.data }}.bin
-          echo "fname=$(fname)" >> $GITHUB_OUTPUT
+          fname=konnected-esphome-garage-door-GDOv2-S-${{ steps.garage-door-gdov2-s-version.outputs.data }}.bin          
           cp $build_path/firmware-factory.bin assets/$fname
+          echo "fname=$fname" >> $GITHUB_OUTPUT
   
       - uses: keithweaver/aws-s3-github-action@v1.0.0
         name: Upload Builds
