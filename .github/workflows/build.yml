@@ -108,7 +108,7 @@ jobs:
         run: |
           esphome compile garage-door-GDOv1-S.yaml
           build_path=.esphome/build/garage-door/.pioenvs/garage-door
-          fname=konnected-esphome-garage-door-GDOv1-S-${{ steps.garage-door-gdov1-s-version.outputs.data }}.bin          
+          fname=konnected-esphome-garage-door-GDOv1-S-${{ steps.garage-door-gdov1-s-version.outputs.data }}.bin
           cp $build_path/firmware-factory.bin assets/$fname
           echo "fname=$fname" >> $GITHUB_OUTPUT
       
@@ -117,7 +117,16 @@ jobs:
         run: |
           esphome compile garage-door-GDOv2-S.yaml
           build_path=.esphome/build/garage-door/.pioenvs/garage-door
-          fname=konnected-esphome-garage-door-GDOv2-S-${{ steps.garage-door-gdov2-s-version.outputs.data }}.bin          
+          fname=konnected-esphome-garage-door-GDOv2-S-${{ steps.garage-door-gdov2-s-version.outputs.data }}.bin
+          cp $build_path/firmware-factory.bin assets/$fname
+          echo "fname=$fname" >> $GITHUB_OUTPUT
+
+      - name: Build Garage Door GDOv2-Q
+        id: build-garage-door-gdov2-q
+        run: |
+          esphome compile garage-door-GDOv2-Q.yaml
+          build_path=.esphome/build/garage-door/.pioenvs/garage-door
+          fname=konnected-esphome-garage-door-GDOv2-Q-${{ steps.garage-door-gdov2-s-version.outputs.data }}.bin
           cp $build_path/firmware-factory.bin assets/$fname
           echo "fname=$fname" >> $GITHUB_OUTPUT
   
@@ -162,7 +171,7 @@ jobs:
           ESP8266_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-alarm-panel-esp8266.outputs.fname }}
           ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-alarm-panel-pro-esp32-wifi.outputs.fname }}
 
-      - name: Build Manifest for Garage Door
+      - name: Build Manifest for GDO White
         if: github.event.release  
         run: |
           ruby ./scripts/update-espwebtools-manifests.rb
