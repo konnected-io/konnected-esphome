@@ -154,7 +154,7 @@ esp32:
     type: arduino
 
 ratgdo:
-  id: ratgdov25i
+  id: konnected_ratgdo
   input_gdo_pin: ${uart_rx_pin}
   output_gdo_pin: ${uart_tx_pin}
   input_obst_pin: ${input_obst_pin}
@@ -165,14 +165,27 @@ ratgdo:
           data:
             title: "${friendly_name} sync failed"
             message: "Failed to communicate with garage opener on startup; Check the ${friendly_name} Rolling code counter number entity history and set the entity to one number larger than the largest value in history. [ESPHome devices](/config/devices/dashboard?domain=esphome)"
-            notification_id: "esphome_ratgdov25i_gdo_sync_failed"
+            notification_id: "esphome_konnected_ratgdo_gdo_sync_failed"
+
+cover:
+  - platform: ratgdo
+    id: garage_door
+    device_class: garage
+    name: "Garage Door"
+    ratgdo_id: konnected_ratgdo
+
+light:
+  - platform: ratgdo
+    id: gdo_light
+    name: "Garage Light"
+    ratgdo_id: konnected_ratgdo
 
 sensor:
   - platform: ratgdo
     id: gdo_openings
     type: openings
     entity_category: diagnostic
-    ratgdo_id: ratgdov25i
+    ratgdo_id: konnected_ratgdo
     name: "Openings"
     unit_of_measurement: "openings"
     icon: mdi:open-in-app
@@ -180,35 +193,76 @@ sensor:
 lock:
   - platform: ratgdo
     id: gdo_lock_remotes
-    ratgdo_id: ratgdov25i
+    ratgdo_id: konnected_ratgdo
     name: "Lock remotes"
 
 binary_sensor:
   - platform: ratgdo
     type: motion
     id: gdo_motion
-    ratgdo_id: ratgdov25i
+    ratgdo_id: konnected_ratgdo
     name: "Motion"
     device_class: motion
   - platform: ratgdo
     type: obstruction
     id: gdo_obstruction
-    ratgdo_id: ratgdov25i
+    ratgdo_id: konnected_ratgdo
     name: "Obstruction"
     device_class: problem
   - platform: ratgdo
     type: button
     id: gdo_button
-    ratgdo_id: ratgdov25i
+    ratgdo_id: konnected_ratgdo
     name: "Button"
     entity_category: diagnostic
   - platform: ratgdo
     type: motor
     id: gdo_motor
-    ratgdo_id: ratgdov25i 
+    ratgdo_id: konnected_ratgdo 
     name: "Motor"
     device_class: running
     entity_category: diagnostic
+
+
+button:
+  - platform: factory_reset
+    name: Factory Reset
+    entity_category: config
+
+number:
+  - platform: ratgdo
+    id: gdo_rolling_code_counter
+    type: rolling_code_counter
+    entity_category: config
+    ratgdo_id: konnected_ratgdo
+    name: "Rolling code counter"
+    mode: box
+    unit_of_measurement: "codes"
+
+  - platform: ratgdo
+    id: gdo_opening_duration
+    type: opening_duration
+    entity_category: config
+    ratgdo_id: konnected_ratgdo
+    name: "Opening duration"
+    unit_of_measurement: "s"
+
+  - platform: ratgdo
+    id: gdo_closing_duration
+    type: closing_duration
+    entity_category: config
+    ratgdo_id: konnected_ratgdo
+    name: "Closing duration"
+    unit_of_measurement: "s"
+
+  - platform: ratgdo
+    id: gdo__client_id
+    type: client_id
+    entity_category: config
+    ratgdo_id: konnected_ratgdo
+    name: "Client ID"
+    mode: box
+
 
 ####
 # DASHBOARD IMPORT
@@ -222,7 +276,7 @@ dashboard_import:
 # LOGGER
 # more: https://esphome.io/components/logger.html
 logger:
-  level: DEBUG
+  level: VERBOSE
   hardware_uart: UART0
   logs:
     ledc.output: INFO
