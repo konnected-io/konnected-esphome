@@ -1,0 +1,164 @@
+substitutions:
+  name: alarm-panel-pro-xxxxxx
+  friendly_name: Alarm Panel Pro
+  project_name: konnected.pro-local-alarm
+  project_version: "0.1.0"
+  
+  ####
+  # CONFIGURABLE OPTIONS
+  ethernet_type: RTL8201
+  sensor_debounce_time: 200ms
+  warning_beep_pulse_time: 100ms
+  warning_beep_pause_time: 130ms
+  warning_beep_internal_only: "false"
+  warning_beep_shared: "false"
+  blink_on_state: "true"
+
+  ####
+  # ZONE MAPPING
+  # Do not edit this section.
+  zone1: GPIO4
+  zone2: GPIO2
+  zone3: GPIO15
+  zone4: GPIO13
+  zone5: GPIO18
+  zone6: GPIO14
+  zone7: GPIO33
+  zone8: GPIO32
+  zone9: GPIO36
+  zone10: GPIO39
+  zone11: GPIO34
+  zone12: GPIO35
+  alarm1: GPIO12
+  alarm2: GPIO5
+  out1: GPIO23
+  out2: GPIO5
+  status_led: GPIO3
+  
+  ####
+  # CONNECTION MAPPINGS
+  warning_beep_pin: $out1
+
+
+####
+# PACKAGES
+# Each package includes the alarm panel feature
+# Remove or comment out any packages that you do not need or want.
+# If you're developing/installing locally, replace the github package line with the local package include above it.
+packages:
+
+  remote_package:
+    url: http://github.com/konnected-io/konnected-esphome
+    ref: master
+    refresh: 5min
+    files:
+
+      ####
+      # CORE
+      # This package is required and sets up core features.
+      - packages/core-esp32.yaml
+
+      ####
+      # ETHERNET
+      # Enables ethernet connectivity.
+      - packages/ethernet.yaml
+
+      ####
+      # STATUS LED
+      # Enables the onboard blue status LED as an activity/error indicator
+      - packages/status-led.yaml
+
+      ####
+      # INPUT ZONES
+      - packages/alarm-panel/zone1.yaml
+      - packages/alarm-panel/zone2.yaml
+      - packages/alarm-panel/zone3.yaml
+      - packages/alarm-panel/zone4.yaml
+      - packages/alarm-panel/zone5.yaml
+      - packages/alarm-panel/zone6.yaml
+      - packages/alarm-panel/zone7.yaml
+      # - packages/alarm-panel/zone8.yaml
+      # - packages/alarm-panel/zone9.yaml
+      # - packages/alarm-panel/zone10.yaml
+      # - packages/alarm-panel/zone11.yaml
+      # - packages/alarm-panel/zone12.yaml
+
+      ####
+      # OUTPUTS
+      - packages/alarm-panel/alarm1.yaml
+      # - packages/alarm-panel/alarm2.yaml
+
+      ####
+      # WARNING BEEP
+      # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer. This is 
+      # implemented using a light entity with strobe effect to create a repeated beeping sound.
+      - packages/warning-beep.yaml
+
+####
+# Zone Customization
+binary_sensor:
+
+  - id: !extend zone1
+    name: Front Door
+    device_class: door
+
+  - id: !extend zone2
+    name: Back Door
+    device_class: door
+
+  - id: !extend zone3
+    name: Main Garage Door
+    device_class: door
+
+  - id: !extend zone4
+    name: Motion
+    device_class: motion
+
+  - id: !extend zone5
+    name: Sun Room & Dining Room GB
+    device_class: sound
+
+  - id: !extend zone6
+    name: Basement GB
+    device_class: sound
+
+  - id: !extend zone7
+    name: South Garage Door
+    device_class: door
+
+
+####
+# Local Alarm Panel Configuration
+alarm_control_panel:
+  - platform: template
+    name: Alarm Panel
+    codes:
+      - "1234"
+    binary_sensors:
+      - input: zone1
+      - input: zone2
+      - input: zone3
+      - input: zone4
+        bypass_armed_home: true
+        bypass_armed_night: true
+      - input: zone5
+        bypass_armed_home: true
+      - input: zone6
+        bypass_armed_home: true
+      - input: zone7
+    restore_mode: RESTORE_DEFAULT_DISARMED
+    on_triggered:
+      then:
+        - switch.turn_on: alarm1
+    on_cleared:
+      then:
+        - switch.turn_off: alarm1
+        - light.turn_off: warning_beep
+    on_pending:
+      then:
+        - light.turn_on:
+            id: warning_beep
+            effect: strobe
+    on_disarmed:
+      then:
+        - light.turn_off: warning_beep
