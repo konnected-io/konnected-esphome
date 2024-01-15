@@ -1,0 +1,216 @@
+####
+##
+## Konnected Garage Door Opener (ESP32)
+## Firmware configuration for ESPHome
+##
+## BUILD/VARIANT: Wired sensor only
+##
+## filename: GDOv2-S-wired-sensor-only.yaml
+## GitHub: https://github.com/konnected-io/konnected-esphome
+## Buy Konnected hardware: https://konnected.io
+## Help & Support: https://help@konnected.io (support is provided for purchasers of Konnected hardware)
+##
+## Copyright© 2024 Konnected Inc.
+##
+## Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+## files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+## modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+## is furnished to do so, subject to the following conditions:
+##
+## The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+##
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+## OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+## LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+## IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+##
+####
+
+####
+# INTRODUCTION
+# 
+# This ESPHome based firmware configuration is designed for the Konnected Garage Door Opener GDOv2-S which is built on the ESP32-S3-MINI.
+# The Garage Door Opener retrofits an older style traditional garage door opener with a dry-contact trigger and has the
+# following features which are included as packages below:
+#
+# 1. Wired contact sensor for detecting open/closed state of garage door
+# 2. Optical range sensor for detecting open/closed state of garage door
+# 3. Emulates a garage door opener button wired to a dry contact relay to open/close the garage door.
+# 4. Adds a Garage Door "Cover" entity that is exposed to Home Assistant. The cover entity incorporates the state of the 
+#    garage door and controls to open/close/stop it.
+# 5. Flashes an onboard LED and beeps an onboard piezo sounder as a warning before automatically closing.
+
+####
+# GENERAL SETTINGS
+# Customize these variables to your preferences and needs
+# more: https://esphome.io/guides/configuration-types.html#substitutions
+
+####
+# GENERAL SETTINGS
+# Customize these variables to your preferences and needs
+# more: https://esphome.io/guides/configuration-types.html#substitutions
+substitutions:
+
+  ####
+  # NAME
+  # By default, the name of the ESPHome device is "garage-door-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "garage-door-xxxxxx.local". Edit this variable to
+  # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
+  name: garage-door
+  friendly_name: Garage Door Opener
+  project_name: konnected.garage-door-gdov2-s
+  project_version: "1.0.0"
+  garage_door_cover_name: Garage Door
+  switch_name: STR output
+
+  ####
+  # GARAGE DOOR OPENER MOMENTARY DURATION
+  # Duration to make the relay contact closure for the garage door opener button circuit. 
+  garage_door_opener_momentary_duration: 300ms
+
+  ####
+  # OPEN GARAGE DOOR DISTANCE MARGIN OF ERROR
+  # The margin of error (+/-) in meters from the value above to consider the garage door in the open position.
+  open_garage_door_distance_margin_of_error: "0.05"
+
+  ####
+  # GARAGE DOOR CLOSE WARNING DURATION
+  # Duration to blink the warning LED and beep the buzzer before the garage door closes.
+  garage_door_close_warning_duration: 5s
+
+  ####
+  # ADDITIONAL SETTTINGS
+  warning_beep_pulse_time: 100ms
+  warning_beep_pause_time: 130ms
+  warning_beep_internal_only: "true"
+  warning_beep_shared: "false"
+  sensor_debounce_time: 200ms
+  range_sensor_polling_time: 2500ms
+  range_sensor_debounce_time: 3s
+  blink_on_state: "true"
+
+  ####
+  # INTERNAL MAPPINGS
+  # DO NOT EDIT these when using Konnected hardware
+  door_control_pin: GPIO1
+  wired_sensor_pin: GPIO5
+  warning_beep_pin: GPIO4
+  warning_leds_pin: GPIO3
+  output_switch_pin: GPIO2
+  status_led: GPIO18
+  sda: GPIO6
+  scl: GPIO7
+
+####
+# PACKAGES
+# Each package includes a Garage Door Opener feature described
+# Remove or comment out any packages that you do not need or want.
+packages:
+
+  remote_package:
+    url: http://github.com/konnected-io/konnected-esphome
+    ref: master
+    refresh: 5min
+    files:
+
+      ####
+      # CORE
+      # This package is required and sets up core ESPHome features.
+      - packages/core-esp32-s3.yaml
+
+      ####
+      # GARAGE DOOR COVER
+      # The Garage Door Cover is the main user interface entity representing a garage door in Home Assistant.
+      # more: https://www.home-assistant.io/integrations/cover/
+      # CHOOSE ONE of the following cover packages depending on the sensors used to determine the open/closed state of the door.
+      #
+      # WIRED SENSOR ONLY - This build uses the wired INPUT to determine the open/closed state of the garage door. The optical
+      # laser sensor is disabled.
+      - packages/garage-door-cover-wired.yaml
+
+      ####
+      # GARAGE DOOR WIRED SENSOR
+      # Enables a wired contact sensor for reporting the open or closed state of the garage door
+      # via the physical INPUT terminals.
+      - packages/garage-door-wired-sensor.yaml
+
+      ####
+      # GARAGE DOOR OPENER BUTTON
+      # Enables the garage door opener relay labeled DOOR on the Konnected Garage Door Opener as a button entity. When
+      # pressed, the relay will close the dry contact, simulating a physical press of the garage door opener wall button.
+      - packages/garage-door-opener-button.yaml
+
+      ####
+      # SWITCH
+      # Enables 12V switched output labeled STR on the Konnected Garage Door opener as a switch entity
+      # switch: !include packages/switch.yaml
+      - packages/switch.yaml
+
+      ####
+      # WARNING LED
+      # Enables the onboard warning LED light, with strobe effect. Used to visually warn of garage door automatic closing.
+      # warning_led: !include packages/warning-led.yaml
+      - packages/warning-led.yaml
+
+      ####
+      # WIFI
+      # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
+      # wifi: !include packages/wifi.yaml
+      - packages/wifi.yaml
+
+      ####
+      # PRE-CLOSE WARNING
+      # Enables a pleasant and customizable pre-close warning tone  using the onboard piezo buzzer. Used to audibly 
+      # warn of a garage door automatic closing.    
+      - packages/buzzer-rtttl.yaml
+      - packages/pre-close-warning-tones.yaml
+
+      ####
+      # STATUS LED
+      # Enables the onboard blue status LED as an activity/error indicator
+      # status_led: !include packages/status-led.yaml
+      - packages/status-led.yaml
+
+esp32:  
+  framework:
+    type: esp-idf
+
+####
+# DASHBOARD IMPORT
+# Enables automatic discovery and upgrades via ESPHome Dashboard
+# more: https://esphome.io/guides/getting_started_hassio.html
+dashboard_import:
+  package_import_url: github://konnected-io/konnected-esphome/examples/GDOv2-S-wired-sensor-only.yaml
+  import_full_config: false
+
+#### 
+# LOGGER
+# more: https://esphome.io/components/logger.html
+logger:
+  level: DEBUG
+  hardware_uart: UART0
+  logs:
+    ledc.output: INFO
+    sensor: INFO
+    json: INFO
+    api: DEBUG
+
+####
+# NATIVE API
+# Enables the native ESPHome API
+# more: https://esphome.io/components/api.html
+api:
+
+#### 
+# OTA UPDATES
+# Enables over-the-air updates
+# more: https://esphome.io/components/ota.html
+ota:
+
+improv_serial:
+
+esp32_improv:
+  authorizer: false
+
+web_server:
+  include_internal: true
