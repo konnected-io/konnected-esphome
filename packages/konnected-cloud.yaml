@@ -3,18 +3,18 @@
 ##
 ## See: https://github.com/esphome/feature-requests/issues/1019
 
-substitutions:
-  mqtt_addr: a35zoibvcdzyfb-ats.iot.us-east-1.amazonaws.com
-  # mqtt_addr: t1alk0zqpysstg.deviceadvisor.iot.us-east-1.amazonaws.com
-
 mqtt:
+  id: konnected_cloud
   broker: $mqtt_addr
   port: 8883
+  client_id: $mac
+  topic_prefix: $mac
   # idf_send_async: true
-  certificate_authority: !secret ca_cert
-  certificate: !secret certificate
-  key: !secret private_key
+  certificate_authority: $certificate_authority
+  client_certificate: $client_certificate
+  client_certificate_key: $client_certificate_key
   discovery_unique_id_generator: mac
   # skip_cert_cn_check: true
-  discovery: false
-  log_topic: false
+  discovery: true
+  log_topic: null
+  discovery_prefix: ${mac}/discovery
