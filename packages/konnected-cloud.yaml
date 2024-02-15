@@ -8,13 +8,14 @@ mqtt:
   broker: $mqtt_addr
   port: 8883
   client_id: $mac
-  topic_prefix: $mac
-  # idf_send_async: true
+  topic_prefix: esphome/$mac
+  discovery_prefix: esphome/${mac}/discovery
+  idf_send_async: true
   certificate_authority: $certificate_authority
   client_certificate: $client_certificate
   client_certificate_key: $client_certificate_key
   discovery_unique_id_generator: mac
-  # skip_cert_cn_check: true
-  discovery: true
+  discovery: false
+  discovery_retain: false
   log_topic: null
-  discovery_prefix: ${mac}/discovery
+  
