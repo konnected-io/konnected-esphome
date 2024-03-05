@@ -5,6 +5,20 @@ output:
       number: $warning_beep_pin
       allow_other_uses: $warning_beep_shared
 
+script:
+  - id: error_tone
+    then:
+      - output.turn_on: buzzer_output
+      - delay: 60ms
+      - output.turn_off: buzzer_output
+      - delay: 50ms
+      - output.turn_on: buzzer_output
+      - delay: 60ms
+      - output.turn_off: buzzer_output
+      - delay: 50ms
+      - output.turn_on: buzzer_output
+      - delay: 60ms
+      - output.turn_off: buzzer_output
 
 light: 
   - id: warning_beep

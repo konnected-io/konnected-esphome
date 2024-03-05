@@ -57,7 +57,7 @@ substitutions:
   name: garage-door
   friendly_name: Garage Door Opener
   project_name: konnected.garage-door-gdov2-s
-  project_version: "1.0.0"
+  project_version: "1.1.0"
   garage_door_cover_name: Garage Door
   switch_name: STR output
 
@@ -117,6 +117,18 @@ packages:
       - packages/core-esp32-s3.yaml
 
       ####
+      # GARAGE DOOR WIRED SENSOR
+      # Enables a wired contact sensor for reporting the open or closed state of the garage door
+      # via the physical INPUT terminals.
+      - packages/garage-door-wired-sensor.yaml
+
+      ####
+      # GARAGE DOOR RANGE SENSOR
+      # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
+      # the open/closed state of an overhead garage door.    
+      - packages/vl53l0x-range-sensor.yaml
+
+      ####
       # GARAGE DOOR COVER
       # The Garage Door Cover is the main user interface entity representing a garage door in Home Assistant.
       # more: https://www.home-assistant.io/integrations/cover/
@@ -130,18 +142,6 @@ packages:
       #
       # 3. WIRED & RANGE SENSORS - Include this line.
       # - packages/garage-door-cover-wired-and-range.yaml
-
-      ####
-      # GARAGE DOOR WIRED SENSOR
-      # Enables a wired contact sensor for reporting the open or closed state of the garage door
-      # via the physical INPUT terminals.
-      - packages/garage-door-wired-sensor.yaml
-
-      ####
-      # GARAGE DOOR RANGE SENSOR
-      # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
-      # the open/closed state of an overhead garage door.    
-      - packages/vl53l0x-range-sensor.yaml
 
       ####
       # GARAGE DOOR OPENER BUTTON

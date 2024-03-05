@@ -1,19 +1,36 @@
-cover:
-  - platform: template
-    name: $garage_door_cover_name
-    id: garage_door
-    device_class: garage
-    lambda: |-
-      if (id(garage_door_input).state || id(garage_door_range_sensor).state) {
-        return COVER_OPEN;
-      } else {
-        return COVER_CLOSED;
-      }
-    open_action:
-      - button.press: garage_door_opener_button
-    close_action:
-      - button.press: pre_close_warning
-      - delay: $garage_door_close_warning_duration
-      - button.press: garage_door_opener_button
-    stop_action:
-      - button.press: garage_door_opener_button
+<<: !include garage-door-cover.yaml
+
+# Consider the garage door open if either the optical or range sensor reports open.
+# Consider the garage closed if both wired and range sensor report closed.
+binary_sensor:
+  - id: !extend garage_door_input
+    on_state:
+      - if:
+          condition:
+            lambda: return (x || id(garage_door_range_sensor).state);
+          then:
+            - cover.template.publish:
+                id: garage_door
+                state: OPEN
+                current_operation: IDLE
+          else:
+            - cover.template.publish:
+                id: garage_door
+                state: CLOSED
+                current_operation: IDLE
+
+  - id: !extend garage_door_range_sensor
+    on_state:
+      - if:
+          condition:
+            lambda: return (x || id(garage_door_input).state);
+          then:
+            - cover.template.publish:
+                id: garage_door
+                state: OPEN
+                current_operation: IDLE
+          else:
+            - cover.template.publish:
+                id: garage_door
+                state: CLOSED
+                current_operation: IDLE

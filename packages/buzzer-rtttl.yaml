@@ -15,6 +15,11 @@ button:
       then:
         - rtttl.play: $ominous_warning
 
+script:
+  - id: error_tone
+    then:
+      - rtttl.play: err:d=16,o=4,b=100:d#,d#,d#
+
 api:
   services:      
     # Call the play_rtttl service to play any RTTTL song in the garage
