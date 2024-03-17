@@ -33,96 +33,12 @@ jobs:
           file: './packages/alarm-panel-esp8266-base.yaml'
           key-path: '["substitutions", "project_version"]'
 
-      - id: alarm-panel-pro-wifi-version
-        uses: jbutcher5/read-yaml@main
-        with:
-          file: './alarm-panel-pro-esp32-wifi.yaml'
-          key-path: '["substitutions", "project_version"]'
-
-      - id: alarm-panel-pro-ethernet-version
-        uses: jbutcher5/read-yaml@main
-        with:
-          file: './alarm-panel-pro-esp32-ethernet.yaml'
-          key-path: '["substitutions", "project_version"]'
-  
-      - id: alarm-panel-pro-v18-ethernet-version
-        uses: jbutcher5/read-yaml@main
-        with:
-          file: './alarm-panel-pro-v1.8-ethernet.yaml'
-          key-path: '["substitutions", "project_version"]'
-
-      - id: garage-door-gdov1-s-version
-        uses: jbutcher5/read-yaml@main
-        with:
-          file: './garage-door-GDOv1-S.yaml'
-          key-path: '["substitutions", "project_version"]'
-
-      - id: garage-door-gdov2-s-version
-        uses: jbutcher5/read-yaml@main
-        with:
-          file: './garage-door-GDOv2-S.yaml'
-          key-path: '["substitutions", "project_version"]'
-  
       - name: Build Alarm Panel ESP8266
         id: build-alarm-panel-esp8266
         run: | 
           esphome compile alarm-panel-esp8266.yaml
           build_path=.esphome/build/alarm-panel/.pioenvs/alarm-panel
           fname=konnected-esphome-alarm-panel-esp8266-${{ steps.alarm-panel-esp8266-version.outputs.data }}.bin          
-          cp $build_path/firmware-factory.bin assets/$fname
-          echo "fname=$fname" >> $GITHUB_OUTPUT
-          
-      - name: Build Alarm Panel Pro v1.x (WiFi)
-        id: build-alarm-panel-pro-esp32-wifi
-        run: |
-          esphome compile alarm-panel-pro-esp32-wifi.yaml
-          build_path=.esphome/build/alarm-panel-pro/.pioenvs/alarm-panel-pro
-          fname=konnected-esphome-alarm-panel-pro-v1-wifi-${{ steps.alarm-panel-pro-wifi-version.outputs.data }}.bin
-          cp $build_path/firmware-factory.bin assets/$fname
-          echo "fname=$fname" >> $GITHUB_OUTPUT
-
-      - name: Build Alarm Panel Pro v1.x (Ethernet)
-        id: build-alarm-panel-pro-esp32-lan8720
-        run: |
-          esphome compile alarm-panel-pro-esp32-ethernet.yaml
-          build_path=.esphome/build/alarm-panel-pro/.pioenvs/alarm-panel-pro
-          fname=konnected-esphome-alarm-panel-pro-v1-ethernet-${{ steps.alarm-panel-pro-ethernet-version.outputs.data }}.bin
-          cp $build_path/firmware-factory.bin assets/$fname
-          echo "fname=$fname" >> $GITHUB_OUTPUT
-
-      - name: Build Alarm Panel Pro v1.8 (Ethernet)
-        id: build-alarm-panel-pro-esp32-rtl8201
-        run: |
-          esphome compile alarm-panel-pro-v1.8-ethernet.yaml
-          build_path=.esphome/build/alarm-panel-pro/.pioenvs/alarm-panel-pro
-          fname=konnected-esphome-alarm-panel-pro-v1.8-ethernet-${{ steps.alarm-panel-pro-v18-ethernet-version.outputs.data }}.bin          
-          cp $build_path/firmware-factory.bin assets/$fname
-          echo "fname=$fname" >> $GITHUB_OUTPUT
-
-      - name: Build Garage Door GDOv1-S
-        id: build-garage-door-gdov1-s
-        run: |
-          esphome compile garage-door-GDOv1-S.yaml
-          build_path=.esphome/build/garage-door/.pioenvs/garage-door
-          fname=konnected-esphome-garage-door-GDOv1-S-${{ steps.garage-door-gdov1-s-version.outputs.data }}.bin
-          cp $build_path/firmware-factory.bin assets/$fname
-          echo "fname=$fname" >> $GITHUB_OUTPUT
-      
-      - name: Build Garage Door GDOv2-S
-        id: build-garage-door-gdov2-s
-        run: |
-          esphome compile garage-door-GDOv2-S.yaml
-          build_path=.esphome/build/garage-door/.pioenvs/garage-door
-          fname=konnected-esphome-garage-door-GDOv2-S-${{ steps.garage-door-gdov2-s-version.outputs.data }}.bin
-          cp $build_path/firmware-factory.bin assets/$fname
-          echo "fname=$fname" >> $GITHUB_OUTPUT
-
-      - name: Build Garage Door GDOv2-Q
-        id: build-garage-door-gdov2-q
-        run: |
-          esphome compile garage-door-GDOv2-Q.yaml
-          build_path=.esphome/build/garage-door/.pioenvs/garage-door
-          fname=konnected-esphome-garage-door-GDOv2-Q-${{ steps.garage-door-gdov2-s-version.outputs.data }}.bin
           cp $build_path/firmware-factory.bin assets/$fname
           echo "fname=$fname" >> $GITHUB_OUTPUT
   
@@ -151,49 +67,3 @@ jobs:
           release-url: ${{ steps.get_release.outputs.upload_url }}
           allow-overwrite: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - run: mkdir -p install-konnected/manifests
-        if: github.event.release  
-
-      - name: Build Manifest for Alarm Panel / WiFi
-        if: github.event.release  
-        run: |
-          ruby ./scripts/update-espwebtools-manifests.rb
-        env:
-          MANIFEST_NAME: Konnected Alarm Panel / Alarm Panel Pro for ESPHome (WiFi)
-          MANIFEST_FNAME: esphome-alarm-panel-wifi.json
-          MANIFEST_VERSION: "${{ steps.alarm-panel-esp8266-version.outputs.data }} / ${{ steps.alarm-panel-pro-wifi-version.outputs.data }}"
-          ESP8266_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-alarm-panel-esp8266.outputs.fname }}
-          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-alarm-panel-pro-esp32-wifi.outputs.fname }}
-
-      - name: Build Manifest for GDO White
-        if: github.event.release  
-        run: |
-          ruby ./scripts/update-espwebtools-manifests.rb
-        env:
-          MANIFEST_NAME: Konnected GDO White (GDOv1-S / GDOv2-S) for ESPHome
-          MANIFEST_FNAME: esphome-garage-door-wifi.json
-          MANIFEST_VERSION: "${{ steps.garage-door-gdov1-s-version.outputs.data }} / ${{ steps.garage-door-gdov2-s-version.outputs.data }}"
-          ESP8266_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-garage-door-gdov1-s.outputs.fname }}
-          ESP32_S3_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-garage-door-gdov2-s.outputs.fname }}
-
-      - name: Build Manifest for Alarm Panel Pro v1.x / LAN8720
-        if: github.event.release  
-        run: |
-          ruby ./scripts/update-espwebtools-manifests.rb
-        env:
-          MANIFEST_NAME: Konnected Alarm Panel Pro v1.x for ESPHome (Ethernet)
-          MANIFEST_FNAME: esphome-alarm-panel-lan8720.json
-          MANIFEST_VERSION: "${{ steps.alarm-panel-pro-ethernet-version.outputs.data }}"
-          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-alarm-panel-pro-esp32-lan8720.outputs.fname }}
-
-      - name: Build Manifest for Alarm Panel Pro v1.8 / RTL8201
-        if: github.event.release  
-        run: |
-          ruby ./scripts/update-espwebtools-manifests.rb
-        env:
-          MANIFEST_NAME: Konnected Alarm Panel Pro v1.8 for ESPHome (Ethernet)
-          MANIFEST_FNAME: esphome-alarm-panel-rtl8201.json
-          MANIFEST_VERSION: "${{ steps.alarm-panel-pro-v18-ethernet-version.outputs.data }}"
-          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-alarm-panel-pro-esp32-rtl8201.outputs.fname }}
-
