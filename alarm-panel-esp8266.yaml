@@ -91,3 +91,8 @@ api:
 # Enables over-the-air updates
 # more: https://esphome.io/components/ota.html
 ota:
+
+####
+# IPv6 Support
+network:
+  enable_ipv6: true
