@@ -133,8 +133,8 @@ jobs:
           access_key: ${{ secrets.MINIO_ACCESS_KEY }}
           secret_key: ${{ secrets.MINIO_SECRET_KEY }}
           bucket: 'konnected'
-          source_dir: '/'
-          target_dir: '/assets'
+          source_dir: 'assets'
+          target_dir: '/'
 
       - name: Get release
         if: github.event.release
@@ -196,15 +196,4 @@ jobs:
           MANIFEST_FNAME: esphome-alarm-panel-rtl8201.json
           MANIFEST_VERSION: "${{ steps.alarm-panel-pro-v18-ethernet-version.outputs.data }}"
           ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-alarm-panel-pro-esp32-rtl8201.outputs.fname }}
-      
-      - name: Deploy
-        if: github.event.release  
-        uses: mamal72/minio-perfect-deploy-action@main
-        with:
-          endpoint: ${{ secrets.MINIO_ENDPOINT }}
-          access_key: ${{ secrets.MINIO_ACCESS_KEY }}
-          secret_key: ${{ secrets.MINIO_SECRET_KEY }}
-          source-dir: '/'
-          target-dir: '/install-konnected'
-          bucket: 'install-konnected'
 
