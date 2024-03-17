@@ -133,8 +133,8 @@ jobs:
           access_key: ${{ secrets.MINIO_ACCESS_KEY }}
           secret_key: ${{ secrets.MINIO_SECRET_KEY }}
           bucket: 'konnected'
-          source_dir: 'assets'
-          target_dir: '/'
+          source_dir: '/'
+          target_dir: '/assets'
 
       - name: Get release
         if: github.event.release
@@ -204,7 +204,7 @@ jobs:
           endpoint: ${{ secrets.MINIO_ENDPOINT }}
           access_key: ${{ secrets.MINIO_ACCESS_KEY }}
           secret_key: ${{ secrets.MINIO_SECRET_KEY }}
-          source-dir: install-konnected
-          target-dir: /
-          bucket: install-konnected
+          source-dir: '/'
+          target-dir: '/install-konnected'
+          bucket: 'install-konnected'
 
