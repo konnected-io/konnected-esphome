@@ -13,10 +13,6 @@ jobs:
   build-upload:
     runs-on: ubuntu-latest
     name: Build
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: us-east-1
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -130,16 +126,15 @@ jobs:
           cp $build_path/firmware-factory.bin assets/$fname
           echo "fname=$fname" >> $GITHUB_OUTPUT
   
-      - uses: keithweaver/aws-s3-github-action@v1.0.0
-        name: Upload Builds
+      - name: Upload Builds
+        uses: mamal72/minio-perfect-deploy-action@main
         with:
-          command: cp
-          source: assets/
-          destination: s3://konnected-io/builds/esphome/
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_region: us-east-2
-          flags: --recursive --acl public-read
+          endpoint: ${{ secrets.MINIO_ENDPOINT }}
+          access_key: ${{ secrets.MINIO_ACCESS_KEY }}
+          secret_key: ${{ secrets.MINIO_SECRET_KEY }}
+          bucket: 'konnected'
+          source_dir: 'assets'
+          target_dir: '/'
 
       - name: Get release
         if: github.event.release
@@ -204,11 +199,12 @@ jobs:
       
       - name: Deploy
         if: github.event.release  
-        uses: reggionick/s3-deploy@v4
+        uses: mamal72/minio-perfect-deploy-action@main
         with:
-          folder: install-konnected
+          endpoint: ${{ secrets.MINIO_ENDPOINT }}
+          access_key: ${{ secrets.MINIO_ACCESS_KEY }}
+          secret_key: ${{ secrets.MINIO_SECRET_KEY }}
+          source-dir: install-konnected
+          target-dir: /
           bucket: install-konnected
-          bucket-region: us-east-1
-          dist-id: E2FDL2RANMI9J7
-          invalidation: /manifests/*
 
