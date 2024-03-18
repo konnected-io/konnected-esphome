@@ -57,18 +57,8 @@ substitutions:
   name: konnected
   friendly_name: GDO blaQ
   project_name: konnected.garage-door-gdov2-q
-  project_version: "0.0.2"
+  project_version: "0.1.0"
   garage_door_cover_name: Garage Door
-
-  ####
-  # GARAGE DOOR OPENER MOMENTARY DURATION
-  # Duration to make the relay contact closure for the garage door opener button circuit. 
-  garage_door_opener_momentary_duration: 300ms
-
-  ####
-  # OPEN GARAGE DOOR DISTANCE MARGIN OF ERROR
-  # The margin of error (+/-) in meters from the value above to consider the garage door in the open position.
-  open_garage_door_distance_margin_of_error: "0.05"
 
   ####
   # GARAGE DOOR CLOSE WARNING DURATION
@@ -77,12 +67,8 @@ substitutions:
 
   ####
   # ADDITIONAL SETTTINGS
-  warning_beep_pulse_time: 100ms
-  warning_beep_pause_time: 130ms
   warning_beep_internal_only: "true"
   sensor_debounce_time: 200ms
-  range_sensor_polling_time: 2500ms
-  range_sensor_debounce_time: 3s
   blink_on_state: "true"
 
   ####
@@ -98,7 +84,7 @@ substitutions:
 external_components:
   - source:
       type: git
-      url: https://github.com/konnected-io/esphome-konnectedgdo
+      url: https://github.com/konnected-io/konnected-esphome
     refresh: 1s
 
 ####
@@ -148,27 +134,38 @@ packages:
       # Self test script used to validate the hardware post-assembly
       # - packages/gdo-self-test.yaml
 
-konnectedgdo:
+script:
+  - id: pc_warn
+    then:
+      - button.press: pre_close_warning
+
+secplus_gdo:
   id: gdo_blaq
   input_gdo_pin: ${uart_rx_pin}
   output_gdo_pin: ${uart_tx_pin}
-  input_obst_pin: ${input_obst_pin}
 
 light:
-  - platform: konnectedgdo
+  - platform: secplus_gdo
     name: garage_light
-    konnectedgdo_id: gdo_blaq
+    secplus_gdo_id: gdo_blaq
     id: gdo_light
 
 cover:
-  - platform: konnectedgdo
+  - platform: secplus_gdo
     name: garage_door
-    konnectedgdo_id: gdo_blaq
+    secplus_gdo_id: gdo_blaq
     id: gdo_door
+    pre_close_warning_duration: $garage_door_close_warning_duration
+    pre_close_warning_start:
+      - script.execute:
+          id: pc_warn
+    pre_close_warning_end:
+      - script.stop: pc_warn
+      - light.turn_off: warning_led
 
 sensor:
-  - platform: konnectedgdo
-    konnectedgdo_id: gdo_blaq
+  - platform: secplus_gdo
+    secplus_gdo_id: gdo_blaq
     id: gdo_openings
     type: openings
     name: "Garage Door Openings"
@@ -176,44 +173,52 @@ sensor:
     icon: mdi:open-in-app
 
 lock:
-  - platform: konnectedgdo
+  - platform: secplus_gdo
     id: gdo_lock_remotes
-    konnectedgdo_id: gdo_blaq
+    secplus_gdo_id: gdo_blaq
     name: "Lock remotes"
 
 binary_sensor:
-  - platform: konnectedgdo
+  - platform: secplus_gdo
     name: "Garage Motion Sensor"
     id: gdo_motion
-    konnectedgdo_id: gdo_blaq
+    secplus_gdo_id: gdo_blaq
     device_class: motion
     type: motion
-  - platform: konnectedgdo
+  - platform: secplus_gdo
     name: "Garage Door Obstruction Sensor"
     id: gdo_obst
-    konnectedgdo_id: gdo_blaq
+    secplus_gdo_id: gdo_blaq
     device_class: problem
     type: obstruction
-  - platform: konnectedgdo
+  - platform: secplus_gdo
     name: "Garage Door Motor"
     id: gdo_motor
-    konnectedgdo_id: gdo_blaq
+    secplus_gdo_id: gdo_blaq
     entity_category: diagnostic
     type: motor
-  - platform: konnectedgdo
+  - platform: secplus_gdo
     name: "Garage Button"
     id: gdo_button
-    konnectedgdo_id: gdo_blaq
+    secplus_gdo_id: gdo_blaq
     entity_category: diagnostic
     type: button
 
 switch:
-  - platform: konnectedgdo
+  - platform: secplus_gdo
     id: "gdo_learn"
     type: learn
-    konnectedgdo_id: gdo_blaq
+    secplus_gdo_id: gdo_blaq
     name: "Learn"
     icon: mdi:plus-box
+    entity_category: config
+
+select:
+  - platform: secplus_gdo
+    id: gdo_protocol
+    secplus_gdo_id: gdo_blaq
+    name: protocol
+    icon: mdi:settings
     entity_category: config
 
 button:
@@ -221,6 +226,22 @@ button:
     name: Factory Reset
     entity_category: config
 
+number:
+  - platform: secplus_gdo
+    name: Garage door opening duration
+    secplus_gdo_id: gdo_blaq
+    entity_category: config
+    id: gdo_open_duration
+    type: open_duration
+    unit_of_measurement: "ms"
+
+  - platform: secplus_gdo
+    name: Garage door closing duration
+    secplus_gdo_id: gdo_blaq
+    entity_category: config
+    id: gdo_close_duration
+    type: close_duration
+    unit_of_measurement: "ms"
 
 ####
 # DASHBOARD IMPORT
