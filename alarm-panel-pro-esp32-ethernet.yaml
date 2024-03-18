@@ -32,13 +32,13 @@ substitutions:
 
   ####
   # NAME
-  # By default, the name of the ESPHome device is "alarm-panel-pro-xxxxxx" where xxxxxx is a unique identifier. The device's
-  # hostname on your network is also defined by the name, defaulting to "alarm-panel-pro-xxxxxx.local". Edit this variable to
+  # By default, the name of the ESPHome device is "konnected-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "konnected-xxxxxx.local". Edit this variable to
   # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
-  name: alarm-panel-pro
+  name: konnected
   friendly_name: Alarm Panel Pro
   project_name: konnected.alarm-panel-pro-ethernet
-  project_version: "1.0.0"
+  project_version: "1.0.1"
 
   # ETHERNET CONFIG
   # On the Alarm Panel Pro v1.5, v1.6 and v1.7 use LAN8720. On the v1.8 set this variable to RTL8201.

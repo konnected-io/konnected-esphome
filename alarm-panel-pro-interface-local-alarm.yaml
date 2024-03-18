@@ -33,7 +33,7 @@
 ## Out 1 : Keyswitch relay
 
 substitutions:
-  name: alarm-panel-pro
+  name: konnected
   friendly_name: Alarm Panel Pro Interface
   project_name: konnected.pro-interface-local
   project_version: "0.1.0"
