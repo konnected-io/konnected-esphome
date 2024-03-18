@@ -6,7 +6,7 @@ openers into your smart home.
 ## Quick Start
 1. **Get started quickly** by [flashing your Konnected device with ESPHome firmware using Konnected's web-based tool](https://install.konnected.io/esphome).
 1. Power on the device.
-1. On your computer or mobile device, connect to the device's captive portal WiFi setup network named "alarm-panel-XXXXXX" or "garage-door-XXXXXX" (depending on the product) where XXXXXX is a unique hexadecimal number. For ethernet devices, plug in the Ethernet cable and skip to step 5.
+1. On your computer or mobile device, connect to the device's captive portal WiFi setup network named "konnected-XXXXXX" where XXXXXX is a unique hexadecimal number. For ethernet devices, plug in the Ethernet cable and skip to step 5.
 1. Select your home WiFi network and enter your WiFi password in the captive portal.
 1. Discover the Konnected device in [Home Assistant > Settings > Devices & Services](https://my.home-assistant.io/redirect/integrations)
 1. (Optional) Discover the device and customize the firmware in ESPHome Dashboard ([see ESPHome add-on](https://my.home-assistant.io/redirect/supervisor_store/)).
@@ -23,15 +23,14 @@ Use these ESPHome firmware configurations for easy and plug-and-play setup in [H
 ## In This Repository
 This repository houses several complete firmware configuration YAML templates for various Konnected devices at the top level. These are the main firmware templates imported by the `dashboard_import` feature when used with ESPHome Dashboard.
 
-### `alarm-panel-pro-esp32.yaml`
+### `alarm-panel-pro-esp32-ethernet.yaml`
+### `alarm-panel-pro-esp32-wifi.yaml`
 Konnected's flagship [Alarm Panel Pro](https://konnected.io/products/konnected-alarm-panel-pro-12-zone-kit) is an ESP32 powered wired alarm panel with Wifi, Ethernet and PoE.
 
 ![https://konnected.io/products/konnected-alarm-panel-pro-12-zone-kit](https://s3.amazonaws.com/cdn.freshdesk.com/data/helpdesk/attachments/production/32013019813/original/KH0hcaxBhEf3Y-LBaUUuki1OTTnFjryGuA.jpg?1666818270)
 
 #### Setup Required:
-When using this template, you _must_ make a few configuration choices, detailed below.
-1. **WiFi** or **Ethernet**. Under _PACKAGES_, un-comment either the `wifi` or `ethernet` package depending on the desired connection type. Note: Either `wifi` or `ethernet` component must be enabled, but both cannot be enabled.
-1. **Ethernet type**. (If `ethernet` is selected in the step above) Under _GENERAL SETTING > ETHERNET CONFIG_ uncomment one of the `ethernet_type:` substitution variables. Choose `LAN8720` for the Alarm Panel Pro up to v1.7. Choose `RTL8201` for the Alarm Panel Pro v1.8 and above. The hardware version is displayed on the front of the device underneath the logo.
+1. **Ethernet type**. If the `ethernet` build is used, Under _GENERAL SETTING > ETHERNET CONFIG_ uncomment one of the `ethernet_type:` substitution variables. Choose `LAN8720` for the Alarm Panel Pro up to v1.7. Choose `RTL8201` for the Alarm Panel Pro v1.8 and above. The hardware version is displayed on the front of the device underneath the logo.
 
 ### `alarm-panel-esp8266.yaml`
 Konnected's original [6-zone Alarm Panel and Alarm Panel Add-on](https://konnected.io/products/konnected-alarm-panel-wired-alarm-system-conversion-kit) is a compact WiFi-only modular wired alarm panel, infinitely expandable for any size system.
@@ -40,16 +39,51 @@ Konnected's original [6-zone Alarm Panel and Alarm Panel Add-on](https://konnect
 
 This firmware config will also run on a NodeMCU module and Konnected's v1 (2018-2020) Alarm Panel product.
 
-
-### `garage-door-esp8266.yaml`
+### `garage-door-GDOv1-S.yaml`
 A [smart garage door opener](https://konnected.io/products/smart-garage-door-opener) based on the ESP8266 (model: GDOv1-S).
 
 ![https://konnected.io/products/smart-garage-door-opener](https://konnected.io/cdn/shop/files/GDOProductImages_2_1.png?v=1683919623&width=600)
 
-### `garage-door-esp32.yaml`
+### `garage-door-GDOv2-S.yaml`
 An improved [smart garage door opener retrofit](https://konnected.io/products/smart-garage-door-opener) based on the ESP32-S3-Mini (GDOv2-S).
 
-(coming soon)
+### `garage-door-GDOv2-Q.yaml`
+Firmware for Konnected's GDO blaQ -- a [smart garage door opener retrofit](https://konnected.io/products/smart-garage-door-opener-blaq-myq-alternative) for Security+ and Security+ 2.0 openers with direct serial connection to the garage door opener unit (GDOv2-Q).
+
+## ESPHome Components
+Components are found in the `components` directory of this repo.
+
+### Secplus GDO
+Secplus GDO is an ESPHome component for controlling Security+ and Security+ 2.0 garage openers
+made by Chamberlain Group, including garage door openers sold since 1997 under the Chamberlain,
+LiftMaster, Craftsman and Merlin brands.
+
+#### This component is maintained by Konnected and powers the [Konnected GDO blaQ](https://konnected.io/products/smart-garage-door-opener-blaq-myq-alternative) Konnected's smart garage door opener accessory for Security+ garage door openers.
+
+#### Adapted from [ratgdo](https://github.com/ratgdo)
+
+This component was adapted from and inspired by [ratgdo](https://paulwieland.github.io/ratgdo/), however it's not a copy and not feature-equivalent. We initially set out to fork ratgdo and contribute back some improvements, however it ultimately became a complete rewrite. Konnected is publishing this derivative work under the GPLv3 license.
+
+#### Project Goals
+The ratgdo and [secplus](https://github.com/argilo/secplus) developers found a way to communicate with Security+ garage door openers over a reverse-engineered serial wireline protocol. This novel development enabled owners of Security+ garage openers to read and send commands directly to the garage unit. Konnected set out to incorporate this technology into a finished consumer product. To do that, we wanted to adapt the code to:
+
+* Remove dependency on Arduino
+* Run on the ESP-IDF platform
+* Utilize the ESP32's hardware UART (instead relying on the SoftwareSerial arduino library)
+* Decouple the Security+ wireline protocol from the ESPHome component
+
+#### Other Differences from ratgdo
+
+1. *Event-driven instead of polling*. This library uses an event-driven architecture to receive data from the garage door unit, instead of polling for updates. This results in a measurably faster response time to state changes.
+1. *Two wires instead of three*. The obstruction sensor state can now be read via the serial protocol, therefore it doesn't need to be wired separately to a GPIO. This makes installation simpler, only requiring the red and white wire to the wall button inputs on the garage door opener.
+1. *Supports a pre-closing warning*. To comply with [U.S. 16 CFR 1211.14(f)](https://www.ecfr.gov/current/title-16/part-1211#p-1211.14(f))
+1. *Automatic detection of Security+ vs Security+ 2.0*. Less for the end-user to think about.
+1. *Removes dry contact trigger support*. We feel that this is better handled with a _template cover_ in ESPHome, and this library should focus on the Security+ interaction only.
+1. *Removes relay outputs*. Again, simplifying the library to do Security+ only.
+
+#### Dependencies
+
+1. [gdolib](https://github.com/konnected-io/gdolib) (to be published soon)
 
 ## Customization
 

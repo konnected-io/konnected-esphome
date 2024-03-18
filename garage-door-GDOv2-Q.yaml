@@ -51,24 +51,14 @@ substitutions:
 
   ####
   # NAME
-  # By default, the name of the ESPHome device is "garage-door-xxxxxx" where xxxxxx is a unique identifier. The device's
-  # hostname on your network is also defined by the name, defaulting to "garage-door-xxxxxx.local". Edit this variable to
+  # By default, the name of the ESPHome device is "konnected-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "konnected-xxxxxx.local". Edit this variable to
   # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
-  name: garage-door
-  friendly_name: Garage Door Opener 
+  name: konnected
+  friendly_name: GDO blaQ
   project_name: konnected.garage-door-gdov2-q
-  project_version: "0.0.1"
+  project_version: "0.1.0"
   garage_door_cover_name: Garage Door
-
-  ####
-  # GARAGE DOOR OPENER MOMENTARY DURATION
-  # Duration to make the relay contact closure for the garage door opener button circuit. 
-  garage_door_opener_momentary_duration: 300ms
-
-  ####
-  # OPEN GARAGE DOOR DISTANCE MARGIN OF ERROR
-  # The margin of error (+/-) in meters from the value above to consider the garage door in the open position.
-  open_garage_door_distance_margin_of_error: "0.05"
 
   ####
   # GARAGE DOOR CLOSE WARNING DURATION
@@ -77,13 +67,8 @@ substitutions:
 
   ####
   # ADDITIONAL SETTTINGS
-  warning_beep_pulse_time: 100ms
-  warning_beep_pause_time: 130ms
   warning_beep_internal_only: "true"
-  warning_beep_shared: "false"
   sensor_debounce_time: 200ms
-  range_sensor_polling_time: 2500ms
-  range_sensor_debounce_time: 3s
   blink_on_state: "true"
 
   ####
@@ -99,7 +84,7 @@ substitutions:
 external_components:
   - source:
       type: git
-      url: https://github.com/ratgdo/esphome-ratgdo
+      url: https://github.com/konnected-io/konnected-esphome
     refresh: 1s
 
 ####
@@ -149,80 +134,92 @@ packages:
       # Self test script used to validate the hardware post-assembly
       # - packages/gdo-self-test.yaml
 
-esp32:  
-  framework:
-    type: arduino
+script:
+  - id: pc_warn
+    then:
+      - button.press: pre_close_warning
 
-ratgdo:
-  id: konnected_ratgdo
+secplus_gdo:
+  id: gdo_blaq
   input_gdo_pin: ${uart_rx_pin}
   output_gdo_pin: ${uart_tx_pin}
-  input_obst_pin: ${input_obst_pin}
-  on_sync_failed:
-    then:
-      - homeassistant.service:
-          service: persistent_notification.create
-          data:
-            title: "${friendly_name} sync failed"
-            message: "Failed to communicate with garage opener on startup; Check the ${friendly_name} Rolling code counter number entity history and set the entity to one number larger than the largest value in history. [ESPHome devices](/config/devices/dashboard?domain=esphome)"
-            notification_id: "esphome_konnected_ratgdo_gdo_sync_failed"
-
-cover:
-  - platform: ratgdo
-    id: garage_door
-    device_class: garage
-    name: "Garage Door"
-    ratgdo_id: konnected_ratgdo
 
 light:
-  - platform: ratgdo
+  - platform: secplus_gdo
+    name: garage_light
+    secplus_gdo_id: gdo_blaq
     id: gdo_light
-    name: "Garage Light"
-    ratgdo_id: konnected_ratgdo
+
+cover:
+  - platform: secplus_gdo
+    name: garage_door
+    secplus_gdo_id: gdo_blaq
+    id: gdo_door
+    pre_close_warning_duration: $garage_door_close_warning_duration
+    pre_close_warning_start:
+      - script.execute:
+          id: pc_warn
+    pre_close_warning_end:
+      - script.stop: pc_warn
+      - light.turn_off: warning_led
 
 sensor:
-  - platform: ratgdo
+  - platform: secplus_gdo
+    secplus_gdo_id: gdo_blaq
     id: gdo_openings
     type: openings
-    entity_category: diagnostic
-    ratgdo_id: konnected_ratgdo
-    name: "Openings"
+    name: "Garage Door Openings"
     unit_of_measurement: "openings"
     icon: mdi:open-in-app
 
 lock:
-  - platform: ratgdo
+  - platform: secplus_gdo
     id: gdo_lock_remotes
-    ratgdo_id: konnected_ratgdo
+    secplus_gdo_id: gdo_blaq
     name: "Lock remotes"
 
 binary_sensor:
-  - platform: ratgdo
-    type: motion
+  - platform: secplus_gdo
+    name: "Garage Motion Sensor"
     id: gdo_motion
-    ratgdo_id: konnected_ratgdo
-    name: "Motion"
+    secplus_gdo_id: gdo_blaq
     device_class: motion
-  - platform: ratgdo
-    type: obstruction
-    id: gdo_obstruction
-    ratgdo_id: konnected_ratgdo
-    name: "Obstruction"
+    type: motion
+  - platform: secplus_gdo
+    name: "Garage Door Obstruction Sensor"
+    id: gdo_obst
+    secplus_gdo_id: gdo_blaq
     device_class: problem
-  - platform: ratgdo
-    type: button
-    id: gdo_button
-    ratgdo_id: konnected_ratgdo
-    name: "Button"
-    entity_category: diagnostic
-  - platform: ratgdo
-    type: motor
+    type: obstruction
+  - platform: secplus_gdo
+    name: "Garage Door Motor"
     id: gdo_motor
-    ratgdo_id: konnected_ratgdo 
-    name: "Motor"
-    device_class: running
+    secplus_gdo_id: gdo_blaq
     entity_category: diagnostic
+    type: motor
+  - platform: secplus_gdo
+    name: "Garage Button"
+    id: gdo_button
+    secplus_gdo_id: gdo_blaq
+    entity_category: diagnostic
+    type: button
 
+switch:
+  - platform: secplus_gdo
+    id: "gdo_learn"
+    type: learn
+    secplus_gdo_id: gdo_blaq
+    name: "Learn"
+    icon: mdi:plus-box
+    entity_category: config
+
+select:
+  - platform: secplus_gdo
+    id: gdo_protocol
+    secplus_gdo_id: gdo_blaq
+    name: protocol
+    icon: mdi:settings
+    entity_category: config
 
 button:
   - platform: factory_reset
@@ -230,46 +227,28 @@ button:
     entity_category: config
 
 number:
-  - platform: ratgdo
-    id: gdo_rolling_code_counter
-    type: rolling_code_counter
+  - platform: secplus_gdo
+    name: Garage door opening duration
+    secplus_gdo_id: gdo_blaq
     entity_category: config
-    ratgdo_id: konnected_ratgdo
-    name: "Rolling code counter"
-    mode: box
-    unit_of_measurement: "codes"
+    id: gdo_open_duration
+    type: open_duration
+    unit_of_measurement: "ms"
 
-  - platform: ratgdo
-    id: gdo_opening_duration
-    type: opening_duration
+  - platform: secplus_gdo
+    name: Garage door closing duration
+    secplus_gdo_id: gdo_blaq
     entity_category: config
-    ratgdo_id: konnected_ratgdo
-    name: "Opening duration"
-    unit_of_measurement: "s"
-
-  - platform: ratgdo
-    id: gdo_closing_duration
-    type: closing_duration
-    entity_category: config
-    ratgdo_id: konnected_ratgdo
-    name: "Closing duration"
-    unit_of_measurement: "s"
-
-  - platform: ratgdo
-    id: gdo__client_id
-    type: client_id
-    entity_category: config
-    ratgdo_id: konnected_ratgdo
-    name: "Client ID"
-    mode: box
-
+    id: gdo_close_duration
+    type: close_duration
+    unit_of_measurement: "ms"
 
 ####
 # DASHBOARD IMPORT
 # Enables automatic discovery and upgrades via ESPHome Dashboard
 # more: https://esphome.io/guides/getting_started_hassio.html
 dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/garage-door-GDOv2-S.yaml@master
+  package_import_url: github://konnected-io/konnected-esphome/garage-door-GDOv2-Q.yaml@master
   import_full_config: false
 
 #### 
@@ -304,3 +283,9 @@ esp32_improv:
 
 web_server:
   include_internal: true
+
+esphome:
+  platformio_options:
+    build_flags:
+      - -L"../../../gdolib"
+      - -llibgdolib.a -llibsecplus.a

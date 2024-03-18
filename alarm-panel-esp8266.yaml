@@ -25,6 +25,48 @@
 ####
 
 ####
+# GENERAL SETTINGS
+# Customize these variables to your preferences and needs
+# more: https://esphome.io/guides/configuration-types.html#substitutions
+substitutions:
+
+  ####
+  # NAME
+  # By default, the name of the ESPHome device is "konnected-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "konnected-xxxxxx.local". Edit this variable to
+  # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
+  name: konnected
+  friendly_name: Alarm Panel
+  project_name: konnected.alarm-panel-esp8266
+  project_version: "0.3.3"
+
+  ####
+  # SETTINGS
+  sensor_debounce_time: 200ms
+  warning_beep_pulse_time: 100ms
+  warning_beep_pause_time: 130ms
+  warning_beep_internal_only: "false"
+  warning_beep_shared: "true"
+  blink_on_state: "true"
+
+  ####
+  # ZONE MAPPING
+  # Do not edit this section.
+  zone1: D1
+  zone2: D2
+  zone3: D5
+  zone4: D6
+  zone5: D7
+  zone6: D9
+  alarm: D8
+  out: D8
+  status_led: D4
+  
+  ####
+  # CONNECTION MAPPINGS
+  warning_beep_pin: $out
+
+####
 # PACKAGES
 # Each package includes an alarm panel feature
 # Remove or comment out any packages that you do not need or want.
@@ -39,7 +81,7 @@ packages:
       ####
       # CORE
       # This package is required and sets up core features.
-      - packages/alarm-panel-esp8266-base.yaml
+      - packages/core-esp8266.yaml
       - packages/alarm-panel/zone1.yaml
       - packages/alarm-panel/zone2.yaml
       - packages/alarm-panel/zone3.yaml
