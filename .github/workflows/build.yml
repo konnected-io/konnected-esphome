@@ -188,6 +188,16 @@ jobs:
           ESP8266_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-garage-door-gdov1-s.outputs.fname }}
           ESP32_S3_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-garage-door-gdov2-s.outputs.fname }}
 
+      - name: Build Manifest for GDO blaQ
+        if: github.event.release  
+        run: |
+          ruby ./scripts/update-espwebtools-manifests.rb
+        env:
+          MANIFEST_NAME: Konnected GDO blaQ (GDOv2-Q) for ESPHome
+          MANIFEST_FNAME: esphome-gdov2-q.json
+          MANIFEST_VERSION: "${{ steps.garage-door-gdov2-q-version.outputs.data }}"          
+          ESP32_S3_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-garage-door-gdov2-q.outputs.fname }}
+            
       - name: Build Manifest for Alarm Panel Pro v1.x / LAN8720
         if: github.event.release  
         run: |
