@@ -34,7 +34,7 @@ jobs:
       - id: alarm-panel-esp8266-version
         uses: jbutcher5/read-yaml@main
         with:
-          file: './packages/alarm-panel-esp8266-base.yaml'
+          file: './alarm-panel-esp8266.yaml'
           key-path: '["substitutions", "project_version"]'
 
       - id: alarm-panel-pro-wifi-version
@@ -65,6 +65,12 @@ jobs:
         uses: jbutcher5/read-yaml@main
         with:
           file: './garage-door-GDOv2-S.yaml'
+          key-path: '["substitutions", "project_version"]'
+
+      - id: garage-door-gdov2-q-version
+        uses: jbutcher5/read-yaml@main
+        with:
+          file: './garage-door-GDOv2-Q.yaml'
           key-path: '["substitutions", "project_version"]'
   
       - name: Build Alarm Panel ESP8266
@@ -126,7 +132,7 @@ jobs:
         run: |
           esphome compile garage-door-GDOv2-Q.yaml
           build_path=.esphome/build/konnected/.pioenvs/konnected
-          fname=konnected-esphome-garage-door-GDOv2-Q-${{ steps.garage-door-gdov2-s-version.outputs.data }}.bin
+          fname=konnected-esphome-garage-door-GDOv2-Q-${{ steps.garage-door-gdov2-q-version.outputs.data }}.bin
           cp $build_path/firmware-factory.bin assets/$fname
           echo "fname=$fname" >> $GITHUB_OUTPUT
   
