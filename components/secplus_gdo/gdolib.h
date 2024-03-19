@@ -155,7 +155,6 @@ typedef struct {
     bool invert_uart; // Invert UART signal
     gpio_num_t uart_tx_pin; // UART TX pin
     gpio_num_t uart_rx_pin; // UART RX pin
-    gpio_num_t obst_in_pin; // Obstruction input pin
 } gdo_config_t;
 
 #define GDO_PAIRED_DEVICE_COUNT_UNKNOWN 0xff

@@ -121,7 +121,6 @@ namespace secplus_gdo {
             .invert_uart = true,
             .uart_tx_pin = (gpio_num_t)GDO_UART_TX_PIN,
             .uart_rx_pin = (gpio_num_t)GDO_UART_RX_PIN,
-            .obst_in_pin = (gpio_num_t)GDO_OBST_INPUT_PIN,
         };
 
         gdo_init(&gdo_conf);
