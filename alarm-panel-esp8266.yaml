@@ -121,6 +121,7 @@ web_server:
 # LOGGER
 # more: https://esphome.io/components/logger.html
 logger:
+  level: VERBOSE
 
 ####
 # NATIVE API for HOME ASSISTANT

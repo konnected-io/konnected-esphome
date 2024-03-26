@@ -23,6 +23,11 @@ esp32:
 substitutions:
   status_led_inverted: "false"
 
+# overrides the MDNS component to add a Konnected service
+external_components:
+  - source: github://konnected-io/konnected-esphome@master
+    components: [ mdns ]
+
 text_sensor:
   - platform: template
     name: Device ID
