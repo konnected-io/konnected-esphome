@@ -38,7 +38,7 @@ substitutions:
   name: konnected
   friendly_name: Alarm Panel Pro
   project_name: konnected.alarm-panel-pro-ethernet
-  project_version: "1.0.2"
+  project_version: "1.0.1"
 
   # ETHERNET CONFIG
   # On the Alarm Panel Pro v1.5, v1.6 and v1.7 use LAN8720. On the v1.8 set this variable to RTL8201.

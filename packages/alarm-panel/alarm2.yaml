@@ -1,8 +1,6 @@
 switch:
   - id: alarm2
     name: Alarm 2
-    pin: 
-      number: $alarm2
-      ignore_strapping_warning: true
+    pin: $alarm2
     platform: gpio
     icon: mdi:bullhorn

@@ -1,9 +1,7 @@
 output:
   - id: warning_led_output
     platform: gpio
-    pin: 
-      number: $warning_leds_pin
-      ignore_strapping_warning: true
+    pin: $warning_leds_pin
     
 light:
   - id: warning_led
