@@ -5,6 +5,7 @@ binary_sensor:
     pin:
       number: $zone2
       mode: INPUT_PULLUP
+      ignore_strapping_warning: true
     platform: gpio   
     filters:
       - delayed_on_off: $sensor_debounce_time
