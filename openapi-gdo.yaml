@@ -45,15 +45,20 @@ paths:
   /cover/garage_door/open:
     post:
       summary: Open Command
-      description: Send an open command to the garage door.
+      description: Opens the garage door if closed.
   /cover/garage_door/close:
     post:
       summary: Close Command
-      description: Send a close command to the garage door.
+      description: Closes the garage door if open after executing the pre-closing warning.
   /cover/garage_door/stop:
     post:
       summary: Stop Command
       description: Send a stop command to the garage door.
+  /cover/garage_door/toggle:
+    post:
+      summary: Toggle Command
+      description: Toggles the garage door open or closed.
+
   /binary_sensor/wired_sensor:
     get:
       summary: Wired Input State
@@ -227,6 +232,50 @@ paths:
                   state:
                     type: string
                     description: Human readable string representation of the seconds since boot, with units
+  /text_sensor/device_id:
+    get:
+      summary: Device ID
+      description: Unique ID of the device. Also its MAC address.
+      responses:
+        '200':
+          description: Device ID / MAC
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: string
+                    description: 12-character Device ID
+                  state:
+                    type: string
+                    description: 12-character Device ID
+  /text_sensor/ip_address:
+    get:
+      summary: IP Address
+      description: The IP address of the device.
+      responses:
+        '200':
+          description: IP Address
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: string
+                    description: IPv4 address
+                  state:
+                    type: string
+                    description: IPv4 address
+
+
   /button/pre_close_warning/press:
     post:
       summary: Trigger the pre-close warning
