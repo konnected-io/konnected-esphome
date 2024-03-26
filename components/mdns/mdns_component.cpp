@@ -24,15 +24,18 @@ void MDNSComponent::compile_records_() {
   this->hostname_ = App.get_name();
 
   this->services_.clear();
-// Konnected service
-MDNSService service{};
-service.service_type = "_konnected";
-service.proto = "_tcp";
-if (!App.get_friendly_name().empty()) {
-  service.txt_records.push_back({"friendly_name", App.get_friendly_name()});
-}
-service.txt_records.push_back({"esphome_version", ESPHOME_VERSION});
-service.txt_records.push_back({"mac", get_mac_address()});
+
+  // Konnected service
+  {  
+    MDNSService service{};
+    service.service_type = "_konnected";
+    service.proto = "_tcp";
+    service.port = USE_WEBSERVER_PORT;
+    if (!App.get_friendly_name().empty()) {
+      service.txt_records.push_back({"friendly_name", App.get_friendly_name()});
+    }
+    service.txt_records.push_back({"esphome_version", ESPHOME_VERSION});
+    service.txt_records.push_back({"mac", get_mac_address()});
 #if defined(USE_WIFI)
     service.txt_records.push_back({"network", "wifi"});
 #elif defined(USE_ETHERNET)
@@ -47,8 +50,8 @@ service.txt_records.push_back({"mac", get_mac_address()});
 #ifdef USE_WEBSERVER
     service.txt_records.push_back({"web_api", "true"});
 #endif
-this->services_.push_back(service);
-// end Konnected service
+    this->services_.push_back(service);
+  } // end Konnected service
 
 #ifdef USE_API
   if (api::global_api_server != nullptr) {
