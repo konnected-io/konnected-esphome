@@ -20,6 +20,18 @@ substitutions:
   blink_on_state: "true"
 
   ####
+  # ZONE DEVICE CLASSES
+  #   - suggested values: door, window, motion
+  #   - all values:
+  #     https://developers.home-assistant.io/docs/core/entity/binary-sensor/#available-device-classes
+  zone1_device_class: None
+  zone2_device_class: None
+  zone3_device_class: None
+  zone4_device_class: None
+  zone5_device_class: None
+  zone6_device_class: None
+
+  ####
   # ZONE MAPPING
   # Do not edit this section.
   zone1: D1
@@ -38,7 +50,7 @@ substitutions:
 
 packages:
   remote_package:
-    url: http://github.com/konnected-io/konnected-esphome
+    url: http://github.com/dferg/konnected-esphome
     ref: master
     refresh: 5min
     file: packages/core-esp8266.yaml

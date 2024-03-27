@@ -12,7 +12,7 @@ openers into your smart home.
 1. (Optional) Discover the device and customize the firmware in ESPHome Dashboard ([see ESPHome add-on](https://my.home-assistant.io/redirect/supervisor_store/)).
 
 ## Changes and Release Notes
-See [releases](/konnected-io/konnected-esphome/releases) for release notes and downloadable pre-built flashable images.
+See [releases](https://github.com/konnected-io/konnected-esphome/releases) for release notes and downloadable pre-built flashable images.
 
 ## Made for ESPHome
 Konnected's products are made with ESP32 and ESP8266 microcontrollers with integrated USB interfaces, and are completely open to end-user servicing and customization, making them ideal products for ESPHome firmware. Since 2023, Konnected maintains and distributes ESPHome configuration recipies for all products. These firmwares are for Home Assistant users who want a plug-and-play solution. More advanced users can import Konnected's ESPHome configurations into their ESPHome Dashboard and easily customize, build, and update their device(s) with a few simple edits of the well-commented configuration files and packages provided by Konnected.

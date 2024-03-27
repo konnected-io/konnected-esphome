@@ -73,7 +73,7 @@ substitutions:
 packages:
 
   remote_package:
-    url: http://github.com/konnected-io/konnected-esphome
+    url: http://github.com/dferg/konnected-esphome
     ref: master
     refresh: 5min
     files:
@@ -107,7 +107,7 @@ packages:
       - packages/status-led.yaml
 
 dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-esp8266.yaml@master
+  package_import_url: github://dferg/konnected-esphome/alarm-panel-esp8266.yaml@master
   import_full_config: false
 
 ####

@@ -6,6 +6,7 @@ binary_sensor:
       number: $zone6
       mode: INPUT_PULLUP
     platform: gpio   
+    device_class: $zone6_device_class
     filters:
       - delayed_on_off: $sensor_debounce_time
     on_state:
