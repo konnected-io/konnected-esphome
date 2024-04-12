@@ -57,8 +57,16 @@ substitutions:
   name: konnected
   friendly_name: GDO blaQ
   project_name: konnected.garage-door-gdov2-q
-  project_version: "0.1.1"
+  project_version: "0.1.2"
   garage_door_cover_name: Garage Door
+  garage_light_name: Garage Light
+  garage_openings_name: Garage Openings
+  garage_lock_name: Lock
+  garage_motion_name: Motion
+  garage_obstruction_name: Obstruction
+  garage_motor_name: Motor
+  garage_button_name: Button
+
 
   ####
   # GARAGE DOOR CLOSE WARNING DURATION
@@ -146,13 +154,13 @@ secplus_gdo:
 
 light:
   - platform: secplus_gdo
-    name: garage_light
+    name: $garage_light_name
     secplus_gdo_id: gdo_blaq
     id: gdo_light
 
 cover:
   - platform: secplus_gdo
-    name: garage_door
+    name: $garage_door_cover_name
     secplus_gdo_id: gdo_blaq
     id: gdo_door
     pre_close_warning_duration: $garage_door_close_warning_duration
@@ -168,37 +176,37 @@ sensor:
     secplus_gdo_id: gdo_blaq
     id: gdo_openings
     type: openings
-    name: "Garage Door Openings"
-    unit_of_measurement: "openings"
+    name: $garage_openings_name
+    unit_of_measurement: openings
     icon: mdi:open-in-app
 
 lock:
   - platform: secplus_gdo
-    id: gdo_lock_remotes
+    id: gdo_lock
     secplus_gdo_id: gdo_blaq
-    name: "Lock remotes"
+    name: $garage_lock_name
 
 binary_sensor:
   - platform: secplus_gdo
-    name: "Garage Motion Sensor"
+    name: $garage_motion_name
     id: gdo_motion
     secplus_gdo_id: gdo_blaq
     device_class: motion
     type: motion
   - platform: secplus_gdo
-    name: "Garage Door Obstruction Sensor"
+    name: $garage_obstruction_name
     id: gdo_obst
     secplus_gdo_id: gdo_blaq
     device_class: problem
     type: obstruction
   - platform: secplus_gdo
-    name: "Garage Door Motor"
+    name: $garage_motor_name
     id: gdo_motor
     secplus_gdo_id: gdo_blaq
     entity_category: diagnostic
     type: motor
   - platform: secplus_gdo
-    name: "Garage Button"
+    name: $garage_button_name
     id: gdo_button
     secplus_gdo_id: gdo_blaq
     entity_category: diagnostic
@@ -217,7 +225,7 @@ select:
   - platform: secplus_gdo
     id: gdo_protocol
     secplus_gdo_id: gdo_blaq
-    name: protocol
+    name: Security+ protocol
     icon: mdi:settings
     entity_category: config
 
@@ -228,7 +236,7 @@ button:
 
 number:
   - platform: secplus_gdo
-    name: Garage door opening duration
+    name: Opening duration
     secplus_gdo_id: gdo_blaq
     entity_category: config
     id: gdo_open_duration
@@ -236,7 +244,7 @@ number:
     unit_of_measurement: "ms"
 
   - platform: secplus_gdo
-    name: Garage door closing duration
+    name: Closing duration
     secplus_gdo_id: gdo_blaq
     entity_category: config
     id: gdo_close_duration
@@ -256,7 +264,6 @@ dashboard_import:
 # more: https://esphome.io/components/logger.html
 logger:
   level: VERBOSE
-  hardware_uart: UART0
   logs:
     ledc.output: INFO
     vl53l0x: DEBUG
