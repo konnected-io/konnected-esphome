@@ -10,23 +10,23 @@
 ##
 ## Copyright© 2023 Konnected Inc.
 ##
-## Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
-## files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+## Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation
+## files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy,
 ## modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
 ## is furnished to do so, subject to the following conditions:
 ##
 ## The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 ##
 ## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-## OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
-## LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
+## OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+## LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 ## IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##
 ####
 
 ####
 # INTRODUCTION
-# 
+#
 # This ESPHome based firmware configuration is designed for the Konnected Garage Door Opener GDOv2-S which is built on the ESP32-S3-MINI.
 # The Garage Door Opener retrofits an older style traditional garage door opener with a dry-contact trigger and has the
 # following features which are included as packages below:
@@ -34,7 +34,7 @@
 # 1. Wired contact sensor for detecting open/closed state of garage door
 # 2. Optical range sensor for detecting open/closed state of garage door
 # 3. Emulates a garage door opener button wired to a dry contact relay to open/close the garage door.
-# 4. Adds a Garage Door "Cover" entity that is exposed to Home Assistant. The cover entity incorporates the state of the 
+# 4. Adds a Garage Door "Cover" entity that is exposed to Home Assistant. The cover entity incorporates the state of the
 #    garage door and controls to open/close/stop it.
 # 5. Flashes an onboard LED and beeps an onboard piezo sounder as a warning before automatically closing.
 
@@ -118,8 +118,8 @@ packages:
 
       ####
       # PRE-CLOSE WARNING
-      # Enables a pleasant and customizable pre-close warning tone  using the onboard piezo buzzer. Used to audibly 
-      # warn of a garage door automatic closing.    
+      # Enables a pleasant and customizable pre-close warning tone  using the onboard piezo buzzer. Used to audibly
+      # warn of a garage door automatic closing.
       - packages/buzzer-rtttl.yaml
       - packages/pre-close-warning-tones.yaml
 
@@ -251,7 +251,7 @@ dashboard_import:
   package_import_url: github://konnected-io/konnected-esphome/garage-door-GDOv2-Q.yaml@master
   import_full_config: false
 
-#### 
+####
 # LOGGER
 # more: https://esphome.io/components/logger.html
 logger:
@@ -270,7 +270,7 @@ logger:
 # more: https://esphome.io/components/api.html
 api:
 
-#### 
+####
 # OTA UPDATES
 # Enables over-the-air updates
 # more: https://esphome.io/components/ota.html
@@ -286,6 +286,7 @@ web_server:
 
 esphome:
   platformio_options:
+    lib_deps:
+      - https://github.com/konnected-io/gdolib
     build_flags:
-      - -L"../../../gdolib"
-      - -llibgdolib.a -llibsecplus.a
+      - -DUART_SCLK_DEFAULT=UART_SCLK_APB

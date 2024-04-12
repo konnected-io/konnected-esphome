@@ -21,7 +21,7 @@
 #include "number/gdo_number.h"
 #include "esphome/core/defines.h"
 #include "select/gdo_select.h"
-#include "gdolib.h"
+#include "gdo.h"
 
 namespace esphome {
 namespace secplus_gdo {

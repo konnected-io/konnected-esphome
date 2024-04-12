@@ -9,7 +9,7 @@
 
 #include "esphome/components/switch/switch.h"
 #include "esphome/core/component.h"
-#include "../gdolib.h"
+#include "../gdo.h"
 
 namespace esphome {
 namespace secplus_gdo {

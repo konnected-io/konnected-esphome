@@ -19,7 +19,7 @@
 
 #include "esphome/core/component.h"
 #include "esphome/components/binary/light/binary_light_output.h"
-#include "../gdolib.h"
+#include "../gdo.h"
 
 namespace esphome {
 namespace secplus_gdo {
