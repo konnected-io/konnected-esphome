@@ -95,6 +95,12 @@ external_components:
       url: https://github.com/konnected-io/konnected-esphome
     refresh: 1s
 
+  # Un-comment below and comment above for local modification
+  # - source:
+  #     type: local
+  #     path: components
+  #   components: [ secplus_gdo ]
+
 ####
 # PACKAGES
 # Each package includes a Garage Door Opener feature described
@@ -182,7 +188,7 @@ sensor:
 
 lock:
   - platform: secplus_gdo
-    id: gdo_lock
+    id: gdo_lock_remotes
     secplus_gdo_id: gdo_blaq
     name: $garage_lock_name
 

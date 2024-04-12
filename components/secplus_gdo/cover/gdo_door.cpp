@@ -1,3 +1,4 @@
+#include "esphome/core/log.h"
 #include "gdo_door.h"
 
 namespace esphome {
