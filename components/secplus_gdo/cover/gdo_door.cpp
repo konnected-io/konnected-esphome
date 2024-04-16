@@ -51,7 +51,7 @@ void GDODoor::set_state(gdo_door_state_t state, float position) {
     this->publish_state(false);
 }
 
-void GDODoor::start_pre_close(uint32_t pos, bool toggle) {
+void GDODoor::start_pre_close(uint32_t pos) {
     if (this->pre_close_active_) {
         return;
     }
@@ -68,10 +68,7 @@ void GDODoor::start_pre_close(uint32_t pos, bool toggle) {
             this->pre_close_end_trigger->trigger();
         }
 
-        if (toggle) {
-            ESP_LOGD(TAG, "Toggling door to close");
-            gdo_door_toggle();
-        } else if (pos > 0) {
+        if (pos > 0) {
             ESP_LOGD(TAG, "Moving door to position %d", pos);
             gdo_door_move_to_target(pos);
         } else {
@@ -102,7 +99,7 @@ void GDODoor::control(const cover::CoverCall& call) {
     if (call.get_toggle()) {
         ESP_LOGD(TAG, "Toggle command received");
         if (this->position != COVER_CLOSED) {
-            this->start_pre_close(0, true);
+            this->start_pre_close(0);
         } else {
             gdo_door_toggle();
         }
