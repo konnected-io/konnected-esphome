@@ -31,6 +31,9 @@ text_sensor:
     id: device_id
     entity_category: diagnostic
     update_interval: never
+  - platform: version
+    name: ESPHome Version
+    hide_timestamp: true
     
 sensor:
   - platform: uptime

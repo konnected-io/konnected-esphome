@@ -1,5 +1,55 @@
 substitutions:
+
+  ####
+  # NAME
+  # By default, the name of the ESPHome device is "konnected-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "konnected-xxxxxx.local". Edit this variable to
+  # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
+  name: konnected
+  friendly_name: GDOv2-S [FCC TEST]
+  project_name: konnected.garage-door-gdov2-s
+  project_version: "1.1.1"
+  garage_door_cover_name: Garage Door
+  switch_name: STR output
+
+  ####
+  # GARAGE DOOR OPENER MOMENTARY DURATION
+  # Duration to make the relay contact closure for the garage door opener button circuit. 
   garage_door_opener_momentary_duration: 10s
+
+  ####
+  # OPEN GARAGE DOOR DISTANCE MARGIN OF ERROR
+  # The margin of error (+/-) in meters from the value above to consider the garage door in the open position.
+  open_garage_door_distance_margin_of_error: "0.05"
+
+  ####
+  # GARAGE DOOR CLOSE WARNING DURATION
+  # Duration to blink the warning LED and beep the buzzer before the garage door closes.
+  garage_door_close_warning_duration: 5s
+
+  ####
+  # ADDITIONAL SETTTINGS
+  warning_beep_pulse_time: 100ms
+  warning_beep_pause_time: 130ms
+  warning_beep_internal_only: "true"
+  warning_beep_shared: "false"
+  sensor_debounce_time: 200ms
+  range_sensor_polling_time: 2500ms
+  range_sensor_debounce_time: 3s
+  blink_on_state: "true"
+
+  ####
+  # INTERNAL MAPPINGS
+  # DO NOT EDIT these when using Konnected hardware
+  door_control_pin: GPIO1
+  wired_sensor_pin: GPIO5
+  warning_beep_pin: GPIO4
+  warning_leds_pin: GPIO3
+  output_switch_pin: GPIO2
+  status_led: GPIO18
+  sda: GPIO6
+  scl: GPIO7
+
 esphome:
   on_boot:
     priority: 200
@@ -20,7 +70,13 @@ packages:
       ####
       # BASE
       # This package is required and sets up core features.
-      - packages/garage-door-esp32-base.yaml
+      - packages/core-esp32-s3.yaml
+
+      ####
+      # GARAGE DOOR RANGE SENSOR
+      # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
+      # the open/closed state of an overhead garage door.    
+      - packages/vl53l0x-range-sensor.yaml
 
       ####
       # GARAGE DOOR COVER
@@ -42,12 +98,6 @@ packages:
       # Enables a wired contact sensor for reporting the open or closed state of the garage door
       # via the physical INPUT terminals.
       - packages/garage-door-wired-sensor.yaml
-
-      ####
-      # GARAGE DOOR RANGE SENSOR
-      # Enables the optical laser range sensor included with some Konnected Garage Door opener models to detect
-      # the open/closed state of an overhead garage door.    
-      - packages/vl53l0x-range-sensor.yaml
 
       ####
       # GARAGE DOOR OPENER BUTTON
@@ -91,14 +141,10 @@ packages:
       # Self test script used to validate the hardware post-assembly
       - packages/gdo-self-test.yaml
 
-esp32:  
-  framework:
-    type: esp-idf
-
 button:
   - platform: template
     id: button_fcc_test_start
-    name: ~FCC TEST STart
+    name: ~FCC TEST Start
     entity_category: diagnostic
     internal: True
     on_press:
@@ -153,7 +199,6 @@ script:
 # more: https://esphome.io/components/logger.html
 logger:
   level: DEBUG
-  hardware_uart: UART0
   logs:
     ledc.output: INFO
     vl53l0x: DEBUG
