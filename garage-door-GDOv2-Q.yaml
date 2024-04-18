@@ -57,7 +57,7 @@ substitutions:
   name: konnected
   friendly_name: GDO blaQ
   project_name: konnected.garage-door-gdov2-q
-  project_version: "0.1.3"
+  project_version: "0.1.4"
   garage_door_cover_name: Garage Door
   garage_light_name: Garage Light
   garage_openings_name: Garage Openings
@@ -144,118 +144,14 @@ packages:
       - packages/status-led.yaml
 
       ####
+      # SECPLUS GDO
+      # The logic and capabilities of the GDO communication
+      - packages/secplus-gdo.yaml
+
+      ####
       # SELF-TEST
       # Self test script used to validate the hardware post-assembly
       # - packages/gdo-self-test.yaml
-
-script:
-  - id: pc_warn
-    then:
-      - button.press: pre_close_warning
-
-secplus_gdo:
-  id: gdo_blaq
-  input_gdo_pin: ${uart_rx_pin}
-  output_gdo_pin: ${uart_tx_pin}
-
-light:
-  - platform: secplus_gdo
-    name: $garage_light_name
-    secplus_gdo_id: gdo_blaq
-    id: gdo_light
-
-cover:
-  - platform: secplus_gdo
-    name: $garage_door_cover_name
-    secplus_gdo_id: gdo_blaq
-    id: gdo_door
-    pre_close_warning_duration: $garage_door_close_warning_duration
-    pre_close_warning_start:
-      - script.execute:
-          id: pc_warn
-    pre_close_warning_end:
-      - script.stop: pc_warn
-      - light.turn_off: warning_led
-
-sensor:
-  - platform: secplus_gdo
-    secplus_gdo_id: gdo_blaq
-    id: gdo_openings
-    type: openings
-    name: $garage_openings_name
-    unit_of_measurement: openings
-    icon: mdi:open-in-app
-
-lock:
-  - platform: secplus_gdo
-    id: gdo_lock_remotes
-    secplus_gdo_id: gdo_blaq
-    name: $garage_lock_name
-
-binary_sensor:
-  - platform: secplus_gdo
-    name: $garage_motion_name
-    id: gdo_motion
-    secplus_gdo_id: gdo_blaq
-    device_class: motion
-    type: motion
-  - platform: secplus_gdo
-    name: $garage_obstruction_name
-    id: gdo_obst
-    secplus_gdo_id: gdo_blaq
-    device_class: problem
-    type: obstruction
-  - platform: secplus_gdo
-    name: $garage_motor_name
-    id: gdo_motor
-    secplus_gdo_id: gdo_blaq
-    entity_category: diagnostic
-    type: motor
-  - platform: secplus_gdo
-    name: $garage_button_name
-    id: gdo_button
-    secplus_gdo_id: gdo_blaq
-    entity_category: diagnostic
-    type: button
-
-switch:
-  - platform: secplus_gdo
-    id: "gdo_learn"
-    type: learn
-    secplus_gdo_id: gdo_blaq
-    name: "Learn"
-    icon: mdi:plus-box
-    entity_category: config
-
-select:
-  - platform: secplus_gdo
-    id: gdo_protocol
-    secplus_gdo_id: gdo_blaq
-    name: Security+ protocol
-    icon: mdi:settings
-    entity_category: config
-
-button:
-  - platform: factory_reset
-    name: Factory Reset
-    entity_category: config
-
-number:
-  - platform: secplus_gdo
-    name: Opening duration
-    secplus_gdo_id: gdo_blaq
-    entity_category: config
-    id: gdo_open_duration
-    type: open_duration
-    unit_of_measurement: "ms"
-
-  - platform: secplus_gdo
-    name: Closing duration
-    secplus_gdo_id: gdo_blaq
-    entity_category: config
-    id: gdo_close_duration
-    type: close_duration
-    unit_of_measurement: "ms"
 
 ####
 # DASHBOARD IMPORT
