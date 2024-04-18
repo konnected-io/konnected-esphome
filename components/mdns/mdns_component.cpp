@@ -31,14 +31,27 @@ void MDNSComponent::compile_records_() {
     service.service_type = "_konnected";
     service.proto = "_tcp";
     service.port = USE_WEBSERVER_PORT;
-    if (platform != nullptr) {
-      service.txt_records.push_back({"platform", platform});
-    }
     if (!App.get_friendly_name().empty()) {
       service.txt_records.push_back({"friendly_name", App.get_friendly_name()});
     }
     service.txt_records.push_back({"esphome_version", ESPHOME_VERSION});
     service.txt_records.push_back({"mac", get_mac_address()});
+    const char *platform = nullptr;
+#ifdef USE_ESP8266
+    platform = "ESP8266";
+#endif
+#ifdef USE_ESP32
+    platform = "ESP32";
+#endif
+#ifdef USE_RP2040
+    platform = "RP2040";
+#endif
+#ifdef USE_LIBRETINY
+    platform = lt_cpu_get_model_name();
+#endif
+    if (platform != nullptr) {
+      service.txt_records.push_back({"platform", platform});
+    }
 #if defined(USE_WIFI)
     service.txt_records.push_back({"network", "wifi"});
 #elif defined(USE_ETHERNET)
@@ -67,23 +80,9 @@ void MDNSComponent::compile_records_() {
     }
     service.txt_records.push_back({"version", ESPHOME_VERSION});
     service.txt_records.push_back({"mac", get_mac_address()});
-    const char *platform = nullptr;
-#ifdef USE_ESP8266
-    platform = "ESP8266";
-#endif
-#ifdef USE_ESP32
-    platform = "ESP32";
-#endif
-#ifdef USE_RP2040
-    platform = "RP2040";
-#endif
-#ifdef USE_LIBRETINY
-    platform = lt_cpu_get_model_name();
-#endif
     if (platform != nullptr) {
       service.txt_records.push_back({"platform", platform});
     }
-
     service.txt_records.push_back({"board", ESPHOME_BOARD});
 
 #if defined(USE_WIFI)
