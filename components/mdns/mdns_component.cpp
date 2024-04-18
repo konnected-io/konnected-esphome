@@ -31,6 +31,9 @@ void MDNSComponent::compile_records_() {
     service.service_type = "_konnected";
     service.proto = "_tcp";
     service.port = USE_WEBSERVER_PORT;
+    if (platform != nullptr) {
+      service.txt_records.push_back({"platform", platform});
+    }
     if (!App.get_friendly_name().empty()) {
       service.txt_records.push_back({"friendly_name", App.get_friendly_name()});
     }
