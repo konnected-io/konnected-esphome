@@ -38,7 +38,7 @@ substitutions:
   name: konnected
   friendly_name: Alarm Panel
   project_name: konnected.alarm-panel-esp8266
-  project_version: "1.0.1"
+  project_version: "1.0.2"
 
   ####
   # SETTINGS
