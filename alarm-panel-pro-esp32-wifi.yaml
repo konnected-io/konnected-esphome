@@ -126,6 +126,12 @@ packages:
       # implemented using a light entity with strobe effect to create a repeated beeping sound.
       - packages/warning-beep.yaml
 
+external_components:
+  - source:
+      type: git
+      url: https://github.com/konnected-io/konnected-esphome
+    refresh: 1s
+
 dashboard_import:
   package_import_url: github://konnected-io/konnected-esphome/alarm-panel-pro-esp32-wifi.yaml@master
   import_full_config: false
