@@ -89,6 +89,10 @@ substitutions:
   warning_leds_pin: GPIO3
   status_led: GPIO18
 
+external_components:
+  - source: github://konnected-io/konnected-esphome@master
+    components: [ mdns, secplus_gdo ]
+
   # Un-comment below and comment above for local modification
   # - source:
   #     type: local
