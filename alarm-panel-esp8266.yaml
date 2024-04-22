@@ -66,12 +66,6 @@ substitutions:
   # CONNECTION MAPPINGS
   warning_beep_pin: $out
 
-external_components:
-  - source:
-      type: git
-      url: https://github.com/konnected-io/konnected-esphome
-    refresh: 1s
-
 ####
 # PACKAGES
 # Each package includes an alarm panel feature

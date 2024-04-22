@@ -57,7 +57,7 @@ substitutions:
   name: konnected
   friendly_name: GDO blaQ
   project_name: konnected.garage-door-gdov2-q
-  project_version: "0.2.0"
+  project_version: "0.2.1"
   garage_door_cover_name: Garage Door
   garage_light_name: Garage Light
   garage_openings_name: Garage Openings
@@ -88,12 +88,6 @@ substitutions:
   warning_beep_pin: GPIO4
   warning_leds_pin: GPIO3
   status_led: GPIO18
-
-external_components:
-  - source:
-      type: git
-      url: https://github.com/konnected-io/konnected-esphome
-    refresh: 1s
 
   # Un-comment below and comment above for local modification
   # - source:
