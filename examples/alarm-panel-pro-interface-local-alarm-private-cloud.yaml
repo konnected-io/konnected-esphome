@@ -1,0 +1,225 @@
+####
+##
+## Konnected Alarm Panel Pro (ESP32) Interface with Local Alarm
+## Firmware configuration for ESPHome
+##
+## filename: alarm-panel-pro-interface-local-alarm-private-cloud.yaml
+## GitHub: https://github.com/konnected-io/konnected-esphome
+## Buy Konnected hardware: https://konnected.io
+## Help & Support: https://help@konnected.io (support is provided for verified buyers of Konnected hardware)
+##
+## This firmware enables the Konnected Alarm Panel Pro plus two Interface Modules to mirror the state of a 
+## traditional alarm system in Home Assistant. Leveraging ESPHome's new native Alarm Control Panel component,
+## the Konnected device itself manages the alarm panel states (armed, disarmed, alarming, etc) and exposes
+## individual zones to Home Assistant for use in automatoins and dashboards.
+##
+## Alarming logic is not built-in to this firmware, because we are mirroring the state of the traditional alarm
+## system and allowing the traditional alarm system to be the source-of-truth for alarm logic. Using programmable outputs 
+## on the traditional alarm panel, the Konnected panel reads the armed/disarmed state and alarm state from the old alarm panel, 
+## and updates accordingly.
+##
+## To arm/disarm the alarm, the Konnected panel actuates the relay built-in to the Interface Module to trigger an
+## arm/disarm keyswitch on the traditional alarm panel.
+##
+## PRIVATE CLOUD MQTT CONNECTION
+## 
+## This example also includes the konnected-cloud.yaml package to enable a MQTT connection to AWS IoT. To sync states
+## to your private cloud application on AWS, create a "Thing" in AWS IoT Core for each device and create an X.509 certificate
+## for each. Ensure that the certificate has the correct policy to grant access to the appropriate AWS IoT resources.
+## 
+## Note that state topics can be customized for most entities below by customizing the `state_topic` attribute. Also note that
+## as of publishing, the Alarm Control Panel component does not implement the MQTT component so currently the Alarm Panel Component
+## states will not sync to the cloud, only the binary sensor (zone) states.
+## 
+## To disable the cloud connection, remove the konnected-cloud.yaml package from the packages section below, and delete the `state_topic` and
+## `command_topic` attributes from the configuration entries.
+## 
+## ZONE CONFIGURATION EXAMPLE
+## 
+## Zone 1: Input sensor
+## Zone 2: Input sensor
+## Zone 3: Input sensor
+## Zone 4: Input sensor
+## Zone 5: Input sensor
+## Zone 6: Input sensor
+## Zone 7: Input sensor
+## ...
+## Zone 11: Alarm state (0=ok; 1=alarm)
+## Zone 12: Armed state (0=disarmed; 1=armed)
+## Out 1 : Keyswitch relay
+
+substitutions:
+  name: konnected-${mac}
+  friendly_name: Alarm Panel Pro ${mac}
+  mac: replace_me
+  project_name: konnected.alarm-panel-pro-interface-local-alarm
+  project_version: 0.2.0
+  sensor_debounce_time: 200ms
+  warning_beep_pulse_time: 100ms
+  warning_beep_pause_time: 130ms
+  blink_on_state: 'true'
+  zone1: GPIO4
+  zone2: GPIO2
+  zone3: GPIO15
+  zone4: GPIO13
+  zone5: GPIO18
+  zone6: GPIO14
+  zone7: GPIO33
+  zone8: GPIO32
+  zone9: GPIO36
+  zone10: GPIO39
+  zone11: GPIO34
+  zone12: GPIO35
+  alarm1: GPIO12
+  alarm2_out2: GPIO5
+  out1: GPIO23
+  status_led: GPIO3
+  keyswitch_momentary_time: 300ms
+  
+  # To connect to AWS IoT specifiy connection parameters and credentials specific
+  # to each device. Create a Thing and Certificate in AWS IoT Core for each device and
+  # include it in a secrets.yaml file or embed directly.
+  mqtt_addr: a35zoibvcdzyfb-ats.iot.us-east-1.amazonaws.com
+  certificate_authority: !secret ca_cert          # ATS Root CA 1: https://www.amazontrust.com/repository/
+  client_certificate: !secret certificate
+  client_certificate_key: !secret private_key
+
+esphome:
+  name_add_mac_suffix: false
+packages:
+  remote_package:
+    url: http://github.com/konnected-io/konnected-esphome
+    ref: master
+    refresh: 5min
+    files:
+    - packages/core-esp32.yaml
+    - packages/status-led.yaml
+    - packages/wifi.yaml
+    - packages/konnected-cloud.yaml
+    - packages/alarm-panel/zone1.yaml
+    - packages/alarm-panel/zone2.yaml
+    - packages/alarm-panel/zone3.yaml
+    - packages/alarm-panel/zone4.yaml
+    - packages/alarm-panel/zone5.yaml
+    - packages/alarm-panel/zone6.yaml
+    - packages/alarm-panel/zone7.yaml
+    - packages/alarm-panel/zone11.yaml
+    - packages/alarm-panel/zone12.yaml
+
+alarm_control_panel:
+  platform: template
+  name: Alarm System
+  id: acp1
+  
+  # Trigger the physical alarm panel to toggle armed/disarmed by pressing the keyswitch
+  # whenever the virtual alarm panel changes to armed or disarmed state, and the traditional
+  # panel state does not match
+  on_state:
+    then:
+      - if:
+          condition:
+            or:
+              - and:
+                - lambda: 'return id(acp1)->get_state() == ACP_STATE_DISARMED;'
+                - binary_sensor.is_on: zone12
+              - and:
+                - lambda: 'return id(acp1)->get_state() == ACP_STATE_ARMED_AWAY;'
+                - binary_sensor.is_off: zone12
+          then:
+            - button.press:
+                id: alarm_keyswitch
+
+binary_sensor:
+  
+  # Customize the name and device_class of input zones
+  # to mirror the traditional alarm panel
+  - id: !extend zone1
+    name: Front door
+    device_class: door
+    state_topic: esphome/${mac}/binary_sensor/1/state
+  
+  - id: !extend zone2
+    name: Living Room & Dining Room
+    device_class: door
+    state_topic: esphome/${mac}/binary_sensor/2/state
+
+  - id: !extend zone3
+    name: Bedroom 4 & Kitchen
+    device_class: motion
+    state_topic: esphome/${mac}/binary_sensor/3/state
+
+  - id: !extend zone4
+    name: Master Bedroom
+    device_class: door
+    state_topic: esphome/${mac}/binary_sensor/4/state
+
+  - id: !extend zone5
+    name: Family Area
+    device_class: door
+    state_topic: esphome/${mac}/binary_sensor/5/state
+
+  - id: !extend zone6
+    name: Bedroom 3
+    device_class: window
+    state_topic: esphome/${mac}/binary_sensor/6/state
+  
+  - id: !extend zone7
+    name: Bedroom 4
+    device_class: window
+    state_topic: esphome/${mac}/binary_sensor/7/state
+
+  # Monitor the alarm triggered/cleared state of the physical panel
+  # and update the virtual alarm panel accordingly
+  - id: !extend zone11
+    state_topic: esphome/${mac}/binary_sensor/11/state
+    on_state:
+      - if:
+          condition:
+            binary_sensor.is_on: zone11
+          then:
+            lambda: 'id(acp1).publish_state(ACP_STATE_TRIGGERED);'
+          else:
+            lambda: 'id(acp1).publish_state(ACP_STATE_DISARMED);'
+      - if:
+          condition:
+            lambda: return id(blink_on_state);
+          then:
+            - script.execute: blink_status_led
+
+  # Monitor the alarm armed/disarmed state of the physical panel
+  # and update the virtual alarm panel accordingly
+  - id: !extend zone12
+    state_topic: esphome/${mac}/binary_sensor/12/state
+    on_state:
+      - if:
+          condition:
+            binary_sensor.is_on: zone12
+          then:
+            lambda: 'id(acp1).publish_state(ACP_STATE_ARMED_AWAY);'
+          else:
+            lambda: 'id(acp1).publish_state(ACP_STATE_DISARMED);'
+      - if:
+          condition:
+            lambda: return id(blink_on_state);
+          then:
+            - script.execute: blink_status_led
+
+output:
+  - id: alarm_keyswitch_output
+    platform: gpio
+    pin: $out1
+
+button:
+  - platform: output
+    id: alarm_keyswitch
+    name: Arm/Disarm keyswitch
+    output: alarm_keyswitch_output
+    duration: $keyswitch_momentary_time
+    state_topic: esphome/${mac}/button/keyswitch/state
+    command_topic: esphome/${mac}/button/keyswitch/command
+
+api: 
+web_server:
+logger:
+  level: VERBOSE
+ota:
