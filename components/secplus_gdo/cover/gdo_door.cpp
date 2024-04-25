@@ -60,8 +60,6 @@ void GDODoor::start_pre_close(uint32_t pos) {
         this->pre_close_start_trigger->trigger();
     }
 
-    this->set_state(GDO_DOOR_STATE_CLOSING, this->position);
-
     this->set_timeout("pre_close", this->pre_close_duration_, [=]() {
         this->pre_close_active_ = false;
         if (this->pre_close_end_trigger) {
@@ -73,7 +71,7 @@ void GDODoor::start_pre_close(uint32_t pos) {
             gdo_door_move_to_target(pos);
         } else {
             ESP_LOGD(TAG, "Closing door");
-            gdo_door_close();
+            gdo_door_toggle();
         }
     });
 
@@ -90,7 +88,6 @@ void GDODoor::control(const cover::CoverCall& call) {
             if (this->pre_close_end_trigger) {
                 this->pre_close_end_trigger->trigger();
             }
-            this->set_state(GDO_DOOR_STATE_OPEN, this->position);
         }
 
         gdo_door_stop();
@@ -125,7 +122,7 @@ void GDODoor::control(const cover::CoverCall& call) {
 
         if (pos == COVER_OPEN) {
             ESP_LOGD(TAG, "Open command received");
-            gdo_door_open();
+            gdo_door_toggle();
         } else if (pos == COVER_CLOSED) {
             ESP_LOGD(TAG, "Close command received");
             this->start_pre_close();
