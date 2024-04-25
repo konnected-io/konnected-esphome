@@ -224,4 +224,3 @@ esp32_improv:
   authorizer: false
 
 web_server:
-  include_internal: true
