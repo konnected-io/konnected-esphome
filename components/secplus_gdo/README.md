@@ -2,7 +2,7 @@
 
 ## Documentation and Example Usage
 
-See [packages/secplus-gdo.yaml](../packages/secplus-gdo.yaml) for a complete example.
+See [packages/secplus-gdo.yaml](https://github.com/konnected-io/konnected-esphome/blob/master/packages/secplus-gdo.yaml) for a complete example.
 
 ### Setup
 Import the component into your ESPHome config:
