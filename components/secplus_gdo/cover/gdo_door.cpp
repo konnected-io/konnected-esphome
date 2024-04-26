@@ -90,12 +90,22 @@ void GDODoor::do_action(const cover::CoverCall& call) {
         auto pos = *call.get_position();
         if (pos == COVER_OPEN) {
             this->set_state(GDO_DOOR_STATE_OPENING, this->position);
-            ESP_LOGD(TAG, "Sending OPEN action");
-            gdo_door_open();
+            if (this->toggle_only_) {
+                ESP_LOGD(TAG, "Sending TOGGLE action");
+                gdo_door_toggle();
+            } else {
+                ESP_LOGD(TAG, "Sending OPEN action");
+                gdo_door_open();
+            }
         } else if (pos == COVER_CLOSED) {            
             this->set_state(GDO_DOOR_STATE_CLOSING, this->position);
-            ESP_LOGD(TAG, "Sending CLOSE action");
-            gdo_door_close();
+            if (this->toggle_only_) {
+                ESP_LOGD(TAG, "Sending TOGGLE action");
+                gdo_door_toggle();
+            } else {
+                ESP_LOGD(TAG, "Sending CLOSE action");
+                gdo_door_close();
+            }
         } else {
             ESP_LOGD(TAG, "Moving garage door to position %f", pos);
             gdo_door_move_to_target(10000 - (pos * 10000));

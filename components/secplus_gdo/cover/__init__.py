@@ -40,6 +40,7 @@ CoverClosingEndTrigger = secplus_gdo_ns.class_(
 CONF_PRE_CLOSE_WARNING_DURATION = "pre_close_warning_duration"
 CONF_PRE_CLOSE_WARNING_START = "pre_close_warning_start"
 CONF_PRE_CLOSE_WARNING_END = "pre_close_warning_end"
+CONF_TOGGLE_ONLY = "toggle_only"
 
 CONFIG_SCHEMA = cover.COVER_SCHEMA.extend(
     {
@@ -51,6 +52,7 @@ CONFIG_SCHEMA = cover.COVER_SCHEMA.extend(
         cv.Optional(CONF_PRE_CLOSE_WARNING_END): automation.validate_automation(
             {cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(CoverClosingEndTrigger)}
         ),
+        cv.Optional(CONF_TOGGLE_ONLY, default=False): cv.boolean,
     }
 ).extend(SECPLUS_GDO_CONFIG_SCHEMA)
 
@@ -63,6 +65,7 @@ async def to_code(config):
     text = "std::bind(&" + str(GDODoor) + "::set_state," + str(config[CONF_ID]) + ",std::placeholders::_1,std::placeholders::_2)"
     cg.add(parent.register_door(cg.RawExpression(text)))
     cg.add(var.set_pre_close_warning_duration(config[CONF_PRE_CLOSE_WARNING_DURATION]))
+    cg.add(var.set_toggle_only(config[CONF_TOGGLE_ONLY]))
     for conf in config.get(CONF_PRE_CLOSE_WARNING_START, []):
         trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
         await automation.build_automation(trigger, [], conf)
