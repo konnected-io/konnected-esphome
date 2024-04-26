@@ -60,6 +60,8 @@ LiftMaster, Craftsman and Merlin brands.
 
 #### This component is maintained by Konnected and powers the [Konnected GDO blaQ](https://konnected.io/products/smart-garage-door-opener-blaq-myq-alternative) Konnected's smart garage door opener accessory for Security+ garage door openers.
 
+#### Documentation
+
 #### Adapted from [ratgdo](https://github.com/ratgdo)
 
 This component was adapted from and inspired by [ratgdo](https://paulwieland.github.io/ratgdo/), however it's not a copy and not feature-equivalent. We initially set out to fork ratgdo and contribute back some improvements, however it ultimately became a complete rewrite. Konnected is publishing this derivative work under the GPLv3 license.
@@ -81,9 +83,10 @@ The ratgdo and [secplus](https://github.com/argilo/secplus) developers found a w
 1. *Removes dry contact trigger support*. We feel that this is better handled with a _template cover_ in ESPHome, and this library should focus on the Security+ interaction only.
 1. *Removes relay outputs*. Again, simplifying the library to do Security+ only.
 
-#### Dependencies
+#### Noted Dependencies
 
-1. [gdolib](https://github.com/konnected-io/gdolib) (to be published soon)
+1. [gdolib](https://github.com/konnected-io/gdolib)
+1. [secplus](https://github.com/argilo/secplus)
 
 ## Customization
 
