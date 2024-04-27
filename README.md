@@ -12,7 +12,7 @@ openers into your smart home.
 1. (Optional) Discover the device and customize the firmware in ESPHome Dashboard ([see ESPHome add-on](https://my.home-assistant.io/redirect/supervisor_store/)).
 
 ## Changes and Release Notes
-See [releases](/konnected-io/konnected-esphome/releases) for release notes and downloadable pre-built flashable images.
+See [releases](https://github.com/konnected-io/konnected-esphome/releases) for release notes and downloadable pre-built flashable images.
 
 ## Made for ESPHome
 Konnected's products are made with ESP32 and ESP8266 microcontrollers with integrated USB interfaces, and are completely open to end-user servicing and customization, making them ideal products for ESPHome firmware. Since 2023, Konnected maintains and distributes ESPHome configuration recipies for all products. These firmwares are for Home Assistant users who want a plug-and-play solution. More advanced users can import Konnected's ESPHome configurations into their ESPHome Dashboard and easily customize, build, and update their device(s) with a few simple edits of the well-commented configuration files and packages provided by Konnected.
@@ -60,6 +60,10 @@ LiftMaster, Craftsman and Merlin brands.
 
 #### This component is maintained by Konnected and powers the [Konnected GDO blaQ](https://konnected.io/products/smart-garage-door-opener-blaq-myq-alternative) Konnected's smart garage door opener accessory for Security+ garage door openers.
 
+#### Documentation
+
+See [README](https://github.com/konnected-io/konnected-esphome/tree/master/components/secplus_gdo)
+
 #### Adapted from [ratgdo](https://github.com/ratgdo)
 
 This component was adapted from and inspired by [ratgdo](https://paulwieland.github.io/ratgdo/), however it's not a copy and not feature-equivalent. We initially set out to fork ratgdo and contribute back some improvements, however it ultimately became a complete rewrite. Konnected is publishing this derivative work under the GPLv3 license.
@@ -81,9 +85,10 @@ The ratgdo and [secplus](https://github.com/argilo/secplus) developers found a w
 1. *Removes dry contact trigger support*. We feel that this is better handled with a _template cover_ in ESPHome, and this library should focus on the Security+ interaction only.
 1. *Removes relay outputs*. Again, simplifying the library to do Security+ only.
 
-#### Dependencies
+#### Noted Dependencies
 
-1. [gdolib](https://github.com/konnected-io/gdolib) (to be published soon)
+1. [gdolib](https://github.com/konnected-io/gdolib)
+1. [secplus](https://github.com/argilo/secplus)
 
 ## Customization
 

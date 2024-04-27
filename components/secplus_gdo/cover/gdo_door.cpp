@@ -51,57 +51,88 @@ void GDODoor::set_state(gdo_door_state_t state, float position) {
     this->publish_state(false);
 }
 
-void GDODoor::start_pre_close(uint32_t pos) {
+void GDODoor::do_action_after_warning(const cover::CoverCall& call) {
     if (this->pre_close_active_) {
         return;
     }
 
+    ESP_LOGD(TAG, "WARNING for %dms", this->pre_close_duration_);
     if (this->pre_close_start_trigger) {
         this->pre_close_start_trigger->trigger();
     }
-
-    this->set_state(GDO_DOOR_STATE_CLOSING, this->position);
 
     this->set_timeout("pre_close", this->pre_close_duration_, [=]() {
         this->pre_close_active_ = false;
         if (this->pre_close_end_trigger) {
             this->pre_close_end_trigger->trigger();
         }
-
-        if (pos > 0) {
-            ESP_LOGD(TAG, "Moving door to position %d", pos);
-            gdo_door_move_to_target(pos);
-        } else {
-            ESP_LOGD(TAG, "Closing door");
-            gdo_door_close();
-        }
+        this->do_action(call);
     });
 
     this->pre_close_active_ = true;
+}
+
+void GDODoor::do_action(const cover::CoverCall& call) {
+    if (call.get_stop()) {
+        ESP_LOGD(TAG, "Sending STOP action");
+        gdo_door_stop();
+    }
+    if (call.get_toggle()) {        
+        if (this->position == COVER_CLOSED) {
+            this->set_state(GDO_DOOR_STATE_OPENING, this->position);
+        } else if (this->position == COVER_OPEN) {
+            this->set_state(GDO_DOOR_STATE_CLOSING, this->position);
+        }
+        ESP_LOGD(TAG, "Sending TOGGLE action");
+        gdo_door_toggle();
+    }
+    if (call.get_position().has_value()) {
+        auto pos = *call.get_position();
+        if (pos == COVER_OPEN) {
+            this->set_state(GDO_DOOR_STATE_OPENING, this->position);
+            if (this->toggle_only_) {
+                ESP_LOGD(TAG, "Sending TOGGLE action");
+                gdo_door_toggle();
+            } else {
+                ESP_LOGD(TAG, "Sending OPEN action");
+                gdo_door_open();
+            }
+        } else if (pos == COVER_CLOSED) {            
+            this->set_state(GDO_DOOR_STATE_CLOSING, this->position);
+            if (this->toggle_only_) {
+                ESP_LOGD(TAG, "Sending TOGGLE action");
+                gdo_door_toggle();
+            } else {
+                ESP_LOGD(TAG, "Sending CLOSE action");
+                gdo_door_close();
+            }
+        } else {
+            ESP_LOGD(TAG, "Moving garage door to position %f", pos);
+            gdo_door_move_to_target(10000 - (pos * 10000));
+        }
+    }
 }
 
 void GDODoor::control(const cover::CoverCall& call) {
     if (call.get_stop()) {
         ESP_LOGD(TAG, "Stop command received");
         if (this->pre_close_active_) {
-            ESP_LOGD(TAG, "Canceling pre-close warning");
+            ESP_LOGD(TAG, "Canceling pending action");
             this->cancel_timeout("pre_close");
             this->pre_close_active_ = false;
             if (this->pre_close_end_trigger) {
                 this->pre_close_end_trigger->trigger();
             }
-            this->set_state(GDO_DOOR_STATE_OPEN, this->position);
         }
-
-        gdo_door_stop();
+        this->do_action(call);
     }
 
     if (call.get_toggle()) {
         ESP_LOGD(TAG, "Toggle command received");
         if (this->position != COVER_CLOSED) {
-            this->start_pre_close(0);
+            this->do_action_after_warning(call);
         } else {
-            gdo_door_toggle();
+            this->do_action(call);
         }
     }
 
@@ -109,7 +140,7 @@ void GDODoor::control(const cover::CoverCall& call) {
         auto pos = *call.get_position();
 
         if (this->pre_close_active_) {
-            ESP_LOGD(TAG, "Canceling pre-close warning");
+            ESP_LOGD(TAG, "Canceling pending action");
             this->cancel_timeout("pre_close");
             this->pre_close_active_ = false;
             if (this->pre_close_end_trigger) {
@@ -119,22 +150,24 @@ void GDODoor::control(const cover::CoverCall& call) {
 
         if (this->current_operation == COVER_OPERATION_OPENING ||
             this->current_operation == COVER_OPERATION_CLOSING) {
-            ESP_LOGD(TAG, "Stopping door in motion");
+            ESP_LOGD(TAG, "Door is in motion - Sending STOP action");
             gdo_door_stop();
         }
 
         if (pos == COVER_OPEN) {
             ESP_LOGD(TAG, "Open command received");
-            gdo_door_open();
+            this->do_action(call);
         } else if (pos == COVER_CLOSED) {
             ESP_LOGD(TAG, "Close command received");
-            this->start_pre_close();
+            this->do_action_after_warning(call);
         } else {
-            ESP_LOGD(TAG, "Move to position command received");
+            ESP_LOGD(TAG, "Move to position %f command received", pos);
             if (pos < this->position) {
-                this->start_pre_close(10000 - (pos * 10000));
+                ESP_LOGV(TAG, "Current position: %f; Intended position: %f; Door will move down after warning", this->position, pos);
+                this->do_action_after_warning(call);
             } else {
-                gdo_door_move_to_target(10000 - (pos * 10000));
+                ESP_LOGV(TAG, "Current position: %f; Intended position: %f; Door will move up immediately", this->position, pos);
+                this->do_action(call);
             }
         }
     }
