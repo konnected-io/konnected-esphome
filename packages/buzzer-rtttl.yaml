@@ -13,12 +13,12 @@ button:
     internal: true
     on_press:
       then:
-        - rtttl.play: $ominous_warning
+        - rtttl.play: $warning_tone_rtttl
 
 script:
-  - id: error_tone
+  - id: error_tone_1
     then:
-      - rtttl.play: err:d=16,o=4,b=100:d#,d#,d#
+      - rtttl.play: $error_tone
 
 api:
   services:      
@@ -39,4 +39,6 @@ substitutions:
   urgent: Urgent:d=8,o=6,b=500:c,e,d7,c,e,a#,c,e,a,c,e,g,c,e,a,c,e,a#,c,e,d7
   mosaic_1: Mosaic:d=8,o=6,b=400:c,e,g,e,c,g,e,g,c,g,c,e,c,g,e,g,e,c
   mosiac_2: Mosaic:d=8,o=6,b=400:c,e,g,e,c,g,e,g,c,g,c,e,c,g,e,g,e,c,p,c5,e5,g5,e5,c5,g5,e5,g5,c5,g5,c5,e5,c5,g5,e5,g5,e5,c5
+  error_tone: err:d=16,o=4,b=100:d#,d#,d#
+  warning_tone_rtttl: "$omonious_warning"
   

@@ -16,7 +16,7 @@ cover:
                 id: garage_door
                 current_operation: OPENING
           else:
-            - script.execute: error_tone
+            - script.execute: error_tone_1
             - lambda: ESP_LOGW("konnected.gdov2-s","Garage door is already open. Ignoring open action.");
 
     
@@ -34,7 +34,7 @@ cover:
                 id: garage_door
                 current_operation: CLOSING
           else:
-            - script.execute: error_tone
+            - script.execute: error_tone_1
             - lambda: ESP_LOGW("konnected.gdov2-s","Garage door is already closed. Ignoring close action.");
     
     # Toggles the garage door open or closed
