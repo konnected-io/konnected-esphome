@@ -32,43 +32,43 @@ jobs:
           mkdir assets
       
       - id: alarm-panel-esp8266-version
-        uses: jbutcher5/read-yaml@main
+        uses: konnected-io/read-yaml@main
         with:
           file: './alarm-panel-esp8266.yaml'
           key-path: '["substitutions", "project_version"]'
 
       - id: alarm-panel-pro-wifi-version
-        uses: jbutcher5/read-yaml@main
+        uses: konnected-io/read-yaml@main
         with:
           file: './alarm-panel-pro-esp32-wifi.yaml'
           key-path: '["substitutions", "project_version"]'
 
       - id: alarm-panel-pro-ethernet-version
-        uses: jbutcher5/read-yaml@main
+        uses: konnected-io/read-yaml@main
         with:
           file: './alarm-panel-pro-esp32-ethernet.yaml'
           key-path: '["substitutions", "project_version"]'
   
       - id: alarm-panel-pro-v18-ethernet-version
-        uses: jbutcher5/read-yaml@main
+        uses: konnected-io/read-yaml@main
         with:
           file: './alarm-panel-pro-v1.8-ethernet.yaml'
           key-path: '["substitutions", "project_version"]'
 
       - id: garage-door-gdov1-s-version
-        uses: jbutcher5/read-yaml@main
+        uses: konnected-io/read-yaml@main
         with:
           file: './garage-door-GDOv1-S.yaml'
           key-path: '["substitutions", "project_version"]'
 
       - id: garage-door-gdov2-s-version
-        uses: jbutcher5/read-yaml@main
+        uses: konnected-io/read-yaml@main
         with:
           file: './garage-door-GDOv2-S.yaml'
           key-path: '["substitutions", "project_version"]'
 
       - id: garage-door-gdov2-q-version
-        uses: jbutcher5/read-yaml@main
+        uses: konnected-io/read-yaml@main
         with:
           file: './garage-door-GDOv2-Q.yaml'
           key-path: '["substitutions", "project_version"]'
