@@ -9,8 +9,8 @@ button:
             id: warning_led
             effect: strobe
         - light.turn_on:
-            id: warning_beep
+            id: warning_beep_1
             effect: strobe
         - delay: $garage_door_close_warning_duration
         - light.turn_off: warning_led
-        - light.turn_off: warning_beep
+        - light.turn_off: warning_beep_1
