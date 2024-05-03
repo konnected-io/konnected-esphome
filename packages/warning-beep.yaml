@@ -1,8 +1,8 @@
-defaults:
+substitutions:
   warning_beep_index: '1'
   warning_beep_name: Warning Beep
-  warning_beep_shared: False
-  warning_beep_internal_only: False
+  warning_beep_shared: 'false'
+  warning_beep_internal_only: 'false'
 
 output:
   - id: buzzer_out_${warning_beep_index}
