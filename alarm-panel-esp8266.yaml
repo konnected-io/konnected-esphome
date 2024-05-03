@@ -38,14 +38,14 @@ substitutions:
   name: konnected
   friendly_name: Alarm Panel
   project_name: konnected.alarm-panel-esp8266
-  project_version: "1.1.0"
+  project_version: "1.1.1"
 
   ####
   # SETTINGS
   sensor_debounce_time: 200ms
   warning_beep_pulse_time: 100ms
   warning_beep_pause_time: 130ms
-  warning_beep_internal_only: "false"
+  warning_beep_name: Warning Beep
   warning_beep_shared: "true"
   blink_on_state: "true"
 
@@ -100,26 +100,12 @@ packages:
       # Enables the onboard blue status LED as an activity/error indicator
       - packages/status-led.yaml
 
-  ####
-  # WARNING BEEP
-  # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer or other pulsing.
-  # binary output This is implemented using the light component with strobe effect to create a 
-  # repeated beeping sound or pulsing action that can be turned on via the _strobe_ effect.
-  #
-  # Here we include one _Warning Beep_ by default, but you can copy/paste this section to create
-  # different pulsing effects on the same or different outputs.
-  remote_package_warning_beep: !include
-    url: https://github.com/konnected-io/konnected-esphome
-    ref: master
-    refresh: 5min
-    file: packages/warning-beep.yaml
-    vars:
-      warning_beep_name: Warning Beep
-      warning_beep_pin: $warning_beep_pin
-      warning_beep_pulse_time: $warning_beep_pulse_time
-      warning_beep_pause_time: $warning_beep_pause_time
-      warning_beep_shared: $warning_beep_shared
-      warning_beep_internal_only: $warning_beep_internal_only
+      ####
+      # WARNING BEEP
+      # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer or other pulsing.
+      # binary output This is implemented using the light component with strobe effect to create a 
+      # repeated beeping sound or pulsing action that can be turned on via the _strobe_ effect.
+      - packages/warning-beep.yaml
 
 dashboard_import:
   package_import_url: github://konnected-io/konnected-esphome/alarm-panel-esp8266.yaml@master

@@ -33,7 +33,7 @@ substitutions:
   name: alarm-panel-pro
   friendly_name: Alarm Panel Pro
   project_name: konnected.alarm-panel-pro-esp32-local
-  project_version: "0.2.0"
+  project_version: "0.2.1"
 
   sensor_debounce_time: 200ms
   warning_beep_pulse_time: 100ms
@@ -375,26 +375,12 @@ packages:
       - packages/alarm-panel/alarm1.yaml
       - packages/alarm-panel/alarm2.yaml
 
-  ####
-  # WARNING BEEP
-  # Enables a 'Warning Beep' output, intended to be used with a piezo buzzer or other pulsing.
-  # binary output This is implemented using the light component with strobe effect to create a 
-  # repeated beeping sound or pulsing action that can be turned on via the _strobe_ effect.
-  #
-  # Here we include one _Warning Beep_ by default, but you can copy/paste this section to create
-  # different pulsing effects on the same or different outputs.
-  remote_package_warning_beep: !include
-    url: http://github.com/konnected-io/konnected-esphome
-    ref: master
-    refresh: 5min
-    file: packages/warning-beep.yaml
-    vars:
-      warning_beep_name: Warning Beep
-      warning_beep_pin: $warning_beep_pin
-      warning_beep_pulse_time: $warning_beep_pulse_time
-      warning_beep_pause_time: $warning_beep_pause_time
-      warning_beep_shared: $warning_beep_shared
-      warning_beep_internal_only: $warning_beep_internal_only
+      ####
+      # WARNING BEEP
+      # Enables a 'Warning Beep' entity, intended to be used with a piezo buzzer or other pulsing.
+      # binary output This is implemented using the light component with strobe effect to create a 
+      # repeated beeping sound or pulsing action that can be turned on via the _strobe_ effect.
+      - packages/warning-beep.yaml
 
 
 dashboard_import:
