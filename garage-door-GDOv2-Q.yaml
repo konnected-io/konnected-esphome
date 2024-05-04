@@ -75,7 +75,6 @@ substitutions:
 
   ####
   # ADDITIONAL SETTTINGS
-  warning_beep_internal_only: "true"
   sensor_debounce_time: 200ms
   blink_on_state: "true"
 
