@@ -52,6 +52,8 @@ void GDODoor::set_state(gdo_door_state_t state, float position) {
 }
 
 void GDODoor::do_action_after_warning(const cover::CoverCall& call) {
+    this->publish_state(false); // publish state to acknowledge command was received
+
     if (this->pre_close_active_) {
         return;
     }
