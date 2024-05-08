@@ -4,14 +4,14 @@ esphome:
   name_add_mac_suffix: true
   project:
     name: $project_name
-    version: $project_version 
+    version: $project_version
   on_boot:
     then:
       - text_sensor.template.publish:
           id: device_id
           state: !lambda 'return get_mac_address();'
 
-esp32:  
+esp32:
   board: wesp32
   framework:
     type: esp-idf
@@ -23,7 +23,7 @@ substitutions:
 # overrides the MDNS component to add a Konnected service
 external_components:
   - source: github://konnected-io/konnected-esphome@master
-    components: [ mdns ]
+    components: [ mdns, ethernet ]
 
 text_sensor:
   - platform: template
@@ -34,7 +34,7 @@ text_sensor:
   - platform: version
     name: ESPHome Version
     hide_timestamp: true
-    
+
 sensor:
   - platform: uptime
     name: Uptime
