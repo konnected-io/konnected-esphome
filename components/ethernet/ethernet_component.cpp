@@ -110,6 +110,12 @@ void EthernetComponent::setup() {
     this->ksz8081_set_clock_reference_(mac);
   }
 
+  if (this->type_ == ETHERNET_TYPE_RTL8201) {
+    this->phy_->phy_reg_write(this->phy_->eth, this->phy_.addr, 0x1f, 0x07); // select page 7
+    this->phy_->phy_reg_write(this->phy_->eth, this->phy_.addr, 0x10, 0x7ffb); // enable external clock as per datasheet page 19
+    this->phy_->phy_reg_write(this->phy_->eth, this->phy_.addr, 0x1f, 0x0); // return page select to 0
+  }
+
   /* attach Ethernet driver to TCP/IP stack */
   err = esp_netif_attach(this->eth_netif_, esp_eth_new_netif_glue(this->eth_handle_));
   ESPHL_ERROR_CHECK(err, "ETH netif attach error");
