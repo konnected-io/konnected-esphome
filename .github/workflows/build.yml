@@ -27,7 +27,7 @@ jobs:
       - name: Install ESPHome
         run: | 
           pip3 install wheel
-          pip3 install esphome
+          pip3 install esphome==2024.5.0b3
           echo "esphome_version=$(esphome version) >> $GITHUB_OUTPUT"
           mkdir assets
       
