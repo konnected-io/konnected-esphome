@@ -32,6 +32,8 @@ CONF_TYPE = "type"
 TYPES = {
     "open_duration": "register_open_duration",
     "close_duration": "register_close_duration",
+    "client_id": "register_client_id",
+    "rolling_code": "register_rolling_code",
 }
 
 CONFIG_SCHEMA = (
@@ -46,7 +48,12 @@ CONFIG_SCHEMA = (
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-    await number.register_number(var, config, min_value=0, max_value=65535, step=1)
+    if "duration" in str(config[CONF_TYPE]):
+        await number.register_number(var, config, min_value=0x0, max_value=0xffff, step=1)
+    elif "client_id" in str(config[CONF_TYPE]):
+        await number.register_number(var, config, min_value=0x666, max_value=0x7ff666, step=1)
+    else:
+        await number.register_number(var, config, min_value=0x0, max_value=0xffffffff, step=1)
     await cg.register_component(var, config)
     parent = await cg.get_variable(config[CONF_SECPLUS_GDO_ID])
     fcall = str(parent) + "->" + str(TYPES[config[CONF_TYPE]])

@@ -106,3 +106,19 @@ number:
     id: gdo_close_duration
     type: close_duration
     unit_of_measurement: "ms"
+
+  - platform: secplus_gdo
+    name: Client ID
+    secplus_gdo_id: gdo_blaq
+    entity_category: config
+    id: gdo_client_id
+    type: client_id
+    mode: box
+
+  - platform: secplus_gdo
+    name: Rolling Code
+    secplus_gdo_id: gdo_blaq
+    entity_category: config
+    id: gdo_rolling_code
+    type: rolling_code
+    mode: box

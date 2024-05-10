@@ -71,6 +71,12 @@ namespace secplus_gdo {
         void register_close_duration(GDONumber* num) { close_duration_ = num; }
         void set_close_duration(uint16_t ms ) { if (close_duration_) { close_duration_->update_state(ms); } }
 
+        void register_client_id(GDONumber* num) { client_id_ = num; }
+        void set_client_id(uint32_t num) { if (client_id_) { client_id_->update_state(num); } }
+
+        void register_rolling_code(GDONumber* num) { rolling_code_ = num; }
+        void set_rolling_code(uint32_t num) { if (rolling_code_) { rolling_code_->update_state(num); } }
+
     protected:
         gdo_status_t status_;
         std::function<void(gdo_door_state_t, float)> f_door{nullptr};
@@ -84,6 +90,8 @@ namespace secplus_gdo {
         std::function<void(bool)>                    f_learn{nullptr};
         GDONumber*                                   open_duration_{nullptr};
         GDONumber*                                   close_duration_{nullptr};
+        GDONumber*                                   client_id_{nullptr};
+        GDONumber*                                   rolling_code_{nullptr};
         GDOSelect*                                   protocol_select_{nullptr};
 
     }; // GDOComponent

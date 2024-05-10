@@ -89,7 +89,7 @@ substitutions:
   status_led: GPIO18
 
 external_components:
-  - source: github://konnected-io/konnected-esphome@master
+  - source: github://konnected-io/konnected-esphome@oz-fix
     components: [ mdns, secplus_gdo ]
 
   # Un-comment below and comment above for local modification
@@ -97,7 +97,7 @@ external_components:
   #     type: local
   #     path: components
   #   components: [ secplus_gdo ]
-  
+
 ####
 # PACKAGES
 # Each package includes a Garage Door Opener feature described
@@ -106,7 +106,7 @@ packages:
 
   remote_package:
     url: https://github.com/konnected-io/konnected-esphome
-    ref: master
+    ref: oz-fix
     refresh: 5min
     files:
 
@@ -155,7 +155,7 @@ packages:
 # Enables automatic discovery and upgrades via ESPHome Dashboard
 # more: https://esphome.io/guides/getting_started_hassio.html
 dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/garage-door-GDOv2-Q.yaml@master
+  package_import_url: github://konnected-io/konnected-esphome/garage-door-GDOv2-Q.yaml@oz-fix
   import_full_config: false
 
 ####
