@@ -10,6 +10,7 @@
 #include "esphome/components/select/select.h"
 #include "esphome/core/component.h"
 #include "esphome/core/preferences.h"
+#include "esphome/core/application.h"
 #include "../secplus_gdo.h"
 #include "gdo.h"
 
@@ -51,8 +52,10 @@ namespace secplus_gdo {
             auto idx = this->index_of(value);
             if (idx.has_value()) {
                 gdo_protocol_type_t protocol = static_cast<gdo_protocol_type_t>(idx.value());
-                if (gdo_set_protocol(protocol) == ESP_OK) {
-                    this->update_state(protocol);
+                this->update_state(protocol);
+                if (gdo_set_protocol(protocol) != ESP_OK) {
+                    vTaskDelay(pdMS_TO_TICKS(100));
+                    App.safe_reboot();
                 }
             }
         }
