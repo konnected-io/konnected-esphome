@@ -98,6 +98,7 @@ number:
     id: gdo_open_duration
     type: open_duration
     unit_of_measurement: "ms"
+    internal: true
 
   - platform: secplus_gdo
     name: Closing duration
@@ -106,6 +107,7 @@ number:
     id: gdo_close_duration
     type: close_duration
     unit_of_measurement: "ms"
+    internal: true
 
   - platform: secplus_gdo
     name: Client ID
@@ -114,6 +116,7 @@ number:
     id: gdo_client_id
     type: client_id
     mode: box
+    internal: true
 
   - platform: secplus_gdo
     name: Rolling Code
@@ -122,3 +125,4 @@ number:
     id: gdo_rolling_code
     type: rolling_code
     mode: box
+    internal: true
