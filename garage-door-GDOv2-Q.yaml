@@ -57,7 +57,7 @@ substitutions:
   name: konnected
   friendly_name: GDO blaQ
   project_name: konnected.garage-door-gdov2-q
-  project_version: "1.0.3"
+  project_version: "1.0.4"
   garage_door_cover_name: Garage Door
   garage_light_name: Garage Light
   garage_openings_name: Garage Openings
@@ -65,7 +65,7 @@ substitutions:
   garage_motion_name: Motion
   garage_obstruction_name: Obstruction
   garage_motor_name: Motor
-  garage_button_name: Button
+  garage_button_name: Wall Button
 
 
   ####

@@ -59,13 +59,12 @@ binary_sensor:
     name: $garage_motor_name
     id: gdo_motor
     secplus_gdo_id: gdo_blaq
-    entity_category: diagnostic
+    device_class: running
     type: motor
   - platform: secplus_gdo
     name: $garage_button_name
     id: gdo_button
     secplus_gdo_id: gdo_blaq
-    entity_category: diagnostic
     type: button
 
 switch:
