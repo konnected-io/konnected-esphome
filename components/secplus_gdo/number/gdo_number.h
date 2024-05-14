@@ -37,8 +37,8 @@ class GDONumber : public number::Number, public Component {
             this->control(value);
         }
 
-        void update_state(float value, bool replace = false) {
-            if (this->state > 0 && !replace) {
+        void update_state(float value) {
+            if (value == this->state) {
                 return;
             }
 

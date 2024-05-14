@@ -32,6 +32,8 @@ namespace secplus_gdo {
             ESP_LOGI(TAG, "Synced: %s, protocol: %s", status->synced ? "true" : "false", gdo_protocol_type_to_string(status->protocol));
             if (status->protocol == GDO_PROTOCOL_SEC_PLUS_V2) {
                 ESP_LOGI(TAG, "Client ID: %" PRIu32 ", Rolling code: %" PRIu32, status->client_id, status->rolling_code);
+                gdo->set_client_id(status->client_id);
+                gdo->set_rolling_code(status->rolling_code);
             }
 
             if (!status->synced) {
