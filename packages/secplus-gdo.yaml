@@ -69,12 +69,11 @@ binary_sensor:
 
 switch:
   - platform: secplus_gdo
-    id: "gdo_learn"
+    id: gdo_learn
     type: learn
     secplus_gdo_id: gdo_blaq
-    name: "Learn"
+    name: Learn
     icon: mdi:plus-box
-    entity_category: config
 
 select:
   - platform: secplus_gdo
@@ -90,6 +89,7 @@ button:
     entity_category: config
   - platform: template
     name: Reset door timings
+    entity_category: config
     on_press:
       - number.set:
           id: gdo_open_duration
@@ -101,6 +101,7 @@ button:
           id: restart_button
   - platform: template
     name: Re-sync
+    entity_category: config
     on_press:
       - number.increment:
           id: gdo_client_id
