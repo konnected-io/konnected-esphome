@@ -46,4 +46,5 @@ sensor:
 button:
   - platform: restart
     name: Restart
+    id: restart_button
     entity_category: config

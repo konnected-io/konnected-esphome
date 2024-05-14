@@ -88,6 +88,25 @@ button:
   - platform: factory_reset
     name: Factory Reset
     entity_category: config
+  - platform: template
+    name: Reset door timings
+    on_press:
+      - number.set:
+          id: gdo_open_duration
+          value: 0
+      - number.set:
+          id: gdo_close_duration
+          value: 0
+      - button.press:
+          id: restart_button
+  - platform: template
+    name: Re-sync
+    on_press:
+      - number.increment:
+          id: gdo_client_id
+      - button.press:
+          id: restart_button
+
 
 number:
   - platform: secplus_gdo
