@@ -79,7 +79,8 @@ void GDODoor::do_action(const cover::CoverCall& call) {
         ESP_LOGD(TAG, "Sending STOP action");
         gdo_door_stop();
     }
-    if (call.get_toggle()) {        
+
+    if (call.get_toggle()) {
         if (this->position == COVER_CLOSED) {
             this->set_state(GDO_DOOR_STATE_OPENING, this->position);
         } else if (this->position == COVER_OPEN) {
@@ -88,6 +89,7 @@ void GDODoor::do_action(const cover::CoverCall& call) {
         ESP_LOGD(TAG, "Sending TOGGLE action");
         gdo_door_toggle();
     }
+
     if (call.get_position().has_value()) {
         auto pos = *call.get_position();
         if (pos == COVER_OPEN) {
@@ -99,7 +101,7 @@ void GDODoor::do_action(const cover::CoverCall& call) {
                 ESP_LOGD(TAG, "Sending OPEN action");
                 gdo_door_open();
             }
-        } else if (pos == COVER_CLOSED) {            
+        } else if (pos == COVER_CLOSED) {
             this->set_state(GDO_DOOR_STATE_CLOSING, this->position);
             if (this->toggle_only_) {
                 ESP_LOGD(TAG, "Sending TOGGLE action");
@@ -126,22 +128,44 @@ void GDODoor::control(const cover::CoverCall& call) {
                 this->pre_close_end_trigger->trigger();
             }
         }
+        this->target_position_ = this->position;
         this->do_action(call);
     }
 
     if (call.get_toggle()) {
         ESP_LOGD(TAG, "Toggle command received");
         if (this->position != COVER_CLOSED) {
+            this->target_position_ = COVER_CLOSED;
             this->do_action_after_warning(call);
         } else {
+            this->target_position_ = COVER_OPEN;
             this->do_action(call);
         }
     }
 
     if (call.get_position().has_value()) {
         auto pos = *call.get_position();
+        if (this->position == pos) {
+            ESP_LOGD(TAG, "Door is already %s", pos == COVER_OPEN ? "open" : "closed");
+            this->publish_state(false);
+            return;
+        }
+
+        if ((this->current_operation == COVER_OPERATION_OPENING && pos > this->position) ||
+            (this->current_operation == COVER_OPERATION_CLOSING && pos < this->position)) {
+            ESP_LOGD(TAG, "Door is already moving in target direction; target position: %.0f%%", *this->target_position_);
+            this->publish_state(false);
+            return;
+        }
 
         if (this->pre_close_active_) {
+            // don't start the pre-close again if the door is already going to close.
+            if (pos < this->position) {
+                ESP_LOGD(TAG, "Door is already closing");
+                this->publish_state(false);
+                return;
+            }
+
             ESP_LOGD(TAG, "Canceling pending action");
             this->cancel_timeout("pre_close");
             this->pre_close_active_ = false;
@@ -172,6 +196,8 @@ void GDODoor::control(const cover::CoverCall& call) {
                 this->do_action(call);
             }
         }
+
+        this->target_position_ = pos;
     }
 }
 
