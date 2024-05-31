@@ -41,6 +41,8 @@ void GDODoor::set_state(gdo_door_state_t state, float position) {
         this->position = position;
         break;
     case GDO_DOOR_STATE_STOPPED:
+        this->prev_operation = this->current_operation;
+        // falls through
     case GDO_DOOR_STATE_MAX:
     default:
         this->current_operation = COVER_OPERATION_IDLE;
@@ -49,6 +51,7 @@ void GDODoor::set_state(gdo_door_state_t state, float position) {
     }
 
     this->publish_state(false);
+    this->state_ = state;
 }
 
 void GDODoor::do_action_after_warning(const cover::CoverCall& call) {
@@ -93,23 +96,43 @@ void GDODoor::do_action(const cover::CoverCall& call) {
     if (call.get_position().has_value()) {
         auto pos = *call.get_position();
         if (pos == COVER_OPEN) {
-            this->set_state(GDO_DOOR_STATE_OPENING, this->position);
             if (this->toggle_only_) {
                 ESP_LOGD(TAG, "Sending TOGGLE action");
                 gdo_door_toggle();
+                if (this->state_ == GDO_DOOR_STATE_STOPPED && this->prev_operation == COVER_OPERATION_OPENING) {
+                    // If the door was stopped while opening, then we need to toggle to stop, then toggle again to open,
+                    this->set_timeout("stop_door", 1000, [=]() {
+                        gdo_door_stop();
+                    });
+                    this->set_timeout("open_door", 2000, [=]() {
+                        gdo_door_toggle();
+                    });
+                }
             } else {
                 ESP_LOGD(TAG, "Sending OPEN action");
                 gdo_door_open();
             }
+
+            this->set_state(GDO_DOOR_STATE_OPENING, this->position);
         } else if (pos == COVER_CLOSED) {
-            this->set_state(GDO_DOOR_STATE_CLOSING, this->position);
             if (this->toggle_only_) {
                 ESP_LOGD(TAG, "Sending TOGGLE action");
                 gdo_door_toggle();
+                if (this->state_ == GDO_DOOR_STATE_STOPPED && this->prev_operation == COVER_OPERATION_CLOSING) {
+                    // If the door was stopped while closing, then we need to toggle to stop, then toggle again to close,
+                    this->set_timeout("stop_door", 1000, [=]() {
+                        gdo_door_stop();
+                    });
+                    this->set_timeout("close_door", 2000, [=]() {
+                        gdo_door_toggle();
+                    });
+                }
             } else {
                 ESP_LOGD(TAG, "Sending CLOSE action");
                 gdo_door_close();
             }
+
+            this->set_state(GDO_DOOR_STATE_CLOSING, this->position);
         } else {
             ESP_LOGD(TAG, "Moving garage door to position %f", pos);
             gdo_door_move_to_target(10000 - (pos * 10000));
