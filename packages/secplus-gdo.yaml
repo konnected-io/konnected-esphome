@@ -74,6 +74,12 @@ switch:
     secplus_gdo_id: gdo_blaq
     name: Learn
     icon: mdi:plus-box
+  - platform: secplus_gdo
+    id: gdo_toggle_only
+    type: toggle_only
+    secplus_gdo_id: gdo_blaq
+    name: Toggle Only
+    icon: mdi:plus-box
 
 select:
   - platform: secplus_gdo

@@ -12,6 +12,7 @@ GDOSwitch = secplus_gdo_ns.class_("GDOSwitch", switch.Switch, cg.Component)
 CONF_TYPE = "type"
 TYPES = {
     "learn": "register_learn",
+    "toggle_only": "register_toggle_only",
 }
 
 
@@ -32,5 +33,7 @@ async def to_code(config):
     await cg.register_component(var, config)
     parent = await cg.get_variable(config[CONF_SECPLUS_GDO_ID])
     fcall = str(parent) + "->" + str(TYPES[config[CONF_TYPE]])
-    text = fcall + "(std::bind(&" + str(GDOSwitch) + "::write_state," + str(config[CONF_ID]) + ",std::placeholders::_1))"
+    text = fcall + "(" + str(var) + ")"
     cg.add((cg.RawExpression(text)))
+    text = "secplus_gdo::SwitchType::" + str(config[CONF_TYPE]).upper()
+    cg.add(var.set_type(cg.RawExpression(text)))
