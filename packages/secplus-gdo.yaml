@@ -80,6 +80,7 @@ switch:
     secplus_gdo_id: gdo_blaq
     name: Toggle Only
     icon: mdi:plus-box
+    entity_category: config
 
 select:
   - platform: secplus_gdo
