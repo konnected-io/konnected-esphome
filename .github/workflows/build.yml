@@ -141,7 +141,7 @@ jobs:
         with:
           command: cp
           source: assets/
-          destination: s3://konnected-io/builds/esphome/
+          destination: s3://konnected-io/builds/esphome/${{ github.ref_name }}
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: us-east-2
@@ -174,8 +174,8 @@ jobs:
           MANIFEST_NAME: Konnected Alarm Panel / Alarm Panel Pro for ESPHome (WiFi)
           MANIFEST_FNAME: esphome-alarm-panel-wifi.json
           MANIFEST_VERSION: "${{ steps.alarm-panel-esp8266-version.outputs.data }} / ${{ steps.alarm-panel-pro-wifi-version.outputs.data }}"
-          ESP8266_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-alarm-panel-esp8266.outputs.fname }}
-          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-alarm-panel-pro-esp32-wifi.outputs.fname }}
+          ESP8266_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ github.ref_name }}/${{ steps.build-alarm-panel-esp8266.outputs.fname }}
+          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ github.ref_name }}/${{ steps.build-alarm-panel-pro-esp32-wifi.outputs.fname }}
 
       - name: Build Manifest for GDO White
         if: github.event.release  
@@ -185,19 +185,30 @@ jobs:
           MANIFEST_NAME: Konnected GDO White (GDOv1-S / GDOv2-S) for ESPHome
           MANIFEST_FNAME: esphome-garage-door-wifi.json
           MANIFEST_VERSION: "${{ steps.garage-door-gdov1-s-version.outputs.data }} / ${{ steps.garage-door-gdov2-s-version.outputs.data }}"
-          ESP8266_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-garage-door-gdov1-s.outputs.fname }}
-          ESP32_S3_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-garage-door-gdov2-s.outputs.fname }}
+          ESP8266_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ github.ref_name }}/${{ steps.build-garage-door-gdov1-s.outputs.fname }}
+          ESP32_S3_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ github.ref_name }}/${{ steps.build-garage-door-gdov2-s.outputs.fname }}
 
       - name: Build Manifest for GDO blaQ
         if: github.event.release  
         run: |
           ruby ./scripts/update-espwebtools-manifests.rb
         env:
-          MANIFEST_NAME: Konnected GDO blaQ (GDOv2-Q) for ESPHome
+          MANIFEST_NAME: Konnected GDO blaQ (GDOv2-Q)
           MANIFEST_FNAME: esphome-gdov2-q.json
           MANIFEST_VERSION: "${{ steps.garage-door-gdov2-q-version.outputs.data }}"          
-          ESP32_S3_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-garage-door-gdov2-q.outputs.fname }}
-            
+          ESP32_S3_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ github.ref_name }}/${{ steps.build-garage-door-gdov2-q.outputs.fname }}
+
+      - name: Build Dev Manifest for GDO blaQ
+        if: github.ref_name == 'dev'
+        run: |
+          ruby ./scripts/update-espwebtools-manifests.rb
+        env:
+          MANIFEST_NAME: Konnected GDO blaQ (GDOv2-Q)[DEV]
+          MANIFEST_FNAME: esphome-gdov2-q-dev.json
+          MANIFEST_VERSION: "${{ steps.garage-door-gdov2-q-version.outputs.data }}"          
+          ESP32_S3_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ github.ref_name }}/${{ steps.build-garage-door-gdov2-q.outputs.fname }}
+  
+          
       - name: Build Manifest for Alarm Panel Pro v1.x / LAN8720
         if: github.event.release  
         run: |
@@ -206,7 +217,7 @@ jobs:
           MANIFEST_NAME: Konnected Alarm Panel Pro v1.x for ESPHome (Ethernet)
           MANIFEST_FNAME: esphome-alarm-panel-lan8720.json
           MANIFEST_VERSION: "${{ steps.alarm-panel-pro-ethernet-version.outputs.data }}"
-          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-alarm-panel-pro-esp32-lan8720.outputs.fname }}
+          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ github.ref_name }}/${{ steps.build-alarm-panel-pro-esp32-lan8720.outputs.fname }}
 
       - name: Build Manifest for Alarm Panel Pro v1.8 / RTL8201
         if: github.event.release  
@@ -216,7 +227,7 @@ jobs:
           MANIFEST_NAME: Konnected Alarm Panel Pro v1.8 for ESPHome (Ethernet)
           MANIFEST_FNAME: esphome-alarm-panel-rtl8201.json
           MANIFEST_VERSION: "${{ steps.alarm-panel-pro-v18-ethernet-version.outputs.data }}"
-          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ steps.build-alarm-panel-pro-esp32-rtl8201.outputs.fname }}
+          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ github.ref_name }}/${{ steps.build-alarm-panel-pro-esp32-rtl8201.outputs.fname }}
       
       - name: Deploy
         if: github.event.release  
