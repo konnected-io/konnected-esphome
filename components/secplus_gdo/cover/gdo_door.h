@@ -45,7 +45,7 @@ using namespace esphome::cover;
         }
 
         void do_action(const cover::CoverCall& call);
-        void do_action_after_warning(const cover::CoverCall& call);        
+        void do_action_after_warning(const cover::CoverCall& call);
         void set_pre_close_warning_duration(uint32_t ms) { this->pre_close_duration_ = ms; }
         void set_toggle_only(bool val) { this->toggle_only_ = val; }
         void set_state(gdo_door_state_t state, float position);
@@ -55,9 +55,12 @@ using namespace esphome::cover;
 
         CoverClosingStartTrigger *pre_close_start_trigger{nullptr};
         CoverClosingEndTrigger   *pre_close_end_trigger{nullptr};
-        uint32_t                 pre_close_duration_{0};        
+        uint32_t                 pre_close_duration_{0};
         bool                     pre_close_active_{false};
         bool                     toggle_only_{false};
+        optional<float>          target_position_{0};
+        CoverOperation           prev_operation{COVER_OPERATION_IDLE};
+        gdo_door_state_t         state_{GDO_DOOR_STATE_MAX};
     };
 } // namespace secplus_gdo
 } // namespace esphome

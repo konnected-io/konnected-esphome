@@ -14,11 +14,13 @@ esphome:
           id: device_id
           state: !lambda 'return get_mac_address();'
 
-esp32:  
+esp32:
   board: esp32-s3-devkitc-1
   framework:
     type: esp-idf
     version: recommended
+    sdkconfig_options:
+      CONFIG_LWIP_MAX_SOCKETS: "16"
 
 substitutions:
   status_led_inverted: "false"

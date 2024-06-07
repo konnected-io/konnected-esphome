@@ -89,7 +89,7 @@ substitutions:
   status_led: GPIO18
 
 external_components:
-  - source: github://konnected-io/konnected-esphome@master
+  - source: github://konnected-io/konnected-esphome@door-op-fixes
     components: [ mdns, secplus_gdo ]
 
   # Un-comment below and comment above for local modification
@@ -106,7 +106,7 @@ packages:
 
   remote_package:
     url: https://github.com/konnected-io/konnected-esphome
-    ref: master
+    ref: door-op-fixes
     refresh: 5min
     files:
 
@@ -155,7 +155,7 @@ packages:
 # Enables automatic discovery and upgrades via ESPHome Dashboard
 # more: https://esphome.io/guides/getting_started_hassio.html
 dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/garage-door-GDOv2-Q.yaml@master
+  package_import_url: github://konnected-io/konnected-esphome/garage-door-GDOv2-Q.yaml@door-op-fixes
   import_full_config: false
 
 ####
@@ -193,6 +193,6 @@ web_server:
 esphome:
   platformio_options:
     lib_deps:
-      - https://github.com/konnected-io/gdolib
+      - https://github.com/konnected-io/gdolib#command-delay-rx-fix
     build_flags:
       - -DUART_SCLK_DEFAULT=UART_SCLK_APB
