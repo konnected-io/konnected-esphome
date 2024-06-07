@@ -9,7 +9,7 @@ DEPENDENCIES = ["secplus_gdo"]
 
 GDOSelect = secplus_gdo_ns.class_("GDOSelect", select.Select, cg.Component)
 
-CONF_PROTOCOL_SELECT_OPTIONS = ["auto", "security+1.0", "security+2.0"]
+CONF_PROTOCOL_SELECT_OPTIONS = ["auto", "security+1.0", "security+2.0", "security+1.0 with smart panel"]
 
 CONFIG_SCHEMA = (
     select.select_schema(GDOSelect)
