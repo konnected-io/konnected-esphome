@@ -83,7 +83,6 @@ substitutions:
   # DO NOT EDIT these when using Konnected hardware
   uart_tx_pin: GPIO1
   uart_rx_pin: GPIO2
-  input_obst_pin: GPIO5
   warning_beep_pin: GPIO4
   warning_leds_pin: GPIO3
   status_led: GPIO18
@@ -166,10 +165,10 @@ logger:
   # hardware_uart: UART0  -- uncomment on batch 2403; not needed on batch 2404 and newer
   logs:
     ledc.output: INFO
-    vl53l0x: DEBUG
     sensor: INFO
     json: INFO
     api: DEBUG
+    esp-idf: VERBOSE
 
 ####
 # NATIVE API
