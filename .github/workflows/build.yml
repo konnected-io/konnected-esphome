@@ -164,7 +164,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           
       - run: mkdir -p install-konnected/manifests
-        if: github.event.release  
 
       - name: Build Manifest for Alarm Panel / WiFi
         if: github.event.release  
@@ -207,7 +206,6 @@ jobs:
           MANIFEST_FNAME: esphome-gdov2-q-dev.json
           MANIFEST_VERSION: "${{ steps.garage-door-gdov2-q-version.outputs.data }}"          
           ESP32_S3_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ github.ref_name }}/${{ steps.build-garage-door-gdov2-q.outputs.fname }}
-  
           
       - name: Build Manifest for Alarm Panel Pro v1.x / LAN8720
         if: github.event.release  
