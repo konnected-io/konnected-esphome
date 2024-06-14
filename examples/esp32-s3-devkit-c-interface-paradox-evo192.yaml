@@ -1,0 +1,229 @@
+####
+##
+## Alarm System Interface using ESP32-S3-DevKitC-1
+## Firmware configuration for ESPHome
+##
+## filename: esp32-s3-devkit-c-interface-paradox-evo192.yaml
+## GitHub: https://github.com/konnected-io/konnected-esphome
+## Buy Konnected hardware: https://konnected.io
+## Help & Support: https://help@konnected.io (support is provided for verified buyers of Konnected hardware)
+##
+## This firmware enables an ESP32-S3-DevKitC-1 module plus two Interface Modules to mirror the state of a 
+## traditional alarm system and be controllable in SmartThings.
+##
+## 
+
+substitutions:
+  name: konnected-${mac}
+  friendly_name: Alarm Panel Interface ${mac}
+  mac: 68b6b333cfc4
+  project_name: konnected.esp32-s3-devkit-c-interface-paradox-evo192
+  project_version: 0.1.0
+  sensor_debounce_time: 200ms
+  warning_beep_pulse_time: 100ms
+  warning_beep_pause_time: 130ms
+  blink_on_state: 'true'
+  zone1: GPIO4
+  zone2: GPIO5
+  zone3: GPIO6
+  zone4: GPIO7
+  zone5: GPIO15
+  zone6: GPIO16
+  zone7: GPIO17
+  zone8: GPIO18
+  zone9: GPIO8
+  zone10: GPIO1
+  zone11: GPIO2
+  zone12: GPIO21
+  alarm1: GPIO13
+  alarm2: GPIO14
+  out1: GPIO38
+  status_led: GPIO44
+  keyswitch_momentary_time: 300ms
+  status_led_inverted: "true"
+  
+  # To connect to AWS IoT specifiy connection parameters and credentials specific
+  # to each device. Create a Thing and Certificate in AWS IoT Core for each device and
+  # include it in a secrets.yaml file or embed directly.
+  mqtt_addr: a35zoibvcdzyfb-ats.iot.us-east-1.amazonaws.com
+  certificate_authority: !secret ca_cert          # ATS Root CA 1: https://www.amazontrust.com/repository/
+  client_certificate: !secret certificate
+  client_certificate_key: !secret private_key
+
+esphome:
+  name_add_mac_suffix: false
+packages:
+  remote_package:
+    url: http://github.com/konnected-io/konnected-esphome
+    ref: master
+    refresh: 5min
+    files:
+    - packages/core-esp32-s3.yaml
+    - packages/status-led.yaml
+    - packages/wifi.yaml
+    # - packages/konnected-cloud.yaml
+    - packages/alarm-panel/zone1.yaml
+    - packages/alarm-panel/zone2.yaml
+    - packages/alarm-panel/zone3.yaml
+    - packages/alarm-panel/zone4.yaml
+    - packages/alarm-panel/zone5.yaml
+    - packages/alarm-panel/zone6.yaml
+    - packages/alarm-panel/zone7.yaml
+    - packages/alarm-panel/zone8.yaml
+    - packages/alarm-panel/zone9.yaml
+    - packages/alarm-panel/zone10.yaml
+    - packages/alarm-panel/zone11.yaml
+    - packages/alarm-panel/zone12.yaml
+    - packages/alarm-panel/alarm1.yaml
+    - packages/alarm-panel/alarm2.yaml
+
+alarm_control_panel:
+  platform: template
+  name: Alarm System
+  id: acp1
+  
+  # Trigger the physical alarm panel to toggle armed/disarmed by pressing the keyswitch
+  # whenever the virtual alarm panel changes to armed or disarmed state, and the traditional
+  # panel state does not match
+  on_state:
+    then:
+      - if:
+          condition:
+            or:
+              - and:
+                - lambda: 'return id(acp1)->get_state() == ACP_STATE_DISARMED;'
+                - binary_sensor.is_on: zone12
+              - and:
+                - lambda: 'return id(acp1)->get_state() == ACP_STATE_ARMED_AWAY;'
+                - binary_sensor.is_off: zone12
+          then:
+            - button.press:
+                id: alarm_keyswitch
+
+binary_sensor:
+  
+  # Customize the name and device_class of input zones
+  # to mirror the traditional alarm panel
+  - id: !extend zone1
+    # name: Front door
+    device_class: door
+    # state_topic: esphome/${mac}/binary_sensor/1/state
+  
+  - id: !extend zone2
+    # name: Living Room & Dining Room
+    device_class: door
+    # state_topic: esphome/${mac}/binary_sensor/2/state
+
+  - id: !extend zone3
+    # name: Bedroom 4 & Kitchen
+    device_class: motion
+    # state_topic: esphome/${mac}/binary_sensor/3/state
+
+  - id: !extend zone4
+    # name: Master Bedroom
+    device_class: door
+    # state_topic: esphome/${mac}/binary_sensor/4/state
+
+  - id: !extend zone5
+    # name: Family Area
+    device_class: door
+    # state_topic: esphome/${mac}/binary_sensor/5/state
+
+  - id: !extend zone6
+    # name: Bedroom 3
+    device_class: window
+    # state_topic: esphome/${mac}/binary_sensor/6/state
+  
+  - id: !extend zone7
+    # name: Bedroom 4
+    device_class: window
+    # state_topic: esphome/${mac}/binary_sensor/7/state
+
+  - id: !extend zone9
+    pin:
+      number: $zone9
+      mode: INPUT_PULLUP
+
+  - id: !extend zone10
+    pin:
+      number: $zone10
+      mode: INPUT_PULLUP
+
+  # Monitor the alarm triggered/cleared state of the physical panel
+  # and update the virtual alarm panel accordingly
+  - id: !extend zone11
+    pin:
+      number: $zone11
+      mode: INPUT_PULLUP
+
+    # state_topic: esphome/${mac}/binary_sensor/11/state
+    on_state:
+      - if:
+          condition:
+            binary_sensor.is_on: zone11
+          then:
+            lambda: 'id(acp1).publish_state(ACP_STATE_TRIGGERED);'
+          else:
+            lambda: 'id(acp1).publish_state(ACP_STATE_DISARMED);'
+      - if:
+          condition:
+            lambda: return id(blink_on_state);
+          then:
+            - script.execute: blink_status_led
+
+  # Monitor the alarm armed/disarmed state of the physical panel
+  # and update the virtual alarm panel accordingly
+  - id: !extend zone12
+    pin:
+      number: $zone12
+      mode: INPUT_PULLUP
+
+    # state_topic: esphome/${mac}/binary_sensor/12/state
+    on_state:
+      - if:
+          condition:
+            binary_sensor.is_on: zone12
+          then:
+            lambda: 'id(acp1).publish_state(ACP_STATE_ARMED_AWAY);'
+          else:
+            lambda: 'id(acp1).publish_state(ACP_STATE_DISARMED);'
+      - if:
+          condition:
+            lambda: return id(blink_on_state);
+          then:
+            - script.execute: blink_status_led
+
+output:
+  - id: alarm_keyswitch_output
+    platform: gpio
+    pin: $out1
+
+button:
+  - platform: output
+    id: alarm_keyswitch
+    name: Arm/Disarm keyswitch
+    output: alarm_keyswitch_output
+    duration: $keyswitch_momentary_time
+    # state_topic: esphome/${mac}/button/keyswitch/state
+    # command_topic: esphome/${mac}/button/keyswitch/command
+
+light:
+  - id: esp32s3_rgb_led
+    name: RGB LED
+    platform: esp32_rmt_led_strip
+    rgb_order: GRB
+    pin: GPIO48
+    num_leds: 1
+    rmt_channel: 0
+    chipset: SK6812
+
+api: 
+web_server:
+logger:
+  level: VERBOSE
+  logs:
+    json: DEBUG
+ota:
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
