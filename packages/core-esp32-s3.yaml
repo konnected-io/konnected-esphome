@@ -43,7 +43,7 @@ text_sensor:
 sensor:
   - platform: uptime
     name: Uptime
-    id: uptime
+    id: uptime_sensor
     entity_category: diagnostic
 
 button:
