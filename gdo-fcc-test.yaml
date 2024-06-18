@@ -219,6 +219,7 @@ api:
           rtttl: !lambda 'return song_str;'
 
 ota:
+  - platform: esphome
 
 improv_serial:
 

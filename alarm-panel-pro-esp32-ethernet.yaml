@@ -158,3 +158,4 @@ api:
 # Enables over-the-air updates
 # more: https://esphome.io/components/ota.html
 ota:
+  - platform: esphome
