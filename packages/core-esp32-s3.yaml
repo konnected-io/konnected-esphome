@@ -51,3 +51,11 @@ button:
     name: Restart
     id: restart_button
     entity_category: config
+
+#### 
+# OTA UPDATES
+# Enables over-the-air updates
+# more: https://esphome.io/components/ota.html
+ota:
+  - platform: esphome
+

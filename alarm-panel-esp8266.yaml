@@ -134,10 +134,3 @@ logger:
 # Enables the native API for Home Assistant
 # more: https://esphome.io/components/api.html
 api:
-
-#### 
-# OTA UPDATES
-# Enables over-the-air updates
-# more: https://esphome.io/components/ota.html
-ota:
-  - platform: esphome

@@ -426,10 +426,3 @@ api:
             else:
               - state_machine.transition: failed_code
 
-
-#### 
-# OTA UPDATES
-# Enables over-the-air updates
-# more: https://esphome.io/components/ota.html
-ota:
-  - platform: esphome

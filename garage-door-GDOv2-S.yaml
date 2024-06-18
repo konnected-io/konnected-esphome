@@ -161,7 +161,7 @@ packages:
       # WIFI
       # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
       # wifi: !include packages/wifi.yaml
-      - packages/wifi.yaml
+      - packages/wifi-esp32.yaml
 
       ####
       # PRE-CLOSE WARNING
@@ -207,15 +207,6 @@ logger:
 # Enables the native ESPHome API
 # more: https://esphome.io/components/api.html
 api:
-
-#### 
-# OTA UPDATES
-# Enables over-the-air updates
-# more: https://esphome.io/components/ota.html
-ota:
-  - platform: esphome
-  
-improv_serial:
 
 esp32_improv:
   authorizer: false
