@@ -1,7 +1,4 @@
 wifi:
-  on_connect:
-    lambda: id(gdo_blaq).start_gdo();
-
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
 
