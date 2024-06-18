@@ -33,6 +33,8 @@ namespace secplus_gdo {
         void loop() override {};
         void dump_config() override;
         void on_shutdown() override { gdo_deinit(); }
+        void start_gdo() { start_gdo_ = true; }
+
         // Use Late priority so we do not start the GDO lib until all saved preferences are loaded
         float get_setup_priority() const override { return setup_priority::LATE; }
 
@@ -103,6 +105,7 @@ namespace secplus_gdo {
         GDOSelect*                                   protocol_select_{nullptr};
         GDOSwitch*                                   learn_switch_{nullptr};
         GDOSwitch*                                   toggle_only_switch_{nullptr};
+        bool                                         start_gdo_{false};
 
     }; // GDOComponent
 } // namespace secplus_gdo
