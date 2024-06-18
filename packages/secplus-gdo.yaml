@@ -152,3 +152,7 @@ number:
     type: rolling_code
     mode: box
     internal: true
+
+wifi:
+  on_connect:
+    lambda: id(gdo_blaq).start_gdo();

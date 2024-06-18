@@ -133,8 +133,20 @@ namespace secplus_gdo {
 
         gdo_init(&gdo_conf);
         gdo_get_status(&this->status_);
-        gdo_start(gdo_event_handler, this);
-        ESP_LOGI(TAG, "secplus GDO started!");
+        if (this->start_gdo_) {
+            gdo_start(gdo_event_handler, this);
+            ESP_LOGI(TAG, "secplus GDO started!");
+        } else {
+            // check every 500ms for readiness before starting GDO
+            this->set_interval("gdo_start", 500, [=]() {
+                if (this->start_gdo_) {
+                    gdo_start(gdo_event_handler, this);
+                    ESP_LOGI(TAG, "secplus GDO started!");
+                    this->cancel_interval("gdo_start");
+                }
+            });
+
+        }
     }
 
     void GDOComponent::dump_config() {
