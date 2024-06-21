@@ -58,4 +58,5 @@ button:
 # more: https://esphome.io/components/ota.html
 ota:
   - platform: esphome
+    id: konnected_ota
 
