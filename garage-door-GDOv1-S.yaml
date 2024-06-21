@@ -53,7 +53,7 @@ substitutions:
   name: konnected
   friendly_name: Garage Door Opener
   project_name: konnected.garage-door-gdov1-s
-  project_version: "1.2.1"
+  project_version: "1.2.2"
   garage_door_cover_name: Garage Door
   switch_name: Switch
   warning_beep_name: Warning Beep
