@@ -38,6 +38,12 @@ class GDOLight : public binary::BinaryLightOutput, public Component {
         }
 
         void set_state(gdo_light_state_t state) {
+            if (state == this->light_state_) {
+                return;
+            }
+
+            this->light_state_ = state;
+            ESP_LOGI(TAG, "Light state: %s", gdo_light_state_to_string(state));
             bool is_on = state == GDO_LIGHT_STATE_ON;
             this->state_->current_values.set_state(is_on);
             this->state_->remote_values.set_state(is_on);
@@ -46,6 +52,8 @@ class GDOLight : public binary::BinaryLightOutput, public Component {
 
     private:
         light::LightState *state_{nullptr};
+        gdo_light_state_t light_state_{GDO_LIGHT_STATE_MAX};
+        static constexpr auto TAG{"GDOLight"};
     }; // GDOLight
 } // namespace secplus_gdo
 } // namespace esphome
