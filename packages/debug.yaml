@@ -1,0 +1,12 @@
+debug:
+  update_interval: 30s
+
+text_sensor:
+  - platform: debug
+    reset_reason:
+      name: "Reboot Reason"
+
+sensor:
+  - platform: debug
+    free:
+      name: "Heap Free"

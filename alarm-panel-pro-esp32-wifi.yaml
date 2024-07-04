@@ -93,7 +93,7 @@ packages:
       ####
       # WIFI
       # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
-      - packages/wifi.yaml
+      - packages/wifi-esp32.yaml
 
       ####
       # STATUS LED
