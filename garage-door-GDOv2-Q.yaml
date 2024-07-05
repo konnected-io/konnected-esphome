@@ -57,7 +57,7 @@ substitutions:
   name: konnected
   friendly_name: GDO blaQ
   project_name: konnected.garage-door-gdov2-q
-  project_version: "1.2.4"
+  project_version: "1.2.5"
   garage_door_cover_name: Garage Door
   garage_light_name: Garage Light
   garage_openings_name: Garage Openings
@@ -143,11 +143,7 @@ packages:
       # SECPLUS GDO
       # The logic and capabilities of the GDO communication
       - packages/secplus-gdo.yaml
-
-      ####
-      # SELF-TEST
-      # Self test script used to validate the hardware post-assembly
-      # - packages/gdo-self-test.yaml
+      - packages/debug.yaml
 
 ####
 # DASHBOARD IMPORT
@@ -161,13 +157,22 @@ dashboard_import:
 # LOGGER
 # more: https://esphome.io/components/logger.html
 logger:
-  level: VERBOSE
-  # hardware_uart: UART0  -- uncomment on batch 2403; not needed on batch 2404 and newer
+  level: VERY_VERBOSE
+  # hardware_uart: UART0 # -- uncomment on batch 2403; not needed on batch 2404 and newer
   logs:
+    esp-idf: VERBOSE
+    api: VERBOSE
+    api.service: DEBUG
+    esp32_ble: DEBUG
+    esp32_ble_server: DEBUG
+    scheduler: DEBUG
+    esp32.preferences: DEBUG
+    sensor.filter: DEBUG
+    rtttl: DEBUG
+    cover: DEBUG
+    sensor: DEBUG
     ledc.output: INFO
-    sensor: INFO
     json: INFO
-    api: DEBUG
 
 ####
 # NATIVE API
@@ -180,6 +185,6 @@ web_server:
 esphome:
   platformio_options:
     lib_deps:
-      - https://github.com/konnected-io/gdolib
+      - https://github.com/konnected-io/gdolib#4e6f493
     build_flags:
       - -DUART_SCLK_DEFAULT=UART_SCLK_APB

@@ -112,9 +112,11 @@ button:
     on_press:
       - number.increment:
           id: gdo_client_id
+      - number.set:
+          id: gdo_rolling_code
+          value: 0
       - button.press:
           id: restart_button
-
 
 number:
   - platform: secplus_gdo
