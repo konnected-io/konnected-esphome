@@ -39,6 +39,10 @@ namespace secplus_gdo {
         }
 
         void control(const lock::LockCall& call) override {
+            if (!this->synced_) {
+                return;
+            }
+
             auto state = *call.get_state();
 
             if (state == lock::LockState::LOCK_STATE_LOCKED) {
@@ -48,8 +52,13 @@ namespace secplus_gdo {
             }
         }
 
+        void set_sync_state(bool synced) {
+            this->synced_ = synced;
+        }
+
         private:
         gdo_lock_state_t lock_state_{GDO_LOCK_STATE_MAX};
+        bool synced_{false};
         static constexpr const char* TAG = "GDOLock";
     };
 

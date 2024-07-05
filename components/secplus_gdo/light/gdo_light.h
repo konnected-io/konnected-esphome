@@ -29,6 +29,10 @@ class GDOLight : public binary::BinaryLightOutput, public Component {
         void setup_state(light::LightState *state) override { this->state_ = state; }
 
         void write_state(light::LightState *state) override {
+            if (!this->synced_) {
+                return;
+            }
+
             bool binary;
             state->current_values_as_binary(&binary);
             if (binary)
@@ -50,10 +54,15 @@ class GDOLight : public binary::BinaryLightOutput, public Component {
             this->state_->publish_state();
         }
 
+        void set_sync_state(bool synced) {
+            this->synced_ = synced;
+        }
+
     private:
         light::LightState *state_{nullptr};
         gdo_light_state_t light_state_{GDO_LIGHT_STATE_MAX};
         static constexpr auto TAG{"GDOLight"};
+        bool synced_{false};
     }; // GDOLight
 } // namespace secplus_gdo
 } // namespace esphome

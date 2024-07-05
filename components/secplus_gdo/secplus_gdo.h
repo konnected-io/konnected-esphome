@@ -90,6 +90,8 @@ namespace secplus_gdo {
 
         void register_toggle_only(GDOSwitch *sw) { this->toggle_only_switch_ = sw; }
 
+        void set_sync_state(bool synced);
+
     protected:
         gdo_status_t                                 status_{};
         std::function<void(uint16_t)>                f_openings{nullptr};

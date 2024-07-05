@@ -147,6 +147,11 @@ void GDODoor::do_action(const cover::CoverCall& call) {
 }
 
 void GDODoor::control(const cover::CoverCall& call) {
+    if (!this->synced_) {
+        this->publish_state(false);
+        return;
+    }
+
     if (call.get_stop()) {
         ESP_LOGD(TAG, "Stop command received");
         if (this->pre_close_active_) {

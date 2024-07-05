@@ -47,6 +47,7 @@ namespace secplus_gdo {
                 gdo->set_protocol_state(status->protocol);
             }
 
+            gdo->set_sync_state(status->synced);
             break;
         case GDO_CB_EVENT_LIGHT:
             gdo->set_light_state(status->light);
@@ -146,6 +147,20 @@ namespace secplus_gdo {
 
     void GDOComponent::dump_config() {
         ESP_LOGCONFIG(TAG, "Setting up secplus GDO ...");
+    }
+
+    void GDOComponent::set_sync_state(bool synced) {
+        if (this->door_) {
+            this->door_->set_sync_state(synced);
+        }
+
+        if (this->light_) {
+            this->light_->set_sync_state(synced);
+        }
+
+        if (this->lock_) {
+            this->lock_->set_sync_state(synced);
+        }
     }
 
 } // namespace secplus_gdo
