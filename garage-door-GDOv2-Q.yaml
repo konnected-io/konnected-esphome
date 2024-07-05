@@ -143,6 +143,11 @@ packages:
       # SECPLUS GDO
       # The logic and capabilities of the GDO communication
       - packages/secplus-gdo.yaml
+
+      ####
+      # SELF-TEST
+      # Self test script used to validate the hardware post-assembly
+      # - packages/gdo-self-test.yaml
       - packages/debug.yaml
 
 ####
