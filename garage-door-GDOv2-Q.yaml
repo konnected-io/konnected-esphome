@@ -66,6 +66,7 @@ substitutions:
   garage_obstruction_name: Obstruction
   garage_motor_name: Motor
   garage_button_name: Wall Button
+  garage_sync_name: Synced
 
 
   ####
@@ -88,13 +89,13 @@ substitutions:
   status_led: GPIO18
 
 external_components:
-  #- source: github://konnected-io/konnected-esphome@master
-  #  components: [ mdns, secplus_gdo ]
+  - source: github://konnected-io/konnected-esphome@master
+    components: [ mdns, secplus_gdo ]
 
   # Un-comment below and comment above for local modification
-  - source:
-      type: local
-      path: components
+  # - source:
+  #     type: local
+  #     path: components
   #   components: [ secplus_gdo ]
 
 ####
@@ -143,11 +144,6 @@ packages:
       # SECPLUS GDO
       # The logic and capabilities of the GDO communication
       - packages/secplus-gdo.yaml
-
-      ####
-      # SELF-TEST
-      # Self test script used to validate the hardware post-assembly
-      # - packages/gdo-self-test.yaml
       - packages/debug.yaml
 
 ####
