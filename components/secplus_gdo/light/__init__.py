@@ -41,5 +41,4 @@ async def to_code(config):
     await cg.register_component(var, config)
     await light.register_light(var, config)
     parent = await cg.get_variable(config[CONF_SECPLUS_GDO_ID])
-    text = "std::bind(&" + str(GDOLight) + "::set_state," + str(config[CONF_OUTPUT_ID]) + ",std::placeholders::_1)"
-    cg.add(parent.register_light(cg.RawExpression(text)))
+    cg.add(parent.register_light(var))

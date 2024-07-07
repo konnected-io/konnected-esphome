@@ -88,13 +88,13 @@ substitutions:
   status_led: GPIO18
 
 external_components:
-  - source: github://konnected-io/konnected-esphome@master
-    components: [ mdns, secplus_gdo ]
+  #- source: github://konnected-io/konnected-esphome@master
+  #  components: [ mdns, secplus_gdo ]
 
   # Un-comment below and comment above for local modification
-  # - source:
-  #     type: local
-  #     path: components
+  - source:
+      type: local
+      path: components
   #   components: [ secplus_gdo ]
 
 ####
@@ -185,6 +185,6 @@ web_server:
 esphome:
   platformio_options:
     lib_deps:
-      - https://github.com/konnected-io/gdolib#4e6f493
+      - https://github.com/konnected-io/gdolib#dev
     build_flags:
       - -DUART_SCLK_DEFAULT=UART_SCLK_APB

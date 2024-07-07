@@ -49,18 +49,13 @@ namespace secplus_gdo {
 
             break;
         case GDO_CB_EVENT_LIGHT:
-            ESP_LOGI(TAG, "Light: %s", gdo_light_state_to_string(status->light));
             gdo->set_light_state(status->light);
             break;
         case GDO_CB_EVENT_LOCK:
-            ESP_LOGI(TAG, "Lock: %s", gdo_lock_state_to_string(status->lock));
             gdo->set_lock_state(status->lock);
             break;
         case GDO_CB_EVENT_DOOR_POSITION: {
             float position = (float)(10000 - status->door_position)/10000.0f;
-            float target = (float)(10000 - status->door_target)/10000.0f;
-            ESP_LOGI(TAG, "Door: %s, %.0f%%, target: %.0f%%", gdo_door_state_to_string(status->door),
-                     position*100, target*100);
             gdo->set_door_state(status->door, position);
             if (status->door != GDO_DOOR_STATE_OPENING && status->door != GDO_DOOR_STATE_CLOSING) {
                 gdo->set_motor_state(GDO_MOTOR_STATE_OFF);
@@ -68,7 +63,7 @@ namespace secplus_gdo {
             break;
         }
         case GDO_CB_EVENT_LEARN:
-            ESP_LOGI(TAG, "Learn: %s", gdo_learn_state_to_string(status->learn));
+            //ESP_LOGI(TAG, "Learn: %s", gdo_learn_state_to_string(status->learn));
             break;
         case GDO_CB_EVENT_OBSTRUCTION:
             ESP_LOGI(TAG, "Obstruction: %s", gdo_obstruction_state_to_string(status->obstruction));
