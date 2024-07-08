@@ -9,4 +9,5 @@ text_sensor:
 sensor:
   - platform: debug
     free:
+      id: heap_free
       name: "Heap Free"
