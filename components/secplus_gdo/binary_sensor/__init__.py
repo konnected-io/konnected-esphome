@@ -36,6 +36,7 @@ TYPES = {
     "obstruction": "register_obstruction",
     "motor": "register_motor",
     "button": "register_button",
+    "sync": "register_sync",
 }
 
 

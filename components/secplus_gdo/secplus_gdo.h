@@ -23,6 +23,8 @@
 #include "select/gdo_select.h"
 #include "switch/gdo_switch.h"
 #include "cover/gdo_door.h"
+#include "light/gdo_light.h"
+#include "lock/gdo_lock.h"
 #include "gdo.h"
 
 namespace esphome {
@@ -57,17 +59,19 @@ namespace secplus_gdo {
         void register_motor(std::function<void(bool)> f) { f_motor = f; }
         void set_motor_state(gdo_motor_state_t state) { if (f_motor) { f_motor(state == GDO_MOTOR_STATE_ON); } }
 
+        void register_sync(std::function<void(bool)> f) { f_sync = f; }
+
         void register_openings(std::function<void(uint16_t)> f) { f_openings = f; }
         void set_openings(uint16_t openings) { if (f_openings) { f_openings(openings); } }
 
         void register_door(GDODoor *door) { this->door_ = door; }
         void set_door_state(gdo_door_state_t state, float position) { if (this->door_) { this->door_->set_state(state, position); } }
 
-        void register_light(std::function<void(gdo_light_state_t)> f) { f_light = f; }
-        void set_light_state(gdo_light_state_t state) { if (f_light) { f_light(state); } }
+        void register_light(GDOLight *light) { this->light_ = light; }
+        void set_light_state(gdo_light_state_t state) { if (this->light_) { this->light_->set_state(state); } }
 
-        void register_lock(std::function<void(gdo_lock_state_t)> f) { f_lock = f; }
-        void set_lock_state(gdo_lock_state_t state) { if (f_lock) { f_lock(state); } }
+        void register_lock(GDOLock *lock) { this->lock_ = lock; }
+        void set_lock_state(gdo_lock_state_t state) { if (this->lock_) { this->lock_->set_state(state); } }
 
         void register_learn(GDOSwitch *sw) { this->learn_switch_ = sw; }
         void set_learn_state(gdo_learn_state_t state) { if (this->learn_switch_) {
@@ -88,16 +92,19 @@ namespace secplus_gdo {
 
         void register_toggle_only(GDOSwitch *sw) { this->toggle_only_switch_ = sw; }
 
+        void set_sync_state(bool synced);
+
     protected:
         gdo_status_t                                 status_{};
-        std::function<void(gdo_lock_state_t)>        f_lock{nullptr};
-        std::function<void(gdo_light_state_t)>       f_light{nullptr};
         std::function<void(uint16_t)>                f_openings{nullptr};
         std::function<void(bool)>                    f_motion{nullptr};
         std::function<void(bool)>                    f_obstruction{nullptr};
         std::function<void(bool)>                    f_button{nullptr};
         std::function<void(bool)>                    f_motor{nullptr};
+        std::function<void(bool)>                    f_sync{nullptr};
         GDODoor*                                     door_{nullptr};
+        GDOLight*                                    light_{nullptr};
+        GDOLock*                                     lock_{nullptr};
         GDONumber*                                   open_duration_{nullptr};
         GDONumber*                                   close_duration_{nullptr};
         GDONumber*                                   client_id_{nullptr};

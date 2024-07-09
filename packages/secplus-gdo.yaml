@@ -66,6 +66,12 @@ binary_sensor:
     id: gdo_button
     secplus_gdo_id: gdo_blaq
     type: button
+  - platform: secplus_gdo
+    name: $garage_sync_name
+    id: gdo_synced
+    secplus_gdo_id: gdo_blaq
+    type: sync
+    device_class: connectivity
 
 switch:
   - platform: secplus_gdo
