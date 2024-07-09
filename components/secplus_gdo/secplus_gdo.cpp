@@ -32,8 +32,11 @@ namespace secplus_gdo {
             ESP_LOGI(TAG, "Synced: %s, protocol: %s", status->synced ? "true" : "false", gdo_protocol_type_to_string(status->protocol));
             if (status->protocol == GDO_PROTOCOL_SEC_PLUS_V2) {
                 ESP_LOGI(TAG, "Client ID: %" PRIu32 ", Rolling code: %" PRIu32, status->client_id, status->rolling_code);
-                gdo->set_client_id(status->client_id);
-                gdo->set_rolling_code(status->rolling_code);
+                if (status->synced) {
+                    // Save the last successful ClientID rolling code value to NVS for use on reboot
+                    gdo->set_client_id(status->client_id);
+                    gdo->set_rolling_code(status->rolling_code);
+                }
             }
 
             if (!status->synced) {
@@ -47,20 +50,16 @@ namespace secplus_gdo {
                 gdo->set_protocol_state(status->protocol);
             }
 
+            gdo->set_sync_state(status->synced);
             break;
         case GDO_CB_EVENT_LIGHT:
-            ESP_LOGI(TAG, "Light: %s", gdo_light_state_to_string(status->light));
             gdo->set_light_state(status->light);
             break;
         case GDO_CB_EVENT_LOCK:
-            ESP_LOGI(TAG, "Lock: %s", gdo_lock_state_to_string(status->lock));
             gdo->set_lock_state(status->lock);
             break;
         case GDO_CB_EVENT_DOOR_POSITION: {
             float position = (float)(10000 - status->door_position)/10000.0f;
-            float target = (float)(10000 - status->door_target)/10000.0f;
-            ESP_LOGI(TAG, "Door: %s, %.0f%%, target: %.0f%%", gdo_door_state_to_string(status->door),
-                     position*100, target*100);
             gdo->set_door_state(status->door, position);
             if (status->door != GDO_DOOR_STATE_OPENING && status->door != GDO_DOOR_STATE_CLOSING) {
                 gdo->set_motor_state(GDO_MOTOR_STATE_OFF);
@@ -68,7 +67,7 @@ namespace secplus_gdo {
             break;
         }
         case GDO_CB_EVENT_LEARN:
-            ESP_LOGI(TAG, "Learn: %s", gdo_learn_state_to_string(status->learn));
+            //ESP_LOGI(TAG, "Learn: %s", gdo_learn_state_to_string(status->learn));
             break;
         case GDO_CB_EVENT_OBSTRUCTION:
             ESP_LOGI(TAG, "Obstruction: %s", gdo_obstruction_state_to_string(status->obstruction));
@@ -151,6 +150,24 @@ namespace secplus_gdo {
 
     void GDOComponent::dump_config() {
         ESP_LOGCONFIG(TAG, "Setting up secplus GDO ...");
+    }
+
+    void GDOComponent::set_sync_state(bool synced) {
+        if (this->door_) {
+            this->door_->set_sync_state(synced);
+        }
+
+        if (this->light_) {
+            this->light_->set_sync_state(synced);
+        }
+
+        if (this->lock_) {
+            this->lock_->set_sync_state(synced);
+        }
+
+        if (this->f_sync) {
+            this->f_sync(synced);
+        }
     }
 
 } // namespace secplus_gdo

@@ -23,6 +23,12 @@ void GDODoor::set_state(gdo_door_state_t state, float position) {
         }
     }
 
+    if (this->state_ == state && this->position == position) {
+        return;
+    }
+
+    ESP_LOGI(TAG, "Door state: %s, position: %.0f%%", gdo_door_state_to_string(state), position * 100.0f);
+
     switch (state) {
     case GDO_DOOR_STATE_OPEN:
         this->position = COVER_OPEN;
@@ -141,6 +147,11 @@ void GDODoor::do_action(const cover::CoverCall& call) {
 }
 
 void GDODoor::control(const cover::CoverCall& call) {
+    if (!this->synced_) {
+        this->publish_state(false);
+        return;
+    }
+
     if (call.get_stop()) {
         ESP_LOGD(TAG, "Stop command received");
         if (this->pre_close_active_) {

@@ -66,6 +66,7 @@ substitutions:
   garage_obstruction_name: Obstruction
   garage_motor_name: Motor
   garage_button_name: Wall Button
+  garage_sync_name: Synced
 
 
   ####
@@ -185,6 +186,6 @@ web_server:
 esphome:
   platformio_options:
     lib_deps:
-      - https://github.com/konnected-io/gdolib#4e6f493
+      - https://github.com/konnected-io/gdolib#dev
     build_flags:
       - -DUART_SCLK_DEFAULT=UART_SCLK_APB

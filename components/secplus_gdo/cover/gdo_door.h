@@ -44,6 +44,10 @@ using namespace esphome::cover;
             this->pre_close_end_trigger = trigger;
         }
 
+        void set_sync_state(bool synced) {
+            this->synced_ = synced;
+        }
+
         void do_action(const cover::CoverCall& call);
         void do_action_after_warning(const cover::CoverCall& call);
         void set_pre_close_warning_duration(uint32_t ms) { this->pre_close_duration_ = ms; }
@@ -61,6 +65,7 @@ using namespace esphome::cover;
         optional<float>          target_position_{0};
         CoverOperation           prev_operation{COVER_OPERATION_IDLE};
         gdo_door_state_t         state_{GDO_DOOR_STATE_MAX};
+        bool                     synced_{false};
     };
 } // namespace secplus_gdo
 } // namespace esphome
