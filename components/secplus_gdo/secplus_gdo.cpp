@@ -20,6 +20,10 @@
 #include "esphome/core/log.h"
 #include "inttypes.h"
 
+extern "C" void esp_task_wdt_isr_user_handler(void) {
+    gdo_deinit();
+}
+
 namespace esphome {
 namespace secplus_gdo {
 
