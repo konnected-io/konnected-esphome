@@ -170,5 +170,10 @@ namespace secplus_gdo {
         }
     }
 
+    void GDOComponent::zero_state() {
+        gpio_reset_pin((gpio_num_t)GDO_UART_TX_PIN);
+        gpio_reset_pin((gpio_num_t)GDO_UART_RX_PIN);
+    }
+
 } // namespace secplus_gdo
 } // namespace esphome

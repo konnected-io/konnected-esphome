@@ -89,7 +89,7 @@ substitutions:
   status_led: GPIO18
 
 external_components:
-  - source: github://konnected-io/konnected-esphome@master
+  - source: github://konnected-io/konnected-esphome@zero-state
     components: [ mdns, secplus_gdo ]
 
   # Un-comment below and comment above for local modification
@@ -184,6 +184,10 @@ api:
 web_server:
 
 esphome:
+  on_boot:
+    priority: 1001
+    then:
+      - lambda: id(gdo_blaq).zero_state();
   platformio_options:
     lib_deps:
       - https://github.com/konnected-io/gdolib#76ba232

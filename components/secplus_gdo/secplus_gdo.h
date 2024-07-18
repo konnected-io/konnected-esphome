@@ -36,6 +36,7 @@ namespace secplus_gdo {
         void dump_config() override;
         void on_shutdown() override { gdo_deinit(); }
         void start_gdo() { start_gdo_ = true; }
+        void zero_state();
 
         // Use Late priority so we do not start the GDO lib until all saved preferences are loaded
         float get_setup_priority() const override { return setup_priority::LATE; }
