@@ -19,6 +19,7 @@
 #include "esphome/core/application.h"
 #include "esphome/core/log.h"
 #include "inttypes.h"
+#include "esp_task_wdt.h"
 
 extern "C" void esp_task_wdt_isr_user_handler(void) {
     gdo_deinit();
@@ -120,6 +121,16 @@ namespace secplus_gdo {
     }
 
     void GDOComponent::setup() {
+#if ESP_IDF_VERSION_MAJOR >= 5
+        esp_task_wdt_config_t wdt_config = {
+            .timeout_ms = 15000,
+            .idle_core_mask = 0x03,
+            .trigger_panic = true,
+        };
+        esp_task_wdt_reconfigure(&wdt_config);
+#else
+        esp_task_wdt_init(15, true);
+#endif
         // Set the toggle only state and control here because we cannot guarantee the cover instance was created before the switch
         this->door_->set_toggle_only(this->toggle_only_switch_->state);
         this->toggle_only_switch_->set_control_function(std::bind(&esphome::secplus_gdo::GDODoor::set_toggle_only,
