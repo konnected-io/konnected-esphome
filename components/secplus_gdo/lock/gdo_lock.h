@@ -39,6 +39,7 @@ namespace secplus_gdo {
         }
 
         void control(const lock::LockCall& call) override {
+            abort();
             if (!this->synced_) {
                 return;
             }
