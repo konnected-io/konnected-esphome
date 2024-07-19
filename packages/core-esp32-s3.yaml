@@ -21,6 +21,8 @@ esp32:
     version: recommended
     sdkconfig_options:
       CONFIG_LWIP_MAX_SOCKETS: "16"
+      CONFIG_ESP_SYSTEM_PANIC_SILENT_REBOOT: y
+      CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT: n
 
 substitutions:
   status_led_inverted: "false"
