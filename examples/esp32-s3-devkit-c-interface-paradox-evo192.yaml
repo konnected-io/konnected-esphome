@@ -14,9 +14,9 @@
 ## 
 
 substitutions:
-  name: konnected-${mac}
-  friendly_name: Alarm Panel Interface ${mac}
-  mac: 68b6b333cfc4
+  name: konnected
+  friendly_name: Alarm Panel Interface
+  # mac: 68b6b333cfc4
   project_name: konnected.esp32-s3-devkit-c-interface-paradox-evo192
   project_version: 0.1.0
   sensor_debounce_time: 200ms
@@ -45,13 +45,14 @@ substitutions:
   # To connect to AWS IoT specifiy connection parameters and credentials specific
   # to each device. Create a Thing and Certificate in AWS IoT Core for each device and
   # include it in a secrets.yaml file or embed directly.
-  mqtt_addr: a35zoibvcdzyfb-ats.iot.us-east-1.amazonaws.com
-  certificate_authority: !secret ca_cert          # ATS Root CA 1: https://www.amazontrust.com/repository/
-  client_certificate: !secret certificate
-  client_certificate_key: !secret private_key
+
+  # mqtt_addr: a35zoibvcdzyfb-ats.iot.us-east-1.amazonaws.com
+  # certificate_authority: !secret ca_cert          # ATS Root CA 1: https://www.amazontrust.com/repository/
+  # client_certificate: !secret certificate
+  # client_certificate_key: !secret private_key
 
 esphome:
-  name_add_mac_suffix: false
+  name_add_mac_suffix: true
 packages:
   remote_package:
     url: http://github.com/konnected-io/konnected-esphome
@@ -105,37 +106,37 @@ binary_sensor:
   # Customize the name and device_class of input zones
   # to mirror the traditional alarm panel
   - id: !extend zone1
-    # name: Front door
+    name: Front door
     device_class: door
     # state_topic: esphome/${mac}/binary_sensor/1/state
   
   - id: !extend zone2
-    # name: Living Room & Dining Room
+    name: Living Room & Dining Room
     device_class: door
     # state_topic: esphome/${mac}/binary_sensor/2/state
 
   - id: !extend zone3
-    # name: Bedroom 4 & Kitchen
+    name: Bedroom 4 & Kitchen
     device_class: motion
     # state_topic: esphome/${mac}/binary_sensor/3/state
 
   - id: !extend zone4
-    # name: Master Bedroom
+    name: Master Bedroom
     device_class: door
     # state_topic: esphome/${mac}/binary_sensor/4/state
 
   - id: !extend zone5
-    # name: Family Area
+    name: Family Area
     device_class: door
     # state_topic: esphome/${mac}/binary_sensor/5/state
 
   - id: !extend zone6
-    # name: Bedroom 3
+    name: Bedroom 3
     device_class: window
     # state_topic: esphome/${mac}/binary_sensor/6/state
   
   - id: !extend zone7
-    # name: Bedroom 4
+    name: Bedroom 4
     device_class: window
     # state_topic: esphome/${mac}/binary_sensor/7/state
 
