@@ -18,7 +18,7 @@ substitutions:
   friendly_name: Alarm Panel Interface
   # mac: 68b6b333cfc4
   project_name: konnected.esp32-s3-devkit-c-interface-paradox-evo192
-  project_version: 0.1.0
+  project_version: 0.1.1
   sensor_debounce_time: 200ms
   warning_beep_pulse_time: 100ms
   warning_beep_pause_time: 130ms
@@ -37,7 +37,7 @@ substitutions:
   zone12: GPIO21
   alarm1: GPIO13
   alarm2: GPIO14
-  out1: GPIO38
+  out1: GPIO48
   status_led: GPIO44
   keyswitch_momentary_time: 300ms
   status_led_inverted: "true"
@@ -61,8 +61,7 @@ packages:
     files:
     - packages/core-esp32-s3.yaml
     - packages/status-led.yaml
-    - packages/wifi.yaml
-    # - packages/konnected-cloud.yaml
+    - packages/wifi-esp32.yaml
     - packages/alarm-panel/zone1.yaml
     - packages/alarm-panel/zone2.yaml
     - packages/alarm-panel/zone3.yaml
@@ -102,44 +101,6 @@ alarm_control_panel:
                 id: alarm_keyswitch
 
 binary_sensor:
-  
-  # Customize the name and device_class of input zones
-  # to mirror the traditional alarm panel
-  - id: !extend zone1
-    name: Front door
-    device_class: door
-    # state_topic: esphome/${mac}/binary_sensor/1/state
-  
-  - id: !extend zone2
-    name: Living Room & Dining Room
-    device_class: door
-    # state_topic: esphome/${mac}/binary_sensor/2/state
-
-  - id: !extend zone3
-    name: Bedroom 4 & Kitchen
-    device_class: motion
-    # state_topic: esphome/${mac}/binary_sensor/3/state
-
-  - id: !extend zone4
-    name: Master Bedroom
-    device_class: door
-    # state_topic: esphome/${mac}/binary_sensor/4/state
-
-  - id: !extend zone5
-    name: Family Area
-    device_class: door
-    # state_topic: esphome/${mac}/binary_sensor/5/state
-
-  - id: !extend zone6
-    name: Bedroom 3
-    device_class: window
-    # state_topic: esphome/${mac}/binary_sensor/6/state
-  
-  - id: !extend zone7
-    name: Bedroom 4
-    device_class: window
-    # state_topic: esphome/${mac}/binary_sensor/7/state
-
   - id: !extend zone9
     pin:
       number: $zone9
@@ -205,15 +166,13 @@ button:
     name: Arm/Disarm keyswitch
     output: alarm_keyswitch_output
     duration: $keyswitch_momentary_time
-    # state_topic: esphome/${mac}/button/keyswitch/state
-    # command_topic: esphome/${mac}/button/keyswitch/command
 
 light:
   - id: esp32s3_rgb_led
     name: RGB LED
     platform: esp32_rmt_led_strip
     rgb_order: GRB
-    pin: GPIO48
+    pin: GPIO38
     num_leds: 1
     rmt_channel: 0
     chipset: SK6812
@@ -224,7 +183,3 @@ logger:
   level: VERBOSE
   logs:
     json: DEBUG
-ota:
-wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
