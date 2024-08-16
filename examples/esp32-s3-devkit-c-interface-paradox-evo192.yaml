@@ -16,9 +16,8 @@
 substitutions:
   name: konnected
   friendly_name: Alarm Panel Interface
-  # mac: 68b6b333cfc4
   project_name: konnected.esp32-s3-devkit-c-interface-paradox-evo192
-  project_version: 0.1.1
+  project_version: 0.1.2
   sensor_debounce_time: 200ms
   warning_beep_pulse_time: 100ms
   warning_beep_pause_time: 130ms
@@ -176,6 +175,7 @@ light:
     num_leds: 1
     rmt_channel: 0
     chipset: SK6812
+    default_transition_length: 300ms
 
 api: 
 web_server:
