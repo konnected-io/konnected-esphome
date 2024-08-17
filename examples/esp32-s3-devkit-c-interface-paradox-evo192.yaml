@@ -17,7 +17,7 @@ substitutions:
   name: konnected
   friendly_name: Alarm Panel Interface
   project_name: konnected.esp32-s3-devkit-c-interface-paradox-evo192
-  project_version: 0.1.2
+  project_version: 0.1.3
   sensor_debounce_time: 200ms
   warning_beep_pulse_time: 100ms
   warning_beep_pause_time: 130ms
@@ -38,7 +38,7 @@ substitutions:
   alarm2: GPIO14
   out1: GPIO48
   status_led: GPIO44
-  keyswitch_momentary_time: 300ms
+  keyswitch_momentary_time: 5s
   status_led_inverted: "true"
   
   # To connect to AWS IoT specifiy connection parameters and credentials specific
@@ -73,8 +73,8 @@ packages:
     - packages/alarm-panel/zone10.yaml
     - packages/alarm-panel/zone11.yaml
     - packages/alarm-panel/zone12.yaml
-    - packages/alarm-panel/alarm1.yaml
-    - packages/alarm-panel/alarm2.yaml
+    # - packages/alarm-panel/alarm1.yaml
+    # - packages/alarm-panel/alarm2.yaml
 
 alarm_control_panel:
   platform: template
@@ -113,11 +113,11 @@ binary_sensor:
   # Monitor the alarm triggered/cleared state of the physical panel
   # and update the virtual alarm panel accordingly
   - id: !extend zone11
+    internal: true
     pin:
       number: $zone11
       mode: INPUT_PULLUP
 
-    # state_topic: esphome/${mac}/binary_sensor/11/state
     on_state:
       - if:
           condition:
@@ -135,11 +135,11 @@ binary_sensor:
   # Monitor the alarm armed/disarmed state of the physical panel
   # and update the virtual alarm panel accordingly
   - id: !extend zone12
+    internal: true
     pin:
       number: $zone12
       mode: INPUT_PULLUP
 
-    # state_topic: esphome/${mac}/binary_sensor/12/state
     on_state:
       - if:
           condition:
