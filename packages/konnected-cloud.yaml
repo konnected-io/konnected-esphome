@@ -12,7 +12,7 @@ mqtt:
   client_certificate: $client_certificate
   client_certificate_key: $client_certificate_key
   discovery_unique_id_generator: mac
-  discovery: false
+  discover_ip: false
   discovery_retain: false
   log_topic: null
   
