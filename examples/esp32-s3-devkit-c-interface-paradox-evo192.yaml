@@ -91,13 +91,32 @@ alarm_control_panel:
             or:
               - and:
                 - lambda: 'return id(acp1)->get_state() == ACP_STATE_DISARMED;'
-                - binary_sensor.is_on: zone12
+                - binary_sensor.is_off: zone12
               - and:
                 - lambda: 'return id(acp1)->get_state() == ACP_STATE_ARMED_AWAY;'
-                - binary_sensor.is_off: zone12
+                - binary_sensor.is_on: zone12
           then:
             - button.press:
                 id: alarm_keyswitch
+  on_armed_away:
+    then:
+      - light.turn_on:
+          id: esp32s3_rgb_led
+          red: 100%
+          blue: 25%
+          green: 25%
+          brightness: 30%
+          effect: pulse
+  on_disarmed:
+    then:
+      - light.turn_on:
+          id: esp32s3_rgb_led
+          red: 0%
+          blue: 0%
+          green: 60%
+          brightness: 30%
+          effect: pulse
+
 
 binary_sensor:
   - id: !extend zone9
@@ -126,11 +145,6 @@ binary_sensor:
             lambda: 'id(acp1).publish_state(ACP_STATE_TRIGGERED);'
           else:
             lambda: 'id(acp1).publish_state(ACP_STATE_DISARMED);'
-      - if:
-          condition:
-            lambda: return id(blink_on_state);
-          then:
-            - script.execute: blink_status_led
 
   # Monitor the alarm armed/disarmed state of the physical panel
   # and update the virtual alarm panel accordingly
@@ -145,14 +159,9 @@ binary_sensor:
           condition:
             binary_sensor.is_on: zone12
           then:
-            lambda: 'id(acp1).publish_state(ACP_STATE_ARMED_AWAY);'
-          else:
             lambda: 'id(acp1).publish_state(ACP_STATE_DISARMED);'
-      - if:
-          condition:
-            lambda: return id(blink_on_state);
-          then:
-            - script.execute: blink_status_led
+          else:
+            lambda: 'id(acp1).publish_state(ACP_STATE_ARMED_AWAY);'
 
 output:
   - id: alarm_keyswitch_output
