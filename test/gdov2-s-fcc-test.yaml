@@ -8,7 +8,7 @@ substitutions:
   name: konnected
   friendly_name: GDOv2-S [FCC TEST]
   project_name: konnected.garage-door-gdov2-s
-  project_version: "1.1.1"
+  project_version: "1.2.2"
   garage_door_cover_name: Garage Door
   switch_name: STR output
 
@@ -29,10 +29,6 @@ substitutions:
 
   ####
   # ADDITIONAL SETTTINGS
-  warning_beep_pulse_time: 100ms
-  warning_beep_pause_time: 130ms
-  warning_beep_internal_only: "true"
-  warning_beep_shared: "false"
   sensor_debounce_time: 200ms
   range_sensor_polling_time: 2500ms
   range_sensor_debounce_time: 3s
@@ -50,13 +46,17 @@ substitutions:
   sda: GPIO6
   scl: GPIO7
 
+  rtttl_boop: boop:d=32,o=5,b=100:d#
+  rtttl_gotit: got_it:d=32,o=5,b=100:d#,a#,be
+  rtttl_scaleup: scale_up:d=32,o=5,b=100:c,c#,d#,e,f#,g#,a#,b
+  rtttl_success: success:d=4,o=6,b=160:8e6,16f6,16g6,8a6,8g6,8e6,8g6,8a6
+
 esphome:
   on_boot:
     priority: 200
     then:
       - lambda: !lambda |-
           ESP_LOGI("Konnected-FCC-Test", "Disabling WiFi");
-      - script.execute: script_self_test_stop
       - script.execute: script_fcc_test
 
 packages:
@@ -68,9 +68,15 @@ packages:
     files:
 
       ####
-      # BASE
+      # CORE
       # This package is required and sets up core features.
       - packages/core-esp32-s3.yaml
+
+      ####
+      # GARAGE DOOR WIRED SENSOR
+      # Enables a wired contact sensor for reporting the open or closed state of the garage door
+      # via the physical INPUT terminals.
+      - packages/garage-door-wired-sensor.yaml
 
       ####
       # GARAGE DOOR RANGE SENSOR
@@ -92,12 +98,6 @@ packages:
       #
       # 3. WIRED & RANGE SENSORS - Include this line.
       # - packages/garage-door-cover-wired-and-range.yaml
-
-      ####
-      # GARAGE DOOR WIRED SENSOR
-      # Enables a wired contact sensor for reporting the open or closed state of the garage door
-      # via the physical INPUT terminals.
-      - packages/garage-door-wired-sensor.yaml
 
       ####
       # GARAGE DOOR OPENER BUTTON
@@ -136,11 +136,6 @@ packages:
       # status_led: !include packages/status-led.yaml
       - packages/status-led.yaml
 
-      ####
-      # SELF-TEST
-      # Self test script used to validate the hardware post-assembly
-      - packages/gdo-self-test.yaml
-
 button:
   - platform: template
     id: button_fcc_test_start
@@ -166,12 +161,9 @@ script:
             - delay: 600ms
             
             - lambda: ESP_LOGI("Konnected-FCC-Test", "Blinking Warning LED");
-            - light.turn_on:
-                id: warning_led
-                effect: strobe
-            - delay: 5s
-            - light.turn_off: warning_led
-            - delay: 500ms
+            - button.press: pre_close_warning
+            - delay: $garage_door_close_warning_duration
+
             - repeat:
                 count: 2
                 then:

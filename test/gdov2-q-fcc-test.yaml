@@ -1,0 +1,215 @@
+substitutions:
+
+  ####
+  # NAME
+  # By default, the name of the ESPHome device is "konnected-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "konnected-xxxxxx.local". Edit this variable to
+  # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
+  name: konnected
+  friendly_name: GDO blaQ [FCC TEST]
+  project_name: konnected.garage-door-gdov2-q
+  project_version: "1.3.1"
+  garage_door_cover_name: Garage Door
+  garage_light_name: Garage Light
+  garage_openings_name: Garage Openings
+  garage_lock_name: Lock
+  garage_motion_name: Motion
+  garage_obstruction_name: Obstruction
+  garage_motor_name: Motor
+  garage_button_name: Wall Button
+  garage_sync_name: Synced
+
+  ####
+  # GARAGE DOOR CLOSE WARNING DURATION
+  # Duration to blink the warning LED and beep the buzzer before the garage door closes.
+  garage_door_close_warning_duration: 5s
+
+  ####
+  # ADDITIONAL SETTTINGS
+  sensor_debounce_time: 200ms
+  blink_on_state: "true"
+
+  ####
+  # INTERNAL MAPPINGS
+  # DO NOT EDIT these when using Konnected hardware
+  uart_tx_pin: GPIO1
+  uart_rx_pin: GPIO2
+  warning_beep_pin: GPIO4
+  warning_leds_pin: GPIO3
+  status_led: GPIO18
+  input1_pin: GPIO5
+  input2_pin: GPIO9
+
+  rtttl_boop: boop:d=32,o=5,b=100:d#
+  rtttl_gotit: got_it:d=32,o=5,b=100:d#,a#,be
+  rtttl_scaleup: scale_up:d=32,o=5,b=100:c,c#,d#,e,f#,g#,a#,b
+  rtttl_success: success:d=4,o=6,b=160:8e6,16f6,16g6,8a6,8g6,8e6,8g6,8a6
+
+external_components:
+  - source: github://konnected-io/konnected-esphome@master
+    components: [ mdns, secplus_gdo ]
+
+packages:
+
+  remote_package:
+    url: https://github.com/konnected-io/konnected-esphome
+    ref: master
+    refresh: 5min
+    files:
+
+      ####
+      # CORE
+      # This package is required and sets up core features.
+      - packages/core-esp32-s3.yaml
+
+
+      ####
+      # WARNING LED
+      # Enables the onboard warning LED light, with strobe effect. Used to visually warn of garage door automatic closing.
+      # warning_led: !include packages/warning-led.yaml
+      - packages/warning-led.yaml
+
+      ####
+      # WIFI
+      # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
+      # wifi: !include packages/wifi.yaml
+      - packages/wifi.yaml
+
+      ####
+      # PRE-CLOSE WARNING
+      # Enables a pleasant and customizable pre-close warning tone  using the onboard piezo buzzer. Used to audibly 
+      # warn of a garage door automatic closing.    
+      - packages/buzzer-rtttl.yaml
+      - packages/pre-close-warning-tones.yaml
+
+      ####
+      # STATUS LED
+      # Enables the onboard blue status LED as an activity/error indicator
+      # status_led: !include packages/status-led.yaml
+      - packages/status-led.yaml
+
+      ####
+      # SECPLUS GDO
+      # The logic and capabilities of the GDO communication
+      - packages/secplus-gdo.yaml
+      - packages/debug.yaml
+
+button:
+  - platform: template
+    id: button_fcc_test_start
+    name: ~FCC TEST Start
+    entity_category: diagnostic
+    internal: True
+    on_press:
+      then:
+        - script.execute: script_fcc_test
+
+switch:
+  - platform: gpio
+    id: input1
+    pin: $input1_pin
+  - platform: gpio
+    id: input2
+    pin: $input2_pin
+
+script:
+  # Script to put the device in non-transmission mode and cycle thru
+  # all device functions
+  - id: script_fcc_test
+    then:
+      - wifi.disable:
+      - lambda: id(gdo_blaq).start_gdo();
+      - repeat:
+          count: 10000
+          then:
+            - rtttl.play: $rtttl_scaleup
+            - delay: 1s
+            - rtttl.play: beep:d=8,o=6,b=100:d
+            - delay: 600ms
+            
+            - lambda: ESP_LOGI("Konnected-FCC-Test", "Blinking Warning LED");
+            - button.press: pre_close_warning
+            - delay: $garage_door_close_warning_duration
+
+            - repeat:
+                count: 2
+                then:
+                  - rtttl.play: beep:d=8,o=6,b=100:d
+                  - delay: 600ms
+            
+            - lambda: ESP_LOGI("Konnected-FCC-Test", "Sending GDO commands");
+            - cover.open: gdo_door
+            - delay: 1s
+            - cover.close: gdo_door
+            - delay: 1s
+
+            - repeat:
+                count: 3
+                then:
+                  - rtttl.play: beep:d=8,o=6,b=100:d
+                  - delay: 600ms
+
+            - lambda: ESP_LOGI("Konnected-FCC-Test", "Activating outputs");
+            - switch.turn_on: input1
+            - delay: 2s
+            - switch.turn_off: input1
+            - delay: 2s
+            - switch.turn_on: input2
+            - delay: 2s
+            - switch.turn_off: input2
+            - delay: 2s
+     
+
+#### 
+# LOGGER
+# more: https://esphome.io/components/logger.html
+logger:
+  level: VERY_VERBOSE
+  logs:
+    esp-idf: VERBOSE
+    api: VERBOSE
+    api.service: DEBUG
+    esp32_ble: DEBUG
+    esp32_ble_server: DEBUG
+    scheduler: DEBUG
+    esp32.preferences: DEBUG
+    sensor.filter: DEBUG
+    rtttl: DEBUG
+    cover: DEBUG
+    sensor: DEBUG
+    ledc.output: INFO
+    json: INFO
+
+api:
+  reboot_timeout: 0s
+  services:
+  
+  # Call the play_rtttl service to play any RTTTL song in the garage
+  - service: play_rtttl
+    variables:
+      song_str: string
+    then:
+      - rtttl.play:
+          rtttl: !lambda 'return song_str;'
+
+ota:
+  - platform: esphome
+
+improv_serial:
+
+web_server:
+  include_internal: true
+
+esphome:
+  on_boot:
+    priority: 200
+    then:
+      - lambda: !lambda |-
+          ESP_LOGI("Konnected-FCC-Test", "Disabling WiFi");
+      - script.execute: script_fcc_test
+  platformio_options:
+    lib_deps:
+      - https://github.com/konnected-io/gdolib#76ba232
+    build_flags:
+      - -DUART_SCLK_DEFAULT=UART_SCLK_APB
+      - -Wl,--wrap=esp_panic_handler  
