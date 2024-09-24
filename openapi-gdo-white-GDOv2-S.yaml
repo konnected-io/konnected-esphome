@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
-  title: Garage Door Opener REST API
-  summary: Local REST based API for the Konnected Garage Door Opener
+  title: GDO White REST API
+  summary: Local REST based API for the Konnected GDO White
   description: This API is built on ESPHome firmware for Konnected's Garage Door Opener products, models GDOv1-S and GDOv2-S. For more details and API options, see https://esphome.io/web-api/#api-rest.
-  version: 1.0.0
+  version: 1.1.0
   termsOfService: https://konnected.io/terms
   contact:
       name: Konnected Support
@@ -296,14 +296,6 @@ paths:
     post:
       summary: Reset with Factory Default Settings
       description: Resets the device and restores all settings. WARNING! Device will disconnect from Wi-Fi and will go offline! You must set-up WiFi again in close proximity to the device.
-  /button/_test_script_start/press:
-    post:
-      summary: Start the Self-Test
-      description: Starts the pre-flight functional self-test.
-  /button/_test_stop/press:
-    post:
-      summary: Stop the Self-Test
-      description: Stops the self-test script.
 
 components:
   schemas:

@@ -1,0 +1,436 @@
+openapi: 3.1.0
+info:
+  title: GDO blaQ REST API
+  summary: Local REST based API for the Konnected GDO blaQ
+  description: This API is built on ESPHome firmware for Konnected's Garage Door Opener model GDOv2-Q. For more details and API options, see https://esphome.io/web-api/#api-rest.
+  version: 1.0.0
+  termsOfService: https://konnected.io/terms
+  contact:
+      name: Konnected Support
+      url: https://support.konnected.io
+      email: help@konnected.io
+servers:
+  - url: http://{localIP}
+    description: Device on local network    
+    variables:
+      localIp:
+        default: 192.168.1.100
+      port:        
+        default: '80'
+paths:
+  /cover/garage_door:
+    get:
+      summary: Garage Door State
+      description: The garage door *cover* represents the current state of the garage door and current operation.
+      responses:
+        '200':
+          description: Garage door state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  state:
+                    type: string
+                    description: Binary state of the garage door (`OPEN` or `CLOSED`)
+                  current_operation:
+                    type: string
+                    description: Current operational state of the garage door (`IDLE`, `OPENING` or `CLOSING`)
+                  value:
+                    type: integer
+                    description: Numerical representation of the current state (1 means open, 0 means closed)
+                  id:
+                    type: string
+                    description: ESPHome object_id
+  /cover/garage_door/open:
+    post:
+      summary: Open Command
+      description: Opens the garage door if closed.
+  /cover/garage_door/close:
+    post:
+      summary: Close Command
+      description: Closes the garage door if open after executing the pre-closing warning.
+  /cover/garage_door/stop:
+    post:
+      summary: Stop Command
+      description: Send a stop command to the garage door.
+  /cover/garage_door/toggle:
+    post:
+      summary: Toggle Command
+      description: Toggles the garage door open or closed.
+  /cover/garage_door/set:
+    post:
+      summary: Set Position Command
+      description: Set the garage door position to a specific percentage value, expressed as a decimal. 1 is fully open and 0 is fully closed, so half-way would be sent as `0.5` and 10% open would be `0.1`.
+      parameters:
+        - in: query
+          name: position
+          required: True
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Protocol option set
+
+  /light/garage_light:
+    get:
+      summary: Garage Light State
+      description: Returns the state of the garage opener light
+      responses:
+        '200':
+          description: Light state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  state:
+                    type: string
+                    description: Human readable string representation of the light state; `OFF` or `ON`
+  /light/garage_light/turn_on:
+    post:
+      summary: Turn on the Garage Light
+  /light/garage_light/turn_off:
+    post:
+      summary: Turn off the Garage Light
+  /light/garage_light/toggle:
+    post:
+      summary: Toggle the Garage Light
+
+  /lock/lock:
+    get:
+      summary: Garage Remote Control Lock State
+      description: Returns the state of the Remote Control lock
+      responses:
+        '200':
+          description: Lock state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: number
+                    description: Lock state expressed as a number.
+                  state:
+                    type: string
+                    description: Human readable string representation of the lock state; `LOCKED`, `UNLOCKED` or `UNKNOWN`
+  /lock/lock/lock:
+    post:
+      summary: Lock the Remote Control Lock
+      description: Activates the Remote Control Lock feature of the garage opener
+  /lock/lock/unlock:
+    post:
+      summary: Unlock the Remote Control Lock
+      description: Deativates the Remote Control Lock feature of the garage opener
+
+  /binary_sensor/motion:
+    get:
+      summary: Motion Sensor State
+      description: Returns the state of the garage opener motion sensor (if equipped)
+      responses:
+        '200':
+          description: Motion sensor state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+  
+  /binary_sensor/synced:
+    get:
+      summary: Protocol Sync State
+      description: Returns `ON` or `true` when the GDO blaQ is synced with the opener's rolling code, otherwise `OFF` or `false`
+      responses:
+        '200':
+          description: Protocol sync state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+
+  /binary_sensor/obstruction:
+    get:
+      summary: Obstruction (safety beam) state
+      description: Reports `ON` or `true` when there is an object blocking the obstruction sensor beam, otherwise `OFF` or `false`
+      responses:
+        '200':
+          description: Obstruction sensor beam state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+
+  /binary_sensor/motor:
+    get:
+      summary: Garage opener motor state
+      description: Reports `ON` or `true` when the motor is running, otherwise `OFF` or `false`
+      responses:
+        '200':
+          description: Garage opener motor state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+
+  /binary_sensor/wall_button:
+    get:
+      summary: Wall Button State
+      description: Reports `ON` or `true` when the garage opener wall button is pressed, otherwise `OFF` or `false`
+      responses:
+        '200':
+          description: Wall button state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+
+
+  /sensor/garage_openings:
+    get:
+      summary: Cumulative opening cycles of the garage motor
+      description: Reports an integer representing the cumulative number of openings or cycles of the garage motor in its lifetime.
+      responses:
+        '200':
+          description: Garage openings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: number
+                    description: Number of openings or `null` if unknown
+                  state:
+                    type: string
+                    description: String representation of the number of openings or `NA` if unknown                  
+
+  /select/security__protocol:
+    get:
+      summary: Get the selected/detected Security+ protocol setting of the GDO blaQ
+      responses:
+        '200':
+          description: Current Security+ protocol setting
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: string
+                    description: The currently enabled Security+ protocol setting
+                  state:
+                    type: string
+                    description: The currently enabled Security+ protocol setting
+
+  /select/security__protocol/set:
+    post:
+      summary: Set the Security+ protocol
+      description: |
+        Pass the desired protocol setting as a URL-encoded string to the `option` parameter. Valid options are
+        `auto`, `security%2B1.0`, `security%2B1.0%20with%20smart%20panel`, and `security%2B2.0`.
+      parameters:
+        - in: query
+          name: option
+          required: True
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Protocol option set
+
+  /switch/learn:
+    get:
+      summary: State of the "learn mode" on the opener
+      description: Used to pair new wireless remotes, the learn mode state can be read from the garage opener.
+      responses:
+        '200':
+          description: Learn mode state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+  /switch/learn/turn_on:
+    post:
+      summary: Turn on Learn Mode
+      description: Turns on the learn mode on the garage opener, enabling pairing of a new remote control.
+      responses:
+        '200':
+          description: Turn-on request received
+  /switch/learn/turn_off:
+    post:
+      summary: Turn off Learn Mode
+      description: Turns off the garage opener learn mode for normal operation.
+      responses:
+        '200':
+          description: Turn-off request received        
+  /switch/learn/toggle:
+    post:
+      summary: Toggle the Learn Mode
+      responses:
+        '200':
+          description: Toggle request received
+
+  /sensor/wifi_signal_rssi:
+    get:
+      summary: Wi-Fi signal strength RSSI
+      description: Signal strength of the Wi-Fi connection (RSSI) expressed in dBm
+      responses:
+        '200':
+          description: Wi-Fi signal strength (RSSI)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: number
+                    description: RSSI expressed as a negative integer
+                  state:
+                    type: string
+                    description: Human readable string representation of the RSSI with units
+  /sensor/wifi_signal__:
+    get:
+      summary: Wi-Fi signal strength %
+      description: Signal strength of the Wi-Fi connection (RSSI) converted to a percentage
+      responses:
+        '200':
+          description: Wi-Fi signal strength (%)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: number
+                    description: Signal strength expressed as a percentage value (0 - 100)
+                  state:
+                    type: string
+                    description: Human readable string representation of the signal strength percentage
+  /sensor/uptime:
+    get:
+      summary: Uptime
+      description: Time elapsed since last boot of the device, in seconds.
+      responses:
+        '200':
+          description: Uptime
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: number
+                    description: Number of seconds since last boot
+                  state:
+                    type: string
+                    description: Human readable string representation of the seconds since boot, with units
+  /text_sensor/device_id:
+    get:
+      summary: Device ID
+      description: Unique ID of the device. Also its MAC address.
+      responses:
+        '200':
+          description: Device ID / MAC
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: string
+                    description: 12-character Device ID
+                  state:
+                    type: string
+                    description: 12-character Device ID
+  /text_sensor/ip_address:
+    get:
+      summary: IP Address
+      description: The IP address of the device.
+      responses:
+        '200':
+          description: IP Address
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ESPHome object_id
+                  value:
+                    type: string
+                    description: IPv4 address
+                  state:
+                    type: string
+                    description: IPv4 address
+
+
+  /button/pre_close_warning/press:
+    post:
+      summary: Trigger the pre-close warning
+      description: For safety, the device makes an audible and visual warning before automatically closing the garage door. POST to this endpoint (no params) to trigger the warning. Note, it is not necessary to trigger this from your application before closing, the firmware already handles that.
+  /button/play_sound/press:
+    post:
+      summary: Plays the pre-configured pre-close warning sound
+      description: Trigger the pre-close warning sound only. 
+  /button/restart/press:
+    post:
+      summary: Restart/reboot the device
+      description: Trigger the software to reboot, re-connect to Wi-Fi, and re-establish a connection
+  /button/factory_reset/press:
+    post:
+      summary: Reset with Factory Default Settings
+      description: Resets the device and restores all settings. WARNING! Device will disconnect from Wi-Fi and will go offline! You must set-up WiFi again in close proximity to the device.
+
+components:
+  schemas:
+    binary_sensor:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ESPHome object_id
+        state:
+          type: string
+          description: Binary state of the input (`ON` or `OFF`). ON means open or detected, and OFF means closed or not detected.
+        value:
+          type: boolean
+          description: Boolean representation of the input state (*true* means ON or OPEN)
+    sensor:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ESPHome object_id
+        state:
+          type: string
+          description: Human readable state of the sensor displayed with units. For example `0.5 m` or `92 %`.
+        value:
+          type: number
+          description: Numerical representation of the sensor
+
+
