@@ -116,8 +116,16 @@ button:
     name: Re-sync
     entity_category: config
     on_press:
-      - number.increment:
-          id: gdo_client_id
+      - if:
+          condition:
+            lambda: 'return id(gdo_client_id).state;'
+          then:
+            - number.increment:
+                id: gdo_client_id
+          else:
+            - number.set:
+                id: gdo_client_id
+                value: 0x667
       - number.set:
           id: gdo_rolling_code
           value: 0
