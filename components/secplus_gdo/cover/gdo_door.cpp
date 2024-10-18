@@ -60,12 +60,14 @@ void GDODoor::set_state(gdo_door_state_t state, float position) {
     this->state_ = state;
 }
 
-void GDODoor::do_action_after_warning(const cover::CoverCall& call) {
-    this->publish_state(false); // publish state to acknowledge command was received
+void GDODoor::do_action_after_warning(const cover::CoverCall& call) {    
 
     if (this->pre_close_active_) {
         return;
     }
+    
+    this->set_state(GDO_DOOR_STATE_CLOSING, this->position);
+    this->publish_state(false); // publish state to acknowledge command was received
 
     ESP_LOGD(TAG, "WARNING for %dms", this->pre_close_duration_);
     if (this->pre_close_start_trigger) {
