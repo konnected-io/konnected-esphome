@@ -64,7 +64,7 @@ using namespace esphome::cover;
         bool                     toggle_only_{false};
         optional<float>          target_position_{0};
         CoverOperation           prev_operation{COVER_OPERATION_IDLE};
-        gdo_door_state_t         state_{GDO_DOOR_STATE_MAX};
+        gdo_door_state_t         state_{GDO_DOOR_STATE_UNKNOWN};
         bool                     synced_{false};
     };
 } // namespace secplus_gdo
