@@ -28,6 +28,9 @@ void GDODoor::set_state(gdo_door_state_t state, float position) {
     }
 
     ESP_LOGI(TAG, "Door state: %s, position: %.0f%%", gdo_door_state_to_string(state), position * 100.0f);
+    
+    // save the previous operation
+    this->prev_operation = this->current_operation;
 
     switch (state) {
     case GDO_DOOR_STATE_OPEN:
@@ -46,18 +49,21 @@ void GDODoor::set_state(gdo_door_state_t state, float position) {
         this->current_operation = COVER_OPERATION_CLOSING;
         this->position = position;
         break;
-    case GDO_DOOR_STATE_STOPPED:
-        this->prev_operation = this->current_operation;
-        // falls through
-    case GDO_DOOR_STATE_MAX:
+    case GDO_DOOR_STATE_STOPPED: // falls through                
+    case GDO_DOOR_STATE_MAX: // falls through
     default:
         this->current_operation = COVER_OPERATION_IDLE;
         this->position = position;
         break;
     }
 
-    this->publish_state(false);
     this->state_ = state;
+    
+    #ifdef USE_MQTT // if MQTT component is enabled, do not publish the same state more than once
+    if (this->current_operation == this->prev_operation) { return; }
+    #endif
+    
+    this->publish_state(false);  
 }
 
 void GDODoor::do_action_after_warning(const cover::CoverCall& call) {    
@@ -65,7 +71,7 @@ void GDODoor::do_action_after_warning(const cover::CoverCall& call) {
     if (this->pre_close_active_) {
         return;
     }
-    
+
     this->set_state(GDO_DOOR_STATE_CLOSING, this->position);
     this->publish_state(false); // publish state to acknowledge command was received
 
