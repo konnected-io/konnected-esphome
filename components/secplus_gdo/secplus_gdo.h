@@ -38,7 +38,7 @@ namespace secplus_gdo {
         void start_gdo() { start_gdo_ = true; }
 
         // Use Late priority so we do not start the GDO lib until all saved preferences are loaded
-        float get_setup_priority() const override { return setup_priority::LATE; }
+        float get_setup_priority() const override { return setup_priority::BEFORE_CONNECTION; }
 
         void register_protocol_select(GDOSelect *select) { this->protocol_select_ = select; }
         void set_protocol_state(gdo_protocol_type_t protocol) { if (this->protocol_select_) {
