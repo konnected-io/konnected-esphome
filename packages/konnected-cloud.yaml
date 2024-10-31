@@ -7,7 +7,7 @@ mqtt:
   client_id: $mac
   topic_prefix: esphome/$mac
   discovery_prefix: esphome/${mac}/discovery
-  idf_send_async: true
+  idf_send_async: false
   certificate_authority: $certificate_authority
   client_certificate: $client_certificate
   client_certificate_key: $client_certificate_key
