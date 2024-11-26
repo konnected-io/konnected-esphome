@@ -1,0 +1,96 @@
+####
+##
+## Konnected Alarm Panel Pro (ESP32) 
+## Standalone Alarm System with Keyswitch arming/disarming
+##
+## filename: alarm-panel-pro-local-alarm-keyswitch-arming.yaml
+## GitHub: https://github.com/konnected-io/konnected-esphome
+## Buy Konnected hardware: https://konnected.io
+## Help & Support: https://help@konnected.io (support is provided for verified buyers of Konnected hardware)
+##
+## This firmware configuration implements a basic local alarm system with the Alarm Panel Pro that is
+## armed and disarmed exclusively by an external system using a relay to open/close a keyswitch zone (OFF/closed=armed; 
+## ON/open=disarmed). Leveraging ESPHome's new native Alarm Control Panel component,
+## the Konnected device the alarm panel states and actuates a siren/alarm when the alarm is triggered.
+##
+## ZONE CONFIGURATION IN THIS EXAMPLE
+## 
+## Zone 1: Door input sensor
+## Zone 7: Arming Relay input
+## Alarm 1: Audible alarm
+
+substitutions:
+  name: konnected
+  friendly_name: Konnected
+  project_name: konnected.alarm-panel-pro-local-alarm-keyswitch-arming
+  project_version: 0.1.0
+  sensor_debounce_time: 200ms
+  blink_on_state: 'true'
+  zone1: GPIO4
+  zone2: GPIO2
+  zone3: GPIO15
+  zone4: GPIO13
+  zone5: GPIO18
+  zone6: GPIO14
+  zone7: GPIO33
+  zone8: GPIO32
+  zone9: GPIO36
+  zone10: GPIO39
+  zone11: GPIO34
+  zone12: GPIO35
+  alarm1: GPIO12
+  alarm2_out2: GPIO5
+  out1: GPIO23
+  status_led: GPIO3
+  ethernet_type: RTL8201
+
+packages:
+  remote_package:
+    url: https://github.com/konnected-io/konnected-esphome
+    ref: master
+    refresh: 5min
+    files:
+    - packages/core-esp32.yaml
+    - packages/status-led.yaml
+    - packages/ethernet.yaml
+    - packages/alarm-panel/zone1.yaml
+    - packages/alarm-panel/zone7.yaml
+    - packages/alarm-panel/alarm1.yaml    
+
+binary_sensor:
+
+  - id: !extend zone1
+    name: Door
+    device_class: door
+
+  # Zone 7 is connected to a relay which arms and disarms the alarm system.
+  # ON/open = disarmed
+  # OFF/closed = armed
+  - id: !extend zone7
+    internal: true
+    on_state:
+      then:
+        - if:
+            condition:
+              lambda: 'return x;'
+            then: 
+              - alarm_control_panel.disarm: acp1
+            else:
+              - alarm_control_panel.arm_away: acp1
+
+alarm_control_panel:
+  platform: template
+  name: Konnected Alarm
+  id: acp1
+  binary_sensors:
+      - input: zone1
+  on_triggered:
+    then:
+      - switch.turn_on: alarm1
+  on_cleared:
+    then:
+      - switch.turn_off: alarm1
+
+logger:
+web_server:
+  version: 3
