@@ -209,6 +209,6 @@ logger:
 api:
 
 esp32_improv:
-  authorizer: false
+  authorizer: none
 
 web_server:
