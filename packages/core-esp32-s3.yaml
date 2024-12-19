@@ -2,11 +2,13 @@ esphome:
   name: $name
   friendly_name: $friendly_name
   name_add_mac_suffix: true
+  min_version: '2024.12.0' # Includes ESP-IDF 5.1
   project:
     name: $project_name
     version: $project_version
   platformio_options:
     board_build.flash_mode: dio
+  
   on_boot:
     priority: 800.0
     then:

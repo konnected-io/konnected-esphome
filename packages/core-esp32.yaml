@@ -2,9 +2,10 @@ esphome:
   name: $name
   friendly_name: $friendly_name
   name_add_mac_suffix: true
+  min_version: '2024.12.0' # Includes ESP-IDF 5.1
   project:
     name: $project_name
-    version: $project_version 
+    version: $project_version  
   on_boot:
     then:
       - text_sensor.template.publish:
