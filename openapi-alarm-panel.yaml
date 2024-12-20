@@ -18,6 +18,74 @@ servers:
       port:        
         default: '80'
 paths:
+  /alarm_control_panel/{name}:
+    get:
+      summary: Alarm System state
+      description: |
+        Returns the current state of the alarm system (if enabled)
+      parameters:
+        - in: path
+          name: name
+          required: True
+          schema:
+            type: string
+          description: The name of the alarm system as configured in the firmware settings, normalized to lowercase and underscore characters. (default is `konnected_alarm`) 
+      responses:
+        '200':
+          description: Alarm system state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: | 
+                      ESPHome object_id prefixed by `alarm-control-panel-`. The object ID is derived from the name given to
+                      the alarm system when configured in the firmware settings by changing all alpha to lowercase and
+                      all non-alphanumeric characters to underscore. The default name is "Konnected Alarm" which results in
+                      the ID `alarm-control-panel-konnected_alarm`
+                  state:
+                    type: string
+                    description: |
+                      State of the alarm system. Possible values are `DISARMED`, `ARMED_HOME`, `ARMED_AWAY`, 
+                      `ARMED_NIGHT`, `ARMED_VACATION`, `ARMED_CUSTOM_BYPASS`, `PENDING`, `ARMING`, `DISARMING`,
+                      and `TRIGGERED`.
+                  value:
+                    type: number
+                    description: >
+                      Numeric representation of the alarm system state, defined by the [AlarmControlPanelState enum](https://github.com/esphome/esphome/blob/release/esphome/components/alarm_control_panel/alarm_control_panel_state.h#L9-L20).
+  /alarm_control_panel/{name}/{method}:  
+    post:
+      summary: Arm or disarm the alarm system
+      description: |
+        Sends a command to arm or disarm the alarm system, with an optional code (if configured). If the correct
+        conditions are met, the alarm system will change state according to the command sent.
+        
+        A valid request will always return a 200 OK status response. This does not indicate that the command 
+        or state change was successful, it only indicates that the command was valid and the call was issued.
+        You should check the state or event stream following the commanad do verify the state change.
+      parameters:
+        - in: path
+          name: name
+          required: True
+          schema:
+            type: string
+          description: The name of the alarm system as configured in the firmware settings, normalized to lowercase and underscore characters. (default is `konnected_alarm`) 
+        - in: path
+          name: method
+          required: True
+          schema:
+            type: string
+            enum: ['arm_away', 'arm_home', 'arm_night', 'arm_vacation', 'disarm']
+          description: The arm or disarm action to execute on the alarm system.
+        - in: query
+          name: code
+          required: False
+          schema:
+            type: string
+          description: A code used for arming/disarming, if configured.
+
   /binary_sensor/{zone}:
     get:
       summary: Zone state
