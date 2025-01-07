@@ -54,14 +54,24 @@ packages:
     - packages/status-led.yaml
     - packages/ethernet.yaml
     - packages/alarm-panel/zone1.yaml
+    - packages/alarm-panel/zone2.yaml    
     - packages/alarm-panel/zone7.yaml
+    - packages/alarm-panel/zone8.yaml
     - packages/alarm-panel/alarm1.yaml    
 
 binary_sensor:
 
   - id: !extend zone1
-    name: Door
+    name: Desktop Door
     device_class: door
+
+  - id: !extend zone2
+    name: Pedestal Door
+    device_class: door
+
+  - id: !extend zone8
+    name: Tilt
+    device_class: tamper
 
   # Zone 7 is connected to a relay which arms and disarms the alarm system.
   # ON/open = disarmed
@@ -76,14 +86,23 @@ binary_sensor:
             then: 
               - alarm_control_panel.disarm: acp1
             else:
-              - alarm_control_panel.arm_away: acp1
+              - if:
+                  condition:
+                    binary_sensor.is_off: zone1
+                  then:
+                    - alarm_control_panel.arm_away: acp1
 
 alarm_control_panel:
   platform: template
   name: Konnected Alarm
   id: acp1
+  pending_time: 5s
   binary_sensors:
       - input: zone1
+      - input: zone2
+      - input: zone8
+        trigger_mode: instant
+
   on_triggered:
     then:
       - switch.turn_on: alarm1
