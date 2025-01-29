@@ -92,11 +92,71 @@ binary_sensor:
                   then:
                     - alarm_control_panel.arm_away: acp1
 
+  # Computed state of the electronically controlled latch which is
+  # unlocked when the signal is high. Upon unlocking, the alarm system 
+  # disarms so that the user can open the door.
+  - id: latch
+    platform: analog_threshold
+    name: Latch
+    device_class: lock
+    sensor_id: latch_adc
+    threshold: 2.0
+    on_state:
+      then:
+        - if:
+            condition:
+              lambda: 'return x;'
+            then:
+              - alarm_control_panel.disarm: acp1
+
+  # Ready state - A computed state if the alarm system is ready to
+  # arm based on the state of both doors and the electronically
+  # controlled latch
+  # ON means problem; OFF means ready
+  # When the state changes to ready, arm the alarm
+  - id: ready
+    name: Ready
+    device_class: problem
+    platform: template
+    lambda: 'return id(latch).state || id(zone1).state || id(zone2).state || id(zone8).state;'
+    on_state:
+      then:
+        - if:
+            condition:
+              lambda: 'return !x;'
+            then:
+              - alarm_control_panel.arm_away: acp1
+
+
+# Zone 9 is connected to a variable 0V to 3.3V signal that outputs
+# at 3.3V when the latch is unlocked
+sensor:
+  - id: latch_adc
+    platform: adc
+    pin: $zone9
+    name: Latch output voltage
+    update_interval: 1s
+    attenuation: auto
+    entity_category: diagnostic
+    # internal: true
+
+switch:   
+  - id: !extend alarm1
+    name: Siren
+
+script:
+  - id: trigger_siren
+    then:
+      - switch.turn_on: alarm1
+      - delay: 3min
+      - switch.turn_off: alarm1
+
 alarm_control_panel:
   platform: template
   name: Konnected Alarm
   id: acp1
-  pending_time: 5s
+  pending_time: 2s
+  trigger_time: 3min
   binary_sensors:
       - input: zone1
       - input: zone2
@@ -105,11 +165,15 @@ alarm_control_panel:
 
   on_triggered:
     then:
-      - switch.turn_on: alarm1
+      - script.execute: trigger_siren
   on_cleared:
     then:
       - switch.turn_off: alarm1
+      - script.stop: trigger_siren
 
 logger:
+  logs:
+    sensor: INFO
+
 web_server:
   version: 3
