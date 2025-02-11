@@ -72,6 +72,16 @@ binary_sensor:
   - id: !extend zone8
     name: Tilt
     device_class: tamper
+    on_state:
+      then:
+        - if:
+            condition:
+              lambda: 'return x;'
+            then:
+              - alarm_control_panel.triggered: acp1
+            else:
+              - alarm_control_panel.disarm: acp1
+
 
   # Zone 7 is connected to a relay which arms and disarms the alarm system.
   # ON/open = disarmed
@@ -125,6 +135,7 @@ binary_sensor:
             condition:
               lambda: 'return !x;'
             then:
+              - alarm_control_panel.disarm: acp1
               - alarm_control_panel.arm_away: acp1
 
 
@@ -145,11 +156,11 @@ switch:
     name: Siren
 
 script:
-  - id: trigger_siren
+  - id: trigger_timeout
     then:
       - switch.turn_on: alarm1
       - delay: 3min
-      - switch.turn_off: alarm1
+      - alarm_control_panel.disarm: acp1
 
 alarm_control_panel:
   platform: template
@@ -165,11 +176,11 @@ alarm_control_panel:
 
   on_triggered:
     then:
-      - script.execute: trigger_siren
+      - script.execute: trigger_timeout
   on_cleared:
     then:
       - switch.turn_off: alarm1
-      - script.stop: trigger_siren
+      - script.stop: trigger_timeout
 
 logger:
   logs:
