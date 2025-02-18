@@ -1,0 +1,19 @@
+# Configure a GDO input as an external binary sensor
+defaults:
+  inverted: "false"
+
+binary_sensor:
+  - platform: gpio
+    pin: 
+      number: ${pin}
+      mode: INPUT_PULLUP
+      inverted: ${inverted}
+    name: ${name}
+    filters:
+      - delayed_on_off: ${sensor_debounce_time}
+    on_state:
+      - if:
+          condition:
+            lambda: return id(blink_on_state);
+          then:
+            - script.execute: blink_status_led

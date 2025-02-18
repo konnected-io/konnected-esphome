@@ -87,6 +87,8 @@ substitutions:
   warning_beep_pin: GPIO4
   warning_leds_pin: GPIO3
   status_led: GPIO18
+  input1: GPIO5
+  input2: GPIO9
 
 external_components:
   - source: github://konnected-io/konnected-esphome@master
