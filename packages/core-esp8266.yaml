@@ -6,11 +6,11 @@ esphome:
     name: $project_name
     version: $project_version
   on_boot:
-    priority: 800.0
-    then:
-      - text_sensor.template.publish:
-          id: device_id
-          state: !lambda 'return get_mac_address();'
+    - priority: 800.0
+      then:
+        - text_sensor.template.publish:
+            id: device_id
+            state: !lambda 'return get_mac_address();'
 
 esp8266:
   board: nodemcuv2

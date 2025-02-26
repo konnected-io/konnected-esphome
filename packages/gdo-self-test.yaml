@@ -16,19 +16,19 @@ globals:
 
 
 esphome:
-  on_boot:
-    priority: 100
-    then:
-      - lambda: !lambda |-
-          ESP_LOGI("Konnected-GDO-Test", "qcok: %d", id(qcok));
-      - delay: 5s
-      - lambda: !lambda |-
-          ESP_LOGI("Konnected-GDO-Test", "qcok: %d", id(qcok));
-      - if:
-          condition:
-            lambda: return !id(qcok);
-          then:
-            - script.execute: script_self_test
+  on_boot:    
+    - priority: 100
+      then:
+        - lambda: !lambda |-
+            ESP_LOGI("Konnected-GDO-Test", "qcok: %d", id(qcok));
+        - delay: 5s
+        - lambda: !lambda |-
+            ESP_LOGI("Konnected-GDO-Test", "qcok: %d", id(qcok));
+        - if:
+            condition:
+              lambda: return !id(qcok);
+            then:
+              - script.execute: script_self_test
 
 button:
   - platform: template

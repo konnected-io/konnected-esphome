@@ -202,11 +202,11 @@ web_server:
 
 esphome:
   on_boot:
-    priority: 200
-    then:
-      - lambda: !lambda |-
-          ESP_LOGI("Konnected-FCC-Test", "Disabling WiFi");
-      - script.execute: script_fcc_test
+    - priority: 200
+      then:
+        - lambda: !lambda |-
+            ESP_LOGI("Konnected-FCC-Test", "Disabling WiFi");
+        - script.execute: script_fcc_test
   platformio_options:
     lib_deps:
       - https://github.com/konnected-io/gdolib#76ba232

@@ -10,11 +10,11 @@ esphome:
     board_build.flash_mode: dio
   
   on_boot:
-    priority: 800.0
-    then:
-      - text_sensor.template.publish:
-          id: device_id
-          state: !lambda 'return get_mac_address();'
+    - priority: 800.0
+      then:
+        - text_sensor.template.publish:
+            id: device_id
+            state: !lambda 'return get_mac_address();'
 
 esp32:
   board: esp32-s3-devkitc-1

@@ -178,9 +178,9 @@ ota: !remove
 esphome:
   # start secplus gdo without network
   on_boot:
-    priority: 220
-    then:
-      lambda: id(gdo_blaq).start_gdo();
+    - priority: 220
+      then:
+        lambda: id(gdo_blaq).start_gdo();
   platformio_options:
     lib_deps:
       - https://github.com/konnected-io/gdolib#4a55112
