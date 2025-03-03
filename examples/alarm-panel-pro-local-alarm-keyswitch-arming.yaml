@@ -90,7 +90,7 @@ binary_sensor:
     name: Latch
     device_class: lock
     sensor_id: latch_adc
-    threshold: 2.0
+    threshold: 3.0
     on_state:
       then:
         - if:
