@@ -69,6 +69,8 @@ binary_sensor:
     name: Pedestal Door
     device_class: door
 
+  # Tilt sensor
+  # Always trigger the alarm when tilted, even if disarmed
   - id: !extend zone8
     name: Tilt
     device_class: tamper
@@ -79,28 +81,6 @@ binary_sensor:
               lambda: 'return x;'
             then:
               - alarm_control_panel.triggered: acp1
-            else:
-              - alarm_control_panel.disarm: acp1
-
-
-  # Zone 7 is connected to a relay which arms and disarms the alarm system.
-  # ON/open = disarmed
-  # OFF/closed = armed
-  - id: !extend zone7
-    internal: true
-    on_state:
-      then:
-        - if:
-            condition:
-              lambda: 'return x;'
-            then: 
-              - alarm_control_panel.disarm: acp1
-            else:
-              - if:
-                  condition:
-                    binary_sensor.is_off: zone1
-                  then:
-                    - alarm_control_panel.arm_away: acp1
 
   # Computed state of the electronically controlled latch which is
   # unlocked when the signal is high. Upon unlocking, the alarm system 
@@ -123,7 +103,7 @@ binary_sensor:
   # arm based on the state of both doors and the electronically
   # controlled latch
   # ON means problem; OFF means ready
-  # When the state changes to ready, arm the alarm
+  # When the state changes to ready, reset and arm the alarm
   - id: ready
     name: Ready
     device_class: problem
@@ -149,11 +129,19 @@ sensor:
     update_interval: 1s
     attenuation: auto
     entity_category: diagnostic
-    # internal: true
+    internal: true
 
 switch:   
   - id: !extend alarm1
     name: Siren
+
+# Panic button - instantly trigger the alarm, regardless of state
+button:
+  - id: panic_button
+    platform: template
+    name: Panic Button
+    on_press:
+      - alarm_control_panel.triggered: acp1
 
 script:
   - id: trigger_timeout
