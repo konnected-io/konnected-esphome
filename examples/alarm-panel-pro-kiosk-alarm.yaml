@@ -1,29 +1,29 @@
 ####
 ##
 ## Konnected Alarm Panel Pro (ESP32) 
-## Standalone Alarm System with Keyswitch arming/disarming
+## Standalone Alarm System with Latch arming/disarming (kiosk alarm)
 ##
-## filename: alarm-panel-pro-local-alarm-keyswitch-arming.yaml
+## filename: alarm-panel-pro-kiosk-alarm.yaml
 ## GitHub: https://github.com/konnected-io/konnected-esphome
 ## Buy Konnected hardware: https://konnected.io
 ## Help & Support: https://help@konnected.io (support is provided for verified buyers of Konnected hardware)
 ##
 ## This firmware configuration implements a basic local alarm system with the Alarm Panel Pro that is
-## armed and disarmed exclusively by an external system using a relay to open/close a keyswitch zone (OFF/closed=armed; 
-## ON/open=disarmed). Leveraging ESPHome's new native Alarm Control Panel component,
+## armed and disarmed exclusively by an external signal from an electronically controlled latch.
+## Leveraging ESPHome's new native Alarm Control Panel component,
 ## the Konnected device the alarm panel states and actuates a siren/alarm when the alarm is triggered.
 ##
 ## ZONE CONFIGURATION IN THIS EXAMPLE
 ## 
 ## Zone 1: Door input sensor
-## Zone 7: Arming Relay input
+## Zone 2: Pedestal door
 ## Alarm 1: Audible alarm
 
 substitutions:
   name: konnected
   friendly_name: Konnected
-  project_name: konnected.alarm-panel-pro-local-alarm-keyswitch-arming
-  project_version: 0.1.0
+  project_name: konnected.alarm-panel-pro-kiosk-alarm
+  project_version: 0.2.0
   sensor_debounce_time: 200ms
   blink_on_state: 'true'
   zone1: GPIO4
@@ -55,8 +55,7 @@ packages:
     - packages/ethernet.yaml
     - packages/alarm-panel/zone1.yaml
     - packages/alarm-panel/zone2.yaml    
-    - packages/alarm-panel/zone7.yaml
-    - packages/alarm-panel/zone8.yaml
+    # - packages/alarm-panel/zone8.yaml
     - packages/alarm-panel/alarm1.yaml    
 
 binary_sensor:
@@ -69,18 +68,19 @@ binary_sensor:
     name: Pedestal Door
     device_class: door
 
+  # FOR FUTURE USE
   # Tilt sensor
   # Always trigger the alarm when tilted, even if disarmed
-  - id: !extend zone8
-    name: Tilt
-    device_class: tamper
-    on_state:
-      then:
-        - if:
-            condition:
-              lambda: 'return x;'
-            then:
-              - alarm_control_panel.triggered: acp1
+  # - id: !extend zone8
+  #   name: Tilt
+  #   device_class: tamper
+  #   on_state:
+  #     then:
+  #       - if:
+  #           condition:
+  #             lambda: 'return x;'
+  #           then:
+  #             - alarm_control_panel.triggered: acp1
 
   # Computed state of the electronically controlled latch which is
   # unlocked when the signal is high. Upon unlocking, the alarm system 
@@ -103,12 +103,12 @@ binary_sensor:
   # arm based on the state of both doors and the electronically
   # controlled latch
   # ON means problem; OFF means ready
-  # When the state changes to ready, reset and arm the alarm
+  # When the state changes to ready, automatically reset and arm the alarm
   - id: ready
     name: Ready
     device_class: problem
     platform: template
-    lambda: 'return id(latch).state || id(zone1).state || id(zone2).state || id(zone8).state;'
+    lambda: 'return id(latch).state || id(zone1).state || id(zone2).state;'
     on_state:
       then:
         - if:
@@ -159,8 +159,8 @@ alarm_control_panel:
   binary_sensors:
       - input: zone1
       - input: zone2
-      - input: zone8
-        trigger_mode: instant
+      # - input: zone8
+      #   trigger_mode: instant
 
   on_triggered:
     then:
