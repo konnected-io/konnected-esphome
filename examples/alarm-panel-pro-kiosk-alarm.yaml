@@ -56,6 +56,7 @@ packages:
     - packages/alarm-panel/zone1.yaml
     - packages/alarm-panel/zone2.yaml    
     # - packages/alarm-panel/zone8.yaml
+    - packages/alarm-panel/zone9.yaml
     - packages/alarm-panel/alarm1.yaml    
 
 binary_sensor:
@@ -85,12 +86,9 @@ binary_sensor:
   # Computed state of the electronically controlled latch which is
   # unlocked when the signal is high. Upon unlocking, the alarm system 
   # disarms so that the user can open the door.
-  - id: latch
-    platform: analog_threshold
+  - id: !extend zone9
     name: Latch
     device_class: lock
-    sensor_id: latch_adc
-    threshold: 3.0
     on_state:
       then:
         - if:
@@ -108,7 +106,7 @@ binary_sensor:
     name: Ready
     device_class: problem
     platform: template
-    lambda: 'return id(latch).state || id(zone1).state || id(zone2).state;'
+    lambda: 'return id(zone9).state || id(zone1).state || id(zone2).state;'
     on_state:
       then:
         - if:
@@ -117,19 +115,6 @@ binary_sensor:
             then:
               - alarm_control_panel.disarm: acp1
               - alarm_control_panel.arm_away: acp1
-
-
-# Zone 9 is connected to a variable 0V to 3.3V signal that outputs
-# at 3.3V when the latch is unlocked
-sensor:
-  - id: latch_adc
-    platform: adc
-    pin: $zone9
-    name: Latch output voltage
-    update_interval: 1s
-    attenuation: auto
-    entity_category: diagnostic
-    internal: true
 
 switch:   
   - id: !extend alarm1
