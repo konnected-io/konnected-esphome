@@ -108,14 +108,13 @@ binary_sensor:
     name: Ready
     device_class: problem
     platform: template
-    lambda: 'return id(latch).state || id(zone1).state || id(zone2).state;'
+    lambda: 'return id(acp1)->get_state() != ACP_STATE_DISARMED || id(latch).state || id(zone1).state || id(zone2).state;'
     on_state:
       then:
         - if:
             condition:
               lambda: 'return !x;'
             then:
-              - alarm_control_panel.disarm: acp1
               - alarm_control_panel.arm_away: acp1
 
 
