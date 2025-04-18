@@ -1,6 +1,10 @@
-# Configure a GDO input as an external binary sensor
+# Enables a GDO input as an external binary sensor which can be used to wire 
+# an external sensor to the Konnected GDO. For example, add a motion sensor in the garage
+# or a contact sensor that is reported independently of the garage door.
+
 defaults:
   inverted: "false"
+  device_class: "None"
 
 binary_sensor:
   - platform: gpio
@@ -9,6 +13,7 @@ binary_sensor:
       mode: INPUT_PULLUP
       inverted: ${inverted}
     name: ${name}
+    device_class: ${device_class}
     filters:
       - delayed_on_off: ${sensor_debounce_time}
     on_state:

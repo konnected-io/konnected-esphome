@@ -1,0 +1,16 @@
+# Enables a binary_sensor that reports the OPEN or CLOSED state of the garage door
+# by mirroring the state of the gdo_door cover. This enables the garage door to be
+# used in alarm system automations and other automations where a binary_sensor
+# is required.
+
+binary_sensor:
+  - id: gdo_door_sensor
+    platform: template
+    name: $garage_door_cover_name
+    device_class: garage_door
+    lambda: |-
+      if (id(gdo_door).position == COVER_CLOSED) {
+        return false;
+      } else {
+        return true;
+      }

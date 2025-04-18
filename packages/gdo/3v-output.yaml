@@ -1,0 +1,13 @@
+# Configures an input on the Konnected GDO as a continous 3.3V output.
+# This can be useful to supply power an external sensor like a temperature sensor
+
+output:
+  - platform: gpio
+    pin: ${pin}
+    id: io_${pin}
+
+switch:
+  - platform: output
+    output: io_${pin}
+    id: output_3v_${pin}
+    restore_mode: ALWAYS_ON
