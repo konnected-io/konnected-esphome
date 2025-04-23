@@ -11,7 +11,10 @@ esphome:
       then:
         - text_sensor.template.publish:
             id: device_id
-            state: !lambda 'return get_mac_address();'
+            state: !lambda return get_mac_address();
+        - text_sensor.template.publish:
+            id: project_version
+            state: !lambda return ESPHOME_PROJECT_VERSION;
 
 esp32:  
   board: wesp32
@@ -22,11 +25,6 @@ esp32:
 substitutions:
   status_led_inverted: "false"
 
-# overrides the MDNS component to add a Konnected service
-external_components:
-  - source: github://konnected-io/konnected-esphome@master
-    components: [ mdns ]
-
 text_sensor:
   - platform: template
     name: Device ID
@@ -36,7 +34,12 @@ text_sensor:
   - platform: version
     name: ESPHome Version
     hide_timestamp: true
-    
+  - platform: template
+    name: Project version
+    id: project_version
+    entity_category: diagnostic
+    update_interval: never
+
 sensor:
   - platform: uptime
     name: Uptime

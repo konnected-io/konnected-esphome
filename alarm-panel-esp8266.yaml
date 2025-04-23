@@ -96,6 +96,11 @@ packages:
       - packages/wifi.yaml
 
       ####
+      # MDNS
+      # Enables the _konnected MDNS/zeroconf service advertisement needed for the Konnected App
+      - packages/mdns.yaml
+
+      ####
       # STATUS LED
       # Enables the onboard blue status LED as an activity/error indicator
       - packages/status-led.yaml

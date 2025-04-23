@@ -47,7 +47,7 @@ substitutions:
 
 external_components:
   - source: github://konnected-io/konnected-esphome@master
-    components: [ mdns, secplus_gdo ]
+    components: [ secplus_gdo ]
 
 packages:
 

@@ -92,7 +92,7 @@ substitutions:
 
 external_components:
   - source: github://konnected-io/konnected-esphome@master
-    components: [ mdns, secplus_gdo ]
+    components: [ secplus_gdo ]
 
   # Un-comment below and comment above for local modification
   # - source:
@@ -122,6 +122,11 @@ packages:
       # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
       # wifi: !include packages/wifi.yaml
       - packages/wifi-esp32.yaml
+
+      ####
+      # MDNS
+      # Enables the _konnected MDNS/zeroconf service advertisement needed for the Konnected App
+      - packages/mdns.yaml
 
       ####
       # WARNING LED

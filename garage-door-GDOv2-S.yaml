@@ -164,6 +164,11 @@ packages:
       - packages/wifi-esp32.yaml
 
       ####
+      # MDNS
+      # Enables the _konnected MDNS/zeroconf service advertisement needed for the Konnected App
+      - packages/mdns.yaml
+
+      ####
       # PRE-CLOSE WARNING
       # Enables a pleasant and customizable pre-close warning tone  using the onboard piezo buzzer. Used to audibly 
       # warn of a garage door automatic closing.    

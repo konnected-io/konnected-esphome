@@ -100,6 +100,11 @@ packages:
       - packages/ethernet.yaml
 
       ####
+      # MDNS
+      # Enables the _konnected MDNS/zeroconf service advertisement needed for the Konnected App
+      - packages/mdns.yaml
+
+      ####
       # STATUS LED
       # Enables the onboard blue status LED as an activity/error indicator
       - packages/status-led.yaml
@@ -136,6 +141,7 @@ dashboard_import:
   import_full_config: false
 
 # Update for Ethernet issue on v1.8 and v1.9 (batch 2406)
+# not needed on batch 2408 and newer
 ethernet:
   phy_registers:
     - address: 0x10
