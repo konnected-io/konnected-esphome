@@ -38,7 +38,7 @@ substitutions:
   name: konnected
   friendly_name: Alarm Panel
   project_name: konnected.alarm-panel-esp8266
-  project_version: "1.1.2"
+  project_version: "1.1.3"
 
   ####
   # SETTINGS
@@ -133,6 +133,8 @@ logger:
     sensor: INFO
     json: INFO
     api: DEBUG
+    wifi: DEBUG
+    wifi_esp8266: DEBUG
 
 ####
 # NATIVE API for HOME ASSISTANT

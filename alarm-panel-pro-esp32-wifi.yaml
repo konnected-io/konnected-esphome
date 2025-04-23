@@ -38,7 +38,7 @@ substitutions:
   name: konnected
   friendly_name: Alarm Panel Pro
   project_name: konnected.alarm-panel-pro-wifi
-  project_version: "1.2.0"
+  project_version: "1.2.1"
 
   sensor_debounce_time: 200ms
   warning_beep_pulse_time: 100ms
