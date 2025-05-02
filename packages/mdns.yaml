@@ -10,7 +10,14 @@ mdns:
   services:
     - service: _konnected
       protocol: _tcp
-      port: !lambda return USE_WEBSERVER_PORT;
+      port: !lambda |-
+        return
+        #if defined(USE_WEBSERVER_PORT)
+          USE_WEBSERVER_PORT
+        #else
+          0
+        #endif
+        ;
       txt:
         friendly_name: !lambda return App.get_friendly_name();
         project_name: !lambda return ESPHOME_PROJECT_NAME;
