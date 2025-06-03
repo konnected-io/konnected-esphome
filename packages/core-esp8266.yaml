@@ -29,6 +29,7 @@ text_sensor:
     entity_category: diagnostic
     update_interval: never
   - platform: version
+    id: esphome_version
     name: ESPHome Version
     hide_timestamp: true
   - platform: template
