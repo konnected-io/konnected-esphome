@@ -98,9 +98,11 @@ select:
 
 button:
   - platform: factory_reset
+    id: hard_reset
     name: Factory Reset
     entity_category: config
   - platform: template
+    id: reset_door_timings
     name: Reset door timings
     entity_category: config
     on_press:
@@ -113,6 +115,7 @@ button:
       - button.press:
           id: restart_button
   - platform: template
+    id: resync
     name: Re-sync
     entity_category: config
     on_press:
