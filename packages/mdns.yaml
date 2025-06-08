@@ -1,11 +1,6 @@
 # Adds a _konnected MDNS/Zeroconf service used for discovery and identification of a Konnected device
 # in the official Konnected app and some integrations
 
-external_components:
-  - source: github://konnected-io/esphome@mdns-templatable-txt
-    refresh: 1min
-    components: [ mdns ]
-
 mdns:
   services:
     - service: _konnected
