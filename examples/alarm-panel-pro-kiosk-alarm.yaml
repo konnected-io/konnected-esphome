@@ -1,6 +1,6 @@
 ####
 ##
-## Konnected Alarm Panel Pro (ESP32) 
+## Konnected Alarm Panel Pro (ESP32)
 ## Standalone Alarm System with Latch arming/disarming (kiosk alarm)
 ##
 ## filename: alarm-panel-pro-kiosk-alarm.yaml
@@ -23,7 +23,7 @@ substitutions:
   name: konnected
   friendly_name: Konnected
   project_name: konnected.alarm-panel-pro-kiosk-alarm
-  project_version: 0.2.0
+  project_version: 0.3.0
   sensor_debounce_time: 200ms
   blink_on_state: 'true'
   zone1: GPIO4
@@ -54,9 +54,9 @@ packages:
     - packages/status-led.yaml
     - packages/ethernet.yaml
     - packages/alarm-panel/zone1.yaml
-    - packages/alarm-panel/zone2.yaml    
+    - packages/alarm-panel/zone2.yaml
     # - packages/alarm-panel/zone8.yaml
-    - packages/alarm-panel/alarm1.yaml    
+    - packages/alarm-panel/alarm1.yaml
 
 binary_sensor:
 
@@ -83,7 +83,7 @@ binary_sensor:
   #             - alarm_control_panel.triggered: acp1
 
   # Computed state of the electronically controlled latch which is
-  # unlocked when the signal is high. Upon unlocking, the alarm system 
+  # unlocked when the signal is high. Upon unlocking, the alarm system
   # disarms so that the user can open the door.
   - id: latch
     platform: analog_threshold
@@ -130,7 +130,7 @@ sensor:
     entity_category: diagnostic
     internal: true
 
-switch:   
+switch:
   - id: !extend alarm1
     name: Siren
 
@@ -142,12 +142,12 @@ button:
     on_press:
       - alarm_control_panel.triggered: acp1
 
-script:
-  - id: trigger_timeout
-    then:
-      - switch.turn_on: alarm1
-      - delay: 3min
-      - alarm_control_panel.disarm: acp1
+# script:
+#   - id: trigger_timeout
+#     then:
+#       - switch.turn_on: alarm1
+#       - delay: 3min
+#       - alarm_control_panel.disarm: acp1
 
 alarm_control_panel:
   platform: template
@@ -163,11 +163,11 @@ alarm_control_panel:
 
   on_triggered:
     then:
-      - script.execute: trigger_timeout
+      - switch.turn_on: alarm1
   on_cleared:
     then:
       - switch.turn_off: alarm1
-      - script.stop: trigger_timeout
+      # - script.stop: trigger_timeout
 
 logger:
   logs:
