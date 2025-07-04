@@ -193,6 +193,6 @@ web_server:
 esphome:
   platformio_options:
     lib_deps:
-      - https://github.com/konnected-io/gdolib#4a55112
+      - https://github.com/konnected-io/gdolib#f2db80a
     build_flags:
       - -Wl,--wrap=esp_panic_handler
