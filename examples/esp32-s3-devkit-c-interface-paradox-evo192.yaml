@@ -61,6 +61,7 @@ packages:
     - packages/core-esp32-s3.yaml
     - packages/status-led.yaml
     - packages/wifi-esp32.yaml
+    - packages/mdns.yaml
     - packages/alarm-panel/zone1.yaml
     - packages/alarm-panel/zone2.yaml
     - packages/alarm-panel/zone3.yaml
@@ -182,7 +183,6 @@ light:
     rgb_order: GRB
     pin: GPIO38
     num_leds: 1
-    rmt_channel: 0
     chipset: SK6812
     default_transition_length: 300ms
     effects:
