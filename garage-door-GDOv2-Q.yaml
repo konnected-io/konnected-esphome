@@ -57,7 +57,7 @@ substitutions:
   name: konnected
   friendly_name: GDO blaQ
   project_name: konnected.garage-door-gdov2-q
-  project_version: "1.4.1"
+  project_version: "1.5.0"
   garage_door_cover_name: Garage Door
   garage_light_name: Garage Light
   garage_openings_name: Garage Openings
@@ -193,6 +193,6 @@ web_server:
 esphome:
   platformio_options:
     lib_deps:
-      - https://github.com/konnected-io/gdolib#4a55112
+      - https://github.com/konnected-io/gdolib#f2db80a
     build_flags:
       - -Wl,--wrap=esp_panic_handler
