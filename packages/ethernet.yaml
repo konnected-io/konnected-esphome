@@ -8,5 +8,6 @@ ethernet:
 text_sensor:
   - platform: ethernet_info
     ip_address:
+      id: ip_address
       name: Ethernet IP Address
       entity_category: diagnostic
