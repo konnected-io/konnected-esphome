@@ -3,11 +3,13 @@
 # or a contact sensor that is reported independently of the garage door.
 
 defaults:
+  idx: '1'
   inverted: "false"
-  device_class: "None"
+  device_class: ""
 
 binary_sensor:
   - platform: gpio
+    id: external_sensor_${idx}
     pin: 
       number: ${pin}
       mode: INPUT_PULLUP

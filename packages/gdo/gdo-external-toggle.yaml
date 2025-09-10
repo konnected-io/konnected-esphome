@@ -4,13 +4,19 @@
 #
 # This can be useful to integrate a newer Security+ garage opener with an external
 # system that has a relay output
+#
+# Defaults to a 'Normally Open' relay type, with a momentary contact triggering
+# the door. Change `inverted` to "false" for 'Normally Closed'
+
+defaults:
+  inverted: "true"
 
 binary_sensor:
   - platform: gpio
     pin: 
       number: ${pin}
       mode: INPUT_PULLUP
-      inverted: true
+      inverted: ${inverted}
     name: Garage Door Relay
     on_click:
       min_length: 50ms
