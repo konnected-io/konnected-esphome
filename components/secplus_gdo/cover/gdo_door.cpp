@@ -85,11 +85,6 @@ void GDODoor::do_action_after_warning(const cover::CoverCall& call) {
 
 void GDODoor::do_action(const cover::CoverCall& call) {
     if (call.get_toggle()) {
-        if (this->position == COVER_CLOSED) {
-            this->set_state(GDO_DOOR_STATE_OPENING, this->position);
-        } else if (this->position == COVER_OPEN) {
-            this->set_state(GDO_DOOR_STATE_CLOSING, this->position);
-        }
         ESP_LOGD(TAG, "Sending TOGGLE action");
         gdo_door_toggle();
         return;
@@ -114,8 +109,6 @@ void GDODoor::do_action(const cover::CoverCall& call) {
                 ESP_LOGD(TAG, "Sending OPEN action");
                 gdo_door_open();
             }
-
-            this->set_state(GDO_DOOR_STATE_OPENING, this->position);
         } else if (pos == COVER_CLOSED) {
             if (this->toggle_only_) {
                 ESP_LOGD(TAG, "Sending TOGGLE action");
@@ -133,8 +126,6 @@ void GDODoor::do_action(const cover::CoverCall& call) {
                 ESP_LOGD(TAG, "Sending CLOSE action");
                 gdo_door_close();
             }
-
-            this->set_state(GDO_DOOR_STATE_CLOSING, this->position);
         } else {
             ESP_LOGD(TAG, "Moving garage door to position %f", pos);
             gdo_door_move_to_target(10000 - (pos * 10000));
@@ -157,10 +148,10 @@ void GDODoor::control(const cover::CoverCall& call) {
             if (this->pre_close_end_trigger) {
                 this->pre_close_end_trigger->trigger();
             }
+            this->set_state(GDO_DOOR_STATE_STOPPED, this->position);
         }
 
         gdo_door_stop();
-        this->set_state(GDO_DOOR_STATE_STOPPED, this->position);
         return;
     }
 
