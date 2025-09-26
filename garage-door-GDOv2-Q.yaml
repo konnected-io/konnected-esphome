@@ -165,11 +165,11 @@ dashboard_import:
 # LOGGER
 # more: https://esphome.io/components/logger.html
 logger:
-  level: VERY_VERBOSE
+  level: DEBUG
   # hardware_uart: UART0 # -- uncomment on batch 2403; not needed on batch 2404 and newer
   logs:
-    esp-idf: VERBOSE
-    api: VERBOSE
+    # esp-idf: VERBOSE
+    # api: VERBOSE
     api.service: DEBUG
     esp32_ble: DEBUG
     esp32_ble_server: DEBUG

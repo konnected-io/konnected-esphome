@@ -2,7 +2,9 @@ ethernet:
   type: $ethernet_type
   mdc_pin: GPIO16
   mdio_pin: GPIO17
-  clk_mode: GPIO0_IN
+  clk:
+    pin: GPIO0
+    mode: CLK_EXT_IN
   phy_addr: 0
 
 text_sensor:
