@@ -47,7 +47,7 @@ class GDOLight : public binary::BinaryLightOutput, public Component {
             }
 
             this->light_state_ = state;
-            ESP_LOGI(TAG, "Light state: %s", gdo_light_state_to_string(state));
+            ESP_LOGD(TAG, "Light state: %s", gdo_light_state_to_string(state));
             bool is_on = state == GDO_LIGHT_STATE_ON;
             this->state_->current_values.set_state(is_on);
             this->state_->remote_values.set_state(is_on);

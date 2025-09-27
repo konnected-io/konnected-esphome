@@ -29,9 +29,9 @@ namespace secplus_gdo {
         GDOComponent *gdo = static_cast<GDOComponent *>(arg);
         switch (event) {
         case GDO_CB_EVENT_SYNCED:
-            ESP_LOGI(TAG, "Synced: %s, protocol: %s", status->synced ? "true" : "false", gdo_protocol_type_to_string(status->protocol));
+            ESP_LOGD(TAG, "Synced: %s, protocol: %s", status->synced ? "true" : "false", gdo_protocol_type_to_string(status->protocol));
             if (status->protocol == GDO_PROTOCOL_SEC_PLUS_V2) {
-                ESP_LOGI(TAG, "Client ID: %" PRIu32 ", Rolling code: %" PRIu32, status->client_id, status->rolling_code);
+                ESP_LOGD(TAG, "Client ID: %" PRIu32 ", Rolling code: %" PRIu32, status->client_id, status->rolling_code);
                 if (status->synced) {
                     // Save the last successful ClientID rolling code value to NVS for use on reboot
                     gdo->set_client_id(status->client_id);
@@ -43,7 +43,7 @@ namespace secplus_gdo {
                 if (gdo_set_rolling_code(status->rolling_code + 100) != ESP_OK) {
                     ESP_LOGE(TAG, "Failed to set rolling code");
                 } else {
-                    ESP_LOGI(TAG, "Rolling code set to %" PRIu32 ", retryng sync", status->rolling_code);
+                    ESP_LOGD(TAG, "Rolling code set to %" PRIu32 ", retryng sync", status->rolling_code);
                     gdo_sync();
                 }
             } else {
@@ -67,50 +67,50 @@ namespace secplus_gdo {
             break;
         }
         case GDO_CB_EVENT_LEARN:
-            //ESP_LOGI(TAG, "Learn: %s", gdo_learn_state_to_string(status->learn));
+            //ESP_LOGD(TAG, "Learn: %s", gdo_learn_state_to_string(status->learn));
             break;
         case GDO_CB_EVENT_OBSTRUCTION:
-            ESP_LOGI(TAG, "Obstruction: %s", gdo_obstruction_state_to_string(status->obstruction));
+            ESP_LOGD(TAG, "Obstruction: %s", gdo_obstruction_state_to_string(status->obstruction));
             gdo->set_obstruction(status->obstruction);
             break;
         case GDO_CB_EVENT_MOTION:
-            ESP_LOGI(TAG, "Motion: %s", gdo_motion_state_to_string(status->motion));
+            ESP_LOGD(TAG, "Motion: %s", gdo_motion_state_to_string(status->motion));
             gdo->set_motion_state(status->motion);
             break;
         case GDO_CB_EVENT_BATTERY:
-            ESP_LOGI(TAG, "Battery: %s", gdo_battery_state_to_string(status->battery));
+            ESP_LOGD(TAG, "Battery: %s", gdo_battery_state_to_string(status->battery));
             break;
         case GDO_CB_EVENT_BUTTON:
-            ESP_LOGI(TAG, "Button: %s", gdo_button_state_to_string(status->button));
+            ESP_LOGD(TAG, "Button: %s", gdo_button_state_to_string(status->button));
             gdo->set_button_state(status->button);
             break;
         case GDO_CB_EVENT_MOTOR:
-            ESP_LOGI(TAG, "Motor: %s", gdo_motor_state_to_string(status->motor));
+            ESP_LOGD(TAG, "Motor: %s", gdo_motor_state_to_string(status->motor));
             gdo->set_motor_state(status->motor);
             break;
         case GDO_CB_EVENT_OPENINGS:
-            ESP_LOGI(TAG, "Openings: %d", status->openings);
+            ESP_LOGD(TAG, "Openings: %d", status->openings);
             gdo->set_openings(status->openings);
             break;
         case GDO_CB_EVENT_TTC:
-            ESP_LOGI(TAG, "Time to close: %d", status->ttc_seconds);
+            ESP_LOGD(TAG, "Time to close: %d", status->ttc_seconds);
             break;
         case GDO_CB_EVENT_PAIRED_DEVICES:
-            ESP_LOGI(TAG, "Paired devices: %d remotes, %d keypads, %d wall controls, %d accessories, %d total",
+            ESP_LOGD(TAG, "Paired devices: %d remotes, %d keypads, %d wall controls, %d accessories, %d total",
                     status->paired_devices.total_remotes, status->paired_devices.total_keypads,
                     status->paired_devices.total_wall_controls, status->paired_devices.total_accessories,
                     status->paired_devices.total_all);
             break;
         case GDO_CB_EVENT_OPEN_DURATION_MEASUREMENT:
-            ESP_LOGI(TAG, "Open duration: %d", status->open_ms);
+            ESP_LOGD(TAG, "Open duration: %d", status->open_ms);
             gdo->set_open_duration(status->open_ms);
             break;
         case GDO_CB_EVENT_CLOSE_DURATION_MEASUREMENT:
-            ESP_LOGI(TAG, "Close duration: %d", status->close_ms);
+            ESP_LOGD(TAG, "Close duration: %d", status->close_ms);
             gdo->set_close_duration(status->close_ms);
             break;
         default:
-            ESP_LOGI(TAG, "Unknown event: %d", event);
+            ESP_LOGD(TAG, "Unknown event: %d", event);
             break;
         }
     }
@@ -134,13 +134,13 @@ namespace secplus_gdo {
         gdo_get_status(&this->status_);
         if (this->start_gdo_) {
             gdo_start(gdo_event_handler, this);
-            ESP_LOGI(TAG, "secplus GDO started!");
+            ESP_LOGD(TAG, "secplus GDO started!");
         } else {
             // check every 500ms for readiness before starting GDO
             this->set_interval("gdo_start", 500, [=]() {
                 if (this->start_gdo_) {
                     gdo_start(gdo_event_handler, this);
-                    ESP_LOGI(TAG, "secplus GDO started!");
+                    ESP_LOGD(TAG, "secplus GDO started!");
                     this->cancel_interval("gdo_start");
                 }
             });

@@ -32,7 +32,7 @@ namespace secplus_gdo {
             }
 
             this->lock_state_ = state;
-            ESP_LOGI(TAG, "Lock state: %s", gdo_lock_state_to_string(state));
+            ESP_LOGD(TAG, "Lock state: %s", gdo_lock_state_to_string(state));
             this->publish_state(state == GDO_LOCK_STATE_LOCKED ?
                                          lock::LockState::LOCK_STATE_LOCKED :
                                          lock::LockState::LOCK_STATE_UNLOCKED);
