@@ -7,6 +7,10 @@ namespace secplus_gdo {
 const char *TAG = "gdo_cover";
 
 void GDODoor::set_state(gdo_door_state_t state, float position) {
+    if (this->state_ == state && this->position == position) {
+        return;
+    }
+
     if (this->pre_close_active_) {
         // If we are in the pre-close state and the door is closing,
         // then it was triggered by something else and we need to cancel the pre-close
@@ -60,7 +64,6 @@ void GDODoor::set_state(gdo_door_state_t state, float position) {
 }
 
 void GDODoor::do_action_after_warning(const cover::CoverCall& call) {
-
     if (this->pre_close_active_) {
         return;
     }
