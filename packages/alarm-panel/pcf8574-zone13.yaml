@@ -5,7 +5,7 @@ binary_sensor:
     pin:
       pcf8574: inputs_9_16
       number: $zone13
-      mode: INPUT_PULLUP
+      mode: INPUT
       inverted: true
     platform: gpio   
     filters:
