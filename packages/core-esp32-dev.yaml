@@ -62,6 +62,16 @@ ota:
   - platform: esphome
     id: konnected_ota
 
+
+####
+# I2C
+#
+i2c:
+  sda: GPIO4
+  scl:
+    number: GPIO5
+    ignore_strapping_warning: true
+
 ####
 # PCF8574
 #
