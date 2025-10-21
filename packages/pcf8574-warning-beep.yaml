@@ -1,0 +1,42 @@
+substitutions:
+  warning_beep_index: '1'
+  warning_beep_name: Warning Beep
+  warning_beep_shared: 'false'
+  warning_beep_internal_only: 'false'
+
+output:
+  - id: buzzer_out_${warning_beep_index}
+    platform: gpio
+    pin:
+      pcf8574: outputs_1_8
+      number: ${warning_beep_pin}
+      allow_other_uses: ${warning_beep_shared}
+
+script:
+  - id: error_tone_${warning_beep_index}
+    then:
+      - output.turn_on: buzzer_out_${warning_beep_index}
+      - delay: 60ms
+      - output.turn_off: buzzer_out_${warning_beep_index}
+      - delay: 50ms
+      - output.turn_on: buzzer_out_${warning_beep_index}
+      - delay: 60ms
+      - output.turn_off: buzzer_out_${warning_beep_index}
+      - delay: 50ms
+      - output.turn_on: buzzer_out_${warning_beep_index}
+      - delay: 60ms
+      - output.turn_off: buzzer_out_${warning_beep_index}
+
+light: 
+  - id: warning_beep_${warning_beep_index}
+    name: ${warning_beep_name}
+    platform: binary
+    output: buzzer_out_${warning_beep_index}
+    effects:
+      - strobe:
+          colors:
+            - state: true
+              duration: ${warning_beep_pulse_time}
+            - state: false
+              duration: ${warning_beep_pause_time}
+    internal: ${warning_beep_internal_only}

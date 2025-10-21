@@ -1,0 +1,80 @@
+esphome:
+  name: $name
+  friendly_name: $friendly_name
+  name_add_mac_suffix: true
+  min_version: '2024.12.0' # Includes ESP-IDF 5.1
+  project:
+    name: $project_name
+    version: $project_version  
+  on_boot:
+    - priority: 800.0
+      then:
+        - text_sensor.template.publish:
+            id: device_id
+            state: !lambda return get_mac_address();
+        - text_sensor.template.publish:
+            id: project_version
+            state: !lambda return ESPHOME_PROJECT_VERSION;
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+substitutions:
+  status_led_inverted: "false"
+
+text_sensor:
+  - platform: template
+    name: Device ID
+    id: device_id
+    entity_category: diagnostic
+    update_interval: never
+  - platform: version
+    id: esphome_version
+    name: ESPHome Version
+    hide_timestamp: true
+  - platform: template
+    name: Project version
+    id: project_version
+    entity_category: diagnostic
+    update_interval: never
+
+sensor:
+  - platform: uptime
+    name: Uptime
+    id: uptime_sensor
+    entity_category: diagnostic
+
+button:
+  - platform: restart
+    name: Restart
+    entity_category: config
+  # - platform: factory_reset
+  #   name: Factory Reset
+  #   entity_category: config
+
+#### 
+# OTA UPDATES
+# Enables over-the-air updates
+# more: https://esphome.io/components/ota.html
+ota:
+  - platform: esphome
+    id: konnected_ota
+
+####
+# PCF8574
+#
+pcf8574:
+  - id: inputs_1_8
+    address: 0x22
+    pcf8575: false
+  - id: inputs_9_16
+    address: 0x21
+    pcf8575: false
+  - id: outputs_1_8
+    address: 0x24
+    pcf8575: false
+  - id: outputs_9_16
+    address: 0x25
+    pcf8575: false

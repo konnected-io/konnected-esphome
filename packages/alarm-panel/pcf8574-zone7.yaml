@@ -1,0 +1,18 @@
+binary_sensor:
+
+  - id: zone7
+    name: Zone 7
+    pin:
+      pcf8574: inputs_1_8
+      number: $zone7
+      mode: INPUT_PULLUP
+      inverted: true
+    platform: gpio   
+    filters:
+      - delayed_on_off: $sensor_debounce_time
+    on_state:
+      - if:
+          condition:
+            lambda: return id(blink_on_state);
+          then:
+            - script.execute: blink_status_led

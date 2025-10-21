@@ -1,0 +1,11 @@
+switch:   
+
+  - id: alarm2
+    name: Alarm 2
+    pin:
+      pcf8574: outputs_1_8
+      number: $alarm2
+      mode: OUTPUT
+      inverted: true
+    platform: gpio
+    icon: mdi:bullhorn
