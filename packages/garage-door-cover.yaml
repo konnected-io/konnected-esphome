@@ -1,3 +1,5 @@
+substitutions:
+  transition_timeout: 60s
 
 cover:
   - platform: template
@@ -15,6 +17,7 @@ cover:
             - cover.template.publish:
                 id: garage_door
                 current_operation: OPENING
+            - script.execute: garage_door_transition_timeout
           else:
             - script.execute: error_tone_1
             - lambda: ESP_LOGW("konnected.gdov2-s","Garage door is already open. Ignoring open action.");
@@ -33,6 +36,7 @@ cover:
             - cover.template.publish:
                 id: garage_door
                 current_operation: CLOSING
+            - script.execute: garage_door_transition_timeout
           else:
             - script.execute: error_tone_1
             - lambda: ESP_LOGW("konnected.gdov2-s","Garage door is already closed. Ignoring close action.");
@@ -50,10 +54,12 @@ cover:
             - cover.template.publish:
                 id: garage_door
                 current_operation: CLOSING
+            - script.execute: garage_door_transition_timeout
           else:
             - cover.template.publish:
                 id: garage_door
                 current_operation: OPENING
+            - script.execute: garage_door_transition_timeout
       - button.press: garage_door_opener_button
     
     # Triggers the garage door button to stop only if the garage door is known to be moving
@@ -64,6 +70,21 @@ cover:
               lambda: return id(garage_door).current_operation == CoverOperation::COVER_OPERATION_IDLE;
           then:
             - button.press: garage_door_opener_button
+            - cover.template.publish:
+                id: garage_door
+                current_operation: IDLE
+
+script:
+  - id: garage_door_transition_timeout
+    mode: restart
+    then:
+      - delay: $transition_timeout 
+      - if:
+          condition:
+            lambda: return id(garage_door).current_operation == COVER_OPERATION_OPENING ||
+                           id(garage_door).current_operation == COVER_OPERATION_CLOSING;
+          then:
+            - lambda: ESP_LOGW("konnected.gdov2-s","Garage door transition timed out. Resetting state.");
             - cover.template.publish:
                 id: garage_door
                 current_operation: IDLE
