@@ -75,7 +75,7 @@ void GDODoor::do_action_after_warning(const cover::CoverCall& call) {
         this->pre_close_start_trigger->trigger();
     }
 
-    this->set_timeout("pre_close", this->pre_close_duration_, [=]() {
+    this->set_timeout("pre_close", this->pre_close_duration_, [this, call]() {
         this->pre_close_active_ = false;
         if (this->pre_close_end_trigger) {
             this->pre_close_end_trigger->trigger();

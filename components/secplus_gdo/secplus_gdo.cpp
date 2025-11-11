@@ -137,7 +137,7 @@ namespace secplus_gdo {
             ESP_LOGD(TAG, "secplus GDO started!");
         } else {
             // check every 500ms for readiness before starting GDO
-            this->set_interval("gdo_start", 500, [=]() {
+            this->set_interval("gdo_start", 500, [this]() {
                 if (this->start_gdo_) {
                     gdo_start(gdo_event_handler, this);
                     ESP_LOGD(TAG, "secplus GDO started!");
