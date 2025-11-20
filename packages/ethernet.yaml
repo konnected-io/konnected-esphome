@@ -3,7 +3,9 @@ ethernet:
   mdc_pin: GPIO16
   mdio_pin: GPIO17
   clk:
-    pin: GPIO0
+    pin:
+      number: GPIO0
+      ignore_strapping_warning: true
     mode: CLK_EXT_IN
   phy_addr: 0
 
