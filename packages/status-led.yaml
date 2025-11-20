@@ -12,6 +12,7 @@ light:
 
 script:
   - id: blink_status_led
+    mode: queued
     then:
       - light.turn_on: blue_status_led
       - delay: 100ms
