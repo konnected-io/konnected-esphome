@@ -176,13 +176,13 @@ namespace secplus_gdo {
 // Need to wrap the panic handler to disable the GDO TX pin and pull the output high to
 // prevent spuriously triggering the GDO to open when the ESP32 panics.
 extern "C" {
-#include "hal/gpio_hal.h"
+#include "hal/gpio_ll.h"
 
 void __real_esp_panic_handler(void*);
 
 void __wrap_esp_panic_handler(void* info) {
     esp_rom_printf("PANIC: DISABLING GDO UART TX PIN!\n");
-    gpio_hal_iomux_func_sel(GPIO_PIN_MUX_REG[(gpio_num_t)GDO_UART_TX_PIN], PIN_FUNC_GPIO);
+    gpio_ll_func_sel(GPIO_LL_GET_HW((gpio_num_t)GDO_UART_TX_PIN), (uint8_t)GDO_UART_TX_PIN, PIN_FUNC_GPIO);
     gpio_set_direction((gpio_num_t)GDO_UART_TX_PIN, GPIO_MODE_INPUT);
     gpio_pulldown_en((gpio_num_t)GDO_UART_TX_PIN);
 
