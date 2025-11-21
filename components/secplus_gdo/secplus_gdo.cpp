@@ -182,7 +182,7 @@ void __real_esp_panic_handler(void*);
 
 void __wrap_esp_panic_handler(void* info) {
     esp_rom_printf("PANIC: DISABLING GDO UART TX PIN!\n");
-    gpio_ll_func_sel(GPIO_LL_GET_HW((gpio_num_t)GDO_UART_TX_PIN), (uint8_t)GDO_UART_TX_PIN, PIN_FUNC_GPIO);
+    gpio_ll_func_sel(nullptr, GPIO_NUM_1, PIN_FUNC_GPIO);
     gpio_set_direction((gpio_num_t)GDO_UART_TX_PIN, GPIO_MODE_INPUT);
     gpio_pulldown_en((gpio_num_t)GDO_UART_TX_PIN);
 
