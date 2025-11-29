@@ -51,7 +51,7 @@ async def to_code(config):
     if "duration" in str(config[CONF_TYPE]):
         await number.register_number(var, config, min_value=0x0, max_value=0xffff, step=1)
     elif "client_id" in str(config[CONF_TYPE]):
-        await number.register_number(var, config, min_value=0x666, max_value=0x7ff666, step=1)
+        await number.register_number(var, config, min_value=0x0, max_value=0xffffffff, step=1)
     else:
         await number.register_number(var, config, min_value=0x0, max_value=0xffffffff, step=1)
     await cg.register_component(var, config)
