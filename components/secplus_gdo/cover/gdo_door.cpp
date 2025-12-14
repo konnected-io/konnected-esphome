@@ -144,16 +144,7 @@ void GDODoor::control(const cover::CoverCall& call) {
 
     if (call.get_stop()) {
         ESP_LOGD(TAG, "Stop command received");
-        if (this->pre_close_active_) {
-            ESP_LOGD(TAG, "Canceling pending action");
-            this->cancel_timeout("pre_close");
-            this->pre_close_active_ = false;
-            if (this->pre_close_end_trigger) {
-                this->pre_close_end_trigger->trigger();
-            }
-            this->set_state(GDO_DOOR_STATE_STOPPED, this->position);
-        }
-
+        this->cancel_pre_close_warning();
         gdo_door_stop();
         return;
     }
@@ -226,6 +217,19 @@ void GDODoor::control(const cover::CoverCall& call) {
         }
 
         this->target_position_ = pos;
+    }
+}
+
+void GDODoor::cancel_pre_close_warning() {
+    if (this->pre_close_active_) {
+        ESP_LOGD(TAG, "Canceling pending pre-close warning");
+        this->cancel_timeout("pre_close");
+        this->pre_close_active_ = false;
+        if (this->pre_close_end_trigger) {
+            this->pre_close_end_trigger->trigger();
+        }
+        this->set_state(GDO_DOOR_STATE_OPEN, this->position);
+        this->publish_state(false);
     }
 }
 

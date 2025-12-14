@@ -54,7 +54,12 @@ namespace secplus_gdo {
         }
 
         void register_button(std::function<void(bool)> f) { f_button = f; }
-        void set_button_state(gdo_button_state_t state) { if (f_button) { f_button(state == GDO_BUTTON_STATE_PRESSED); } }
+        void set_button_state(gdo_button_state_t state) {
+            if (state == GDO_BUTTON_STATE_PRESSED && this->door_)
+                this->door_->cancel_pre_close_warning();
+            if (f_button)
+                f_button(state == GDO_BUTTON_STATE_PRESSED);
+        }
 
         void register_motor(std::function<void(bool)> f) { f_motor = f; }
         void set_motor_state(gdo_motor_state_t state) { if (f_motor) { f_motor(state == GDO_MOTOR_STATE_ON); } }
