@@ -3,12 +3,12 @@
 ## Konnected Garage Door Opener blaQ (GDOv2-Q)
 ## Firmware configuration for ESPHome
 ##
-## filename: garage-door-esp32.yaml
+## filename: garage-door-GDOv2-Q.yaml
 ## GitHub: https://github.com/konnected-io/konnected-esphome
 ## Buy Konnected hardware: https://konnected.io
 ## Help & Support: https://help@konnected.io (support is provided for purchasers of Konnected hardware)
 ##
-## Copyright© 2023 Konnected Inc.
+## Copyright© 2023-2026 Konnected Inc.
 ##
 ## Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation
 ## files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy,
@@ -23,20 +23,6 @@
 ## IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##
 ####
-
-####
-# INTRODUCTION
-#
-# This ESPHome based firmware configuration is designed for the Konnected Garage Door Opener GDOv2-S which is built on the ESP32-S3-MINI.
-# The Garage Door Opener retrofits an older style traditional garage door opener with a dry-contact trigger and has the
-# following features which are included as packages below:
-#
-# 1. Wired contact sensor for detecting open/closed state of garage door
-# 2. Optical range sensor for detecting open/closed state of garage door
-# 3. Emulates a garage door opener button wired to a dry contact relay to open/close the garage door.
-# 4. Adds a Garage Door "Cover" entity that is exposed to Home Assistant. The cover entity incorporates the state of the
-#    garage door and controls to open/close/stop it.
-# 5. Flashes an onboard LED and beeps an onboard piezo sounder as a warning before automatically closing.
 
 ####
 # GENERAL SETTINGS
@@ -57,7 +43,7 @@ substitutions:
   name: konnected
   friendly_name: GDO blaQ
   project_name: konnected.garage-door-gdov2-q
-  project_version: "1.5.5"
+  project_version: "1.5.6"
   garage_door_cover_name: Garage Door
   garage_light_name: Garage Light
   garage_openings_name: Garage Openings
