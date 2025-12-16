@@ -9,4 +9,5 @@ button:
             effect: strobe
         - button.press: warning_tone
         - delay: $garage_door_close_warning_duration
+        - rtttl.stop
         - light.turn_off: warning_led
