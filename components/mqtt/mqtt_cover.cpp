@@ -97,26 +97,24 @@ const EntityBase *MQTTCoverComponent::get_entity() const { return this->cover_; 
 bool MQTTCoverComponent::send_initial_state() { return this->publish_state(); }
 bool MQTTCoverComponent::publish_state() {
   auto traits = this->cover_->get_traits();
-  bool success = true;
-  if (traits.get_supports_position()) {
-    std::string pos = value_accuracy_to_string(roundf(this->cover_->position * 100), 0);
-    if (!this->publish(this->get_position_state_topic(), pos))
-      success = false;
-  }
-  if (traits.get_supports_tilt()) {
-    std::string pos = value_accuracy_to_string(roundf(this->cover_->tilt * 100), 0);
-    if (!this->publish(this->get_tilt_state_topic(), pos))
-      success = false;
-  }
   const char *state_s = this->cover_->current_operation == COVER_OPERATION_OPENING   ? "opening"
                         : this->cover_->current_operation == COVER_OPERATION_CLOSING ? "closing"
                         : this->cover_->position == COVER_CLOSED                     ? "closed"
                         : this->cover_->position == COVER_OPEN                       ? "open"
                         : traits.get_supports_position()                             ? "open"
                                                                                      : "unknown";
-  if (!this->publish(this->get_state_topic_(), state_s))
-    success = false;
-  return success;
+
+  return this->publish_json(this->get_state_topic_(), [this, traits, state_s](JsonObject root) {
+    // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks) false positive with ArduinoJson
+    root["state"] = state_s;
+    if (traits.get_supports_position()) {
+      root["position"] = static_cast<int>(roundf(this->cover_->position * 100));
+    }
+    if (traits.get_supports_tilt()) {
+      root["tilt"] = static_cast<int>(roundf(this->cover_->tilt * 100));
+    }
+    // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
+  });
 }
 
 }  // namespace mqtt
