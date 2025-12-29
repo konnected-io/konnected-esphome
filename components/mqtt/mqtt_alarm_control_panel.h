@@ -3,38 +3,33 @@
 #include "esphome/core/defines.h"
 
 #ifdef USE_MQTT
-#ifdef USE_LIGHT
+#ifdef USE_ALARM_CONTROL_PANEL
 
 #include "mqtt_component.h"
-#include "esphome/components/light/light_state.h"
+#include "esphome/components/alarm_control_panel/alarm_control_panel.h"
 
 namespace esphome {
 namespace mqtt {
 
-class MQTTJSONLightComponent : public mqtt::MQTTComponent, public light::LightRemoteValuesListener {
+class MQTTAlarmControlPanelComponent : public mqtt::MQTTComponent {
  public:
-  explicit MQTTJSONLightComponent(light::LightState *state);
-
-  light::LightState *get_state() const;
+  explicit MQTTAlarmControlPanelComponent(alarm_control_panel::AlarmControlPanel *alarm_control_panel);
 
   void setup() override;
-
-  void dump_config() override;
 
   void send_discovery(JsonObject root, mqtt::SendDiscoveryConfig &config) override;
 
   bool send_initial_state() override;
 
-  // LightRemoteValuesListener interface
-  void on_light_remote_values_update() override;
+  bool publish_state();
+
+  void dump_config() override;
 
  protected:
   std::string component_type() const override;
   const EntityBase *get_entity() const override;
 
-  bool publish_state_();
-
-  light::LightState *state_;
+  alarm_control_panel::AlarmControlPanel *alarm_control_panel_;
 };
 
 }  // namespace mqtt
