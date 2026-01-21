@@ -18,6 +18,7 @@ binary_sensor:
       mode: INPUT_PULLUP
       inverted: ${inverted}
     name: Garage Door Relay
+    id: gdo_external_toggle
     on_click:
       min_length: 50ms
       max_length: 3s
