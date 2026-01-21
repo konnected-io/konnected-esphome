@@ -78,6 +78,7 @@ substitutions:
 
 external_components:
   - source: github://konnected-io/konnected-esphome@master
+    refresh: 5min
     components: [ secplus_gdo ]
 
   # Un-comment below and comment above for local modification
