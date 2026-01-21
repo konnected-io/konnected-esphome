@@ -39,7 +39,7 @@ namespace secplus_gdo {
         void update_state(gdo_protocol_type_t protocol) {
             if (this->has_index(protocol)) {
                 std::string value = this->at(protocol).value();
-                const char *current_option = this->current_option();
+                const char *current_option = this->current_option().c_str();
                 if (this->has_state() && value != current_option) {
                     this->pref_.save(&protocol);
                 }
