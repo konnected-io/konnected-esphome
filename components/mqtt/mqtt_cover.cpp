@@ -6,8 +6,7 @@
 #ifdef USE_MQTT
 #ifdef USE_COVER
 
-namespace esphome {
-namespace mqtt {
+namespace esphome::mqtt {
 
 static const char *const TAG = "mqtt.cover";
 
@@ -91,7 +90,7 @@ void MQTTCoverComponent::send_discovery(JsonObject root, mqtt::SendDiscoveryConf
   }
 }
 
-std::string MQTTCoverComponent::component_type() const { return "cover"; }
+MQTT_COMPONENT_TYPE(MQTTCoverComponent, "cover")
 const EntityBase *MQTTCoverComponent::get_entity() const { return this->cover_; }
 
 bool MQTTCoverComponent::send_initial_state() { return this->publish_state(); }
@@ -106,12 +105,12 @@ bool MQTTCoverComponent::publish_state() {
 
   return this->publish_json(this->get_state_topic_(), [this, traits, state_s](JsonObject root) {
     // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks) false positive with ArduinoJson
-    root["state"] = state_s;
+    root[ESPHOME_F("state")] = state_s;
     if (traits.get_supports_position()) {
-      root["position"] = static_cast<int>(roundf(this->cover_->position * 100));
+      root[ESPHOME_F("position")] = static_cast<int>(roundf(this->cover_->position * 100));
     }
     if (traits.get_supports_tilt()) {
-      root["tilt"] = static_cast<int>(roundf(this->cover_->tilt * 100));
+      root[ESPHOME_F("tilt")] = static_cast<int>(roundf(this->cover_->tilt * 100));
     }
     // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
   });
