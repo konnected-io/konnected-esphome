@@ -116,8 +116,7 @@ bool MQTTCoverComponent::publish_state() {
   });
 }
 
-}  // namespace mqtt
-}  // namespace esphome
+}  // namespace esphome::mqtt
 
 #endif
 #endif  // USE_MQTT
