@@ -75,11 +75,12 @@ jobs:
   
       - name: Build Alarm Panel ESP8266
         id: build-alarm-panel-esp8266
-        run: | 
+        run: |
           esphome compile alarm-panel-esp8266.yaml
           build_path=.esphome/build/konnected/.pioenvs/konnected
-          fname=konnected-esphome-alarm-panel-esp8266-${{ steps.alarm-panel-esp8266-version.outputs.data }}.bin          
+          fname=konnected-esphome-alarm-panel-esp8266-${{ steps.alarm-panel-esp8266-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
+          cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
           echo "fname=$fname" >> $GITHUB_OUTPUT
           
       - name: Build Alarm Panel Pro v1.x (WiFi)
@@ -89,6 +90,7 @@ jobs:
           build_path=.esphome/build/konnected/.pioenvs/konnected
           fname=konnected-esphome-alarm-panel-pro-v1-wifi-${{ steps.alarm-panel-pro-wifi-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
+          cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
           echo "fname=$fname" >> $GITHUB_OUTPUT
 
       - name: Build Alarm Panel Pro v1.x (Ethernet)
@@ -98,6 +100,7 @@ jobs:
           build_path=.esphome/build/konnected/.pioenvs/konnected
           fname=konnected-esphome-alarm-panel-pro-v1-ethernet-${{ steps.alarm-panel-pro-ethernet-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
+          cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
           echo "fname=$fname" >> $GITHUB_OUTPUT
 
       - name: Build Alarm Panel Pro v1.8 (Ethernet)
@@ -105,8 +108,9 @@ jobs:
         run: |
           esphome compile alarm-panel-pro-v1.8-ethernet.yaml
           build_path=.esphome/build/konnected/.pioenvs/konnected
-          fname=konnected-esphome-alarm-panel-pro-v1.8-ethernet-${{ steps.alarm-panel-pro-v18-ethernet-version.outputs.data }}.bin          
+          fname=konnected-esphome-alarm-panel-pro-v1.8-ethernet-${{ steps.alarm-panel-pro-v18-ethernet-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
+          cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
           echo "fname=$fname" >> $GITHUB_OUTPUT
 
       - name: Build Garage Door GDOv1-S
@@ -116,6 +120,7 @@ jobs:
           build_path=.esphome/build/konnected/.pioenvs/konnected
           fname=konnected-esphome-garage-door-GDOv1-S-${{ steps.garage-door-gdov1-s-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
+          cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
           echo "fname=$fname" >> $GITHUB_OUTPUT
       
       - name: Build Garage Door GDOv2-S
@@ -125,6 +130,7 @@ jobs:
           build_path=.esphome/build/konnected/.pioenvs/konnected
           fname=konnected-esphome-garage-door-GDOv2-S-${{ steps.garage-door-gdov2-s-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
+          cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
           echo "fname=$fname" >> $GITHUB_OUTPUT
 
       - name: Build Garage Door GDOv2-Q
@@ -134,6 +140,7 @@ jobs:
           build_path=.esphome/build/konnected/.pioenvs/konnected
           fname=konnected-esphome-garage-door-GDOv2-Q-${{ steps.garage-door-gdov2-q-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
+          cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
           echo "fname=$fname" >> $GITHUB_OUTPUT
   
       - uses: keithweaver/aws-s3-github-action@v1.0.0
