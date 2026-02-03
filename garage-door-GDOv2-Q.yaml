@@ -43,7 +43,7 @@ substitutions:
   name: konnected
   friendly_name: GDO blaQ
   project_name: konnected.garage-door-gdov2-q
-  project_version: "1.5.6"
+  project_version: "1.5.7"
   garage_door_cover_name: Garage Door
   garage_light_name: Garage Light
   garage_openings_name: Garage Openings
