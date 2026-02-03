@@ -56,7 +56,7 @@ void GDODoor::set_state(gdo_door_state_t state, float position) {
     }
 
     #ifdef USE_MQTT // if MQTT component is enabled, do not publish the same state more than once
-    if (this->state_ == state && this->current_operation == this->prev_operation) { return; }
+    if (this->current_operation == this->prev_operation) { return; }
     #endif
 
     this->publish_state(false);

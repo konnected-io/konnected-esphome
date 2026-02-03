@@ -4,6 +4,7 @@ mqtt:
   id: konnected_cloud
   broker: $mqtt_addr
   port: 8883
+  keepalive: 60s
   client_id: $mac
   topic_prefix: esphome/$mac
   discovery_prefix: esphome/${mac}/discovery
