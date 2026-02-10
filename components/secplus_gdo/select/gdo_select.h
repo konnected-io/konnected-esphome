@@ -22,7 +22,7 @@ namespace secplus_gdo {
         void setup() override {
             std::string value;
             size_t index;
-            this->pref_ = global_preferences->make_preference<size_t>(this->get_object_id_hash());
+            this->pref_ = this->make_entity_preference<size_t>();
             if (!this->pref_.load(&index)) {
                 value = this->initial_option_;
             } else if (!this->has_index(index)) {

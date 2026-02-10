@@ -25,7 +25,7 @@ namespace secplus_gdo {
         void dump_config() override {}
         void setup() override {
             bool value = false;
-            this->pref_ = global_preferences->make_preference<bool>(this->get_object_id_hash());
+            this->pref_ = this->make_entity_preference<bool>();
             if (!this->pref_.load(&value)) {
                 value = false;
             }

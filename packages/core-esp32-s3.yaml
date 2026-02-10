@@ -2,7 +2,7 @@ esphome:
   name: $name
   friendly_name: $friendly_name
   name_add_mac_suffix: true
-  min_version: '2024.12.0' # Includes ESP-IDF 5.1
+  min_version: '2026.2.0' # Required for make_entity_preference() API (PR #13505)
   project:
     name: $project_name
     version: $project_version

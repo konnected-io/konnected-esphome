@@ -29,7 +29,7 @@ class GDONumber : public number::Number, public Component {
         void dump_config() override {}
         void setup() override {
             float value;
-            this->pref_ = global_preferences->make_preference<float>(this->get_object_id_hash());
+            this->pref_ = this->make_entity_preference<float>();
             if (!this->pref_.load(&value)) {
                 value = 0;
             }
