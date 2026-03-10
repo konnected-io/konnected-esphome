@@ -23,7 +23,7 @@ substitutions:
   name: konnected
   friendly_name: Konnected
   project_name: konnected.alarm-panel-pro-kiosk-alarm
-  project_version: 0.3.0
+  project_version: 0.4.0
   sensor_debounce_time: 200ms
   blink_on_state: 'true'
   zone1: GPIO4
@@ -154,7 +154,7 @@ alarm_control_panel:
   name: Konnected Alarm
   id: acp1
   pending_time: 2s
-  trigger_time: 3min
+  # trigger_time: 3min
   binary_sensors:
       - input: zone1
       - input: zone2
