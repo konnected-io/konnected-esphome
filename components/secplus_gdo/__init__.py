@@ -55,3 +55,7 @@ async def to_code(config):
     await cg.register_component(var, config)
     cg.add_define("GDO_UART_TX_PIN", config[CONF_OUTPUT_GDO]['number'])
     cg.add_define("GDO_UART_RX_PIN", config[CONF_INPUT_GDO]['number'])
+
+    # Rename ESPHome's __wrap_esp_panic_handler so ours can take its place
+    # and chain to theirs after disabling the GDO UART TX pin.
+    cg.add_build_flag("-D__wrap_esp_panic_handler=__esphome_wrap_esp_panic_handler")

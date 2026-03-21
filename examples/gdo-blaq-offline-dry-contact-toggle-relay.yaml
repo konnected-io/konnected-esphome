@@ -186,4 +186,3 @@ esphome:
       - https://github.com/konnected-io/gdolib#4a55112
     build_flags:
       - -DUART_SCLK_DEFAULT=UART_SCLK_APB
-      - -Wl,--wrap=esp_panic_handler

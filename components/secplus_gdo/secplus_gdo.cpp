@@ -173,12 +173,17 @@ namespace secplus_gdo {
 } // namespace secplus_gdo
 } // namespace esphome
 
-// Need to wrap the panic handler to disable the GDO TX pin and pull the output high to
-// prevent spuriously triggering the GDO to open when the ESP32 panics.
+// Wrap the panic handler to disable the GDO TX pin to prevent spuriously
+// triggering the GDO to open when the ESP32 panics. ESPHome 2026.3+ also
+// defines __wrap_esp_panic_handler (for crash‑data capture), so our
+// __init__.py renames theirs via a preprocessor macro. We #undef it here
+// so we can define the real __wrap_esp_panic_handler ourselves and chain
+// to ESPHome's (renamed) version after disabling the TX pin.
+#undef __wrap_esp_panic_handler
 extern "C" {
 #include "hal/gpio_ll.h"
 
-void __real_esp_panic_handler(void*);
+void __esphome_wrap_esp_panic_handler(void*);
 
 void __wrap_esp_panic_handler(void* info) {
     esp_rom_printf("PANIC: DISABLING GDO UART TX PIN!\n");
@@ -186,7 +191,8 @@ void __wrap_esp_panic_handler(void* info) {
     gpio_set_direction((gpio_num_t)GDO_UART_TX_PIN, GPIO_MODE_INPUT);
     gpio_pulldown_en((gpio_num_t)GDO_UART_TX_PIN);
 
-    // Call the original panic handler
-    __real_esp_panic_handler(info);
+    // Chain to ESPHome's crash handler (captures backtrace, then calls
+    // the original IDF panic handler)
+    __esphome_wrap_esp_panic_handler(info);
 }
 } //extern "C"
