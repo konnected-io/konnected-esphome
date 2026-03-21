@@ -25,7 +25,7 @@ esp32:
     type: esp-idf
     version: recommended
     sdkconfig_options:
-      CONFIG_LWIP_MAX_SOCKETS: "16"
+      CONFIG_LWIP_MAX_SOCKETS: "20"
 
 substitutions:
   status_led_inverted: "false"
