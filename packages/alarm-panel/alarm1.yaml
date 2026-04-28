@@ -1,8 +1,12 @@
-switch:   
+substitutions:
+  alarm1_ignore_strapping_warning: "false"
+
+switch:
 
   - id: alarm1
     name: Alarm 1
-    pin: $alarm1
     platform: gpio
     icon: mdi:bullhorn
-
+    pin:
+      number: $alarm1
+      ignore_strapping_warning: ${alarm1_ignore_strapping_warning}

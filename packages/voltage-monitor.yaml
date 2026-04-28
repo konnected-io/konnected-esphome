@@ -1,0 +1,17 @@
+substitutions:
+  voltage_monitor_update_interval: 60s
+  voltage_monitor_accuracy_decimals: "2"
+
+sensor:
+  - platform: adc
+    pin: $voltage_monitor_pin
+    name: $voltage_monitor_name
+    id: $voltage_monitor_id
+    attenuation: 12db
+    update_interval: $voltage_monitor_update_interval
+    accuracy_decimals: $voltage_monitor_accuracy_decimals
+    device_class: voltage
+    unit_of_measurement: V
+    entity_category: diagnostic
+    filters:
+      - multiply: $voltage_monitor_divider

@@ -1,0 +1,18 @@
+button:
+  - id: mqtt_toggle
+    name: Toggle Cloud
+    platform: template
+    on_press:
+      - if:
+          condition:
+            mqtt.connected:
+          then:
+            - logger.log:
+                level: WARN
+                format: "MQTT disabled"
+            - mqtt.disable:
+          else:
+            - logger.log:
+                level: WARN
+                format: "MQTT enabled"
+            - mqtt.enable:

@@ -1,0 +1,16 @@
+ethernet:
+  type: W5500
+  clk_pin: $ethernet_clk_pin
+  mosi_pin: $ethernet_mosi_pin
+  miso_pin: $ethernet_miso_pin
+  cs_pin: $ethernet_cs_pin
+  interrupt_pin: $ethernet_int_pin
+  reset_pin: $ethernet_rst_pin
+  clock_speed: 25MHz
+
+text_sensor:
+  - platform: ethernet_info
+    ip_address:
+      id: ip_address
+      name: Ethernet IP Address
+      entity_category: diagnostic

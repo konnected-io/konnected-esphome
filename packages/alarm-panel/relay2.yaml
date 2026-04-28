@@ -1,0 +1,11 @@
+substitutions:
+  relay2_ignore_strapping_warning: "false"
+
+switch:
+  - id: relay2
+    name: Relay 2
+    platform: gpio
+    icon: mdi:electric-switch
+    pin:
+      number: $relay2
+      ignore_strapping_warning: ${relay2_ignore_strapping_warning}

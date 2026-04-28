@@ -48,8 +48,6 @@ Reusable YAML modules that provide specific features:
 
 **mdns** - Modified mDNS component for Konnected service advertisement
 
-**mqtt** - Modified MQTT component
-
 ### Component Pattern
 Each component subfolder follows ESPHome's component structure:
 - `__init__.py` - Python code for YAML schema validation and C++ code generation

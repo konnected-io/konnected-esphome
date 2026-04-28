@@ -1,0 +1,190 @@
+####
+##
+## Konnected Alarm Panel 3e (ESP32-S3 + W5500 Ethernet/PoE)
+## Firmware configuration for ESPHome
+##
+## filename: alarm-panel-3e.yaml
+## GitHub: https://github.com/konnected-io/konnected-esphome
+## Buy Konnected hardware: https://konnected.io
+## Help & Support: https://help@konnected.io (support is provided for purchasers of Konnected hardware)
+##
+## Copyright© 2026 Konnected Inc.
+##
+## Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation
+## files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy,
+## modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+## is furnished to do so, subject to the following conditions:
+##
+## The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+##
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+## OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+## LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+## IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+##
+####
+
+####
+# GENERAL SETTINGS
+# Customize these variables to your preferences and needs
+# more: https://esphome.io/guides/configuration-types.html#substitutions
+substitutions:
+
+  ####
+  # NAME
+  # By default, the name of the ESPHome device is "konnected-xxxxxx" where xxxxxx is a unique identifier. The device's
+  # hostname on your network is also defined by the name, defaulting to "konnected-xxxxxx.local". Edit this variable to
+  # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
+  name: konnected
+  friendly_name: Alarm Panel 3e
+  project_name: konnected.alarm-panel-3e
+  project_version: "0.1.0"
+
+  sensor_debounce_time: 200ms
+  blink_on_state: "true"
+
+  ####
+  # ZONE MAPPING
+  # Do not edit this section.
+  zone1: GPIO8
+  zone2: GPIO7
+  zone3: GPIO5
+  zone4: GPIO21
+  zone5: GPIO36
+  zone6: GPIO38
+  zone7: GPIO41
+  zone8: GPIO2
+  zone9: GPIO16
+  zone10: GPIO6
+  zone11: GPIO4
+  zone12: GPIO47
+  zone13: GPIO37
+  zone14: GPIO40
+  zone15: GPIO42
+  zone16: GPIO1
+
+  ####
+  # OUTPUT MAPPING
+  # Do not edit this section.
+  relay1: GPIO46
+  relay2: GPIO3
+  alarm1: GPIO48
+  alarm2: GPIO45
+  relay1_ignore_strapping_warning: "true"   # GPIO46 is a strapping pin (boot mode); driver pull-down ensures safety
+  relay2_ignore_strapping_warning: "true"   # GPIO3 is a strapping pin (JTAG);     driver pull-down ensures safety
+  alarm2_ignore_strapping_warning: "true"   # GPIO45 is a strapping pin (VDD_SPI);  driver pull-down ensures safety
+
+  ####
+  # ETHERNET (W5500) PIN MAPPING
+  # Do not edit this section.
+  ethernet_cs_pin: GPIO10
+  ethernet_mosi_pin: GPIO11
+  ethernet_clk_pin: GPIO12
+  ethernet_miso_pin: GPIO13
+  ethernet_int_pin: GPIO14
+  ethernet_rst_pin: GPIO15
+
+  ####
+  # MISC HARDWARE
+  status_led: GPIO35
+  status_led_inverted: "false"
+  voltage_monitor_pin: GPIO17
+  voltage_monitor_divider: "4.8"
+  voltage_monitor_name: Supply Voltage
+  voltage_monitor_id: supply_voltage
+
+  ####
+  # CONNECTION MAPPINGS
+  warning_beep_pin: GPIO39
+
+####
+# PACKAGES
+# Each package includes the alarm panel feature
+# Remove or comment out any packages that you do not need or want.
+# If you're developing/installing locally, replace the github package line with the local package include above it.
+packages:
+
+  remote_package:
+    url: https://github.com/konnected-io/konnected-esphome
+    ref: master
+    refresh: 5min
+    files:
+
+      ####
+      # CORE
+      # This package is required and sets up core features.
+      - packages/core-esp32-s3.yaml
+
+      ####
+      # ETHERNET (W5500)
+      # Enables W5500 SPI ethernet connectivity.
+      - packages/ethernet-w5500.yaml
+
+      ####
+      # MDNS
+      # Enables the _konnected MDNS/zeroconf service advertisement needed for the Konnected App
+      - packages/mdns.yaml
+
+      ####
+      # STATUS LED
+      # Enables the onboard WS2812B RGB status LED as an activity/error indicator
+      - packages/status-led-rgb.yaml
+
+      ####
+      # SUPPLY VOLTAGE MONITOR
+      # Diagnostic sensor for the 12V supply rail (voltage divider on GPIO17)
+      - packages/voltage-monitor.yaml
+
+      ####
+      # INPUT ZONES
+      - packages/alarm-panel/zone1.yaml
+      - packages/alarm-panel/zone2.yaml
+      - packages/alarm-panel/zone3.yaml
+      - packages/alarm-panel/zone4.yaml
+      - packages/alarm-panel/zone5.yaml
+      - packages/alarm-panel/zone6.yaml
+      - packages/alarm-panel/zone7.yaml
+      - packages/alarm-panel/zone8.yaml
+      - packages/alarm-panel/zone9.yaml
+      - packages/alarm-panel/zone10.yaml
+      - packages/alarm-panel/zone11.yaml
+      - packages/alarm-panel/zone12.yaml
+      - packages/alarm-panel/zone13.yaml
+      - packages/alarm-panel/zone14.yaml
+      - packages/alarm-panel/zone15.yaml
+      - packages/alarm-panel/zone16.yaml
+
+      ####
+      # OUTPUTS
+      - packages/alarm-panel/alarm1.yaml
+      - packages/alarm-panel/alarm2.yaml
+      - packages/alarm-panel/relay1.yaml
+      - packages/alarm-panel/relay2.yaml
+
+      ####
+      # BUZZER (RTTTL)
+      # Drives the onboard piezo buzzer with the RTTTL ringtone player. Exposes a 'play_rtttl'
+      # service for arbitrary tunes plus pre-defined tones (ominous, urgent, mario, etc.).
+      - packages/buzzer-rtttl.yaml
+
+dashboard_import:
+  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-3e.yaml@master
+  import_full_config: false
+
+####
+# WEB SEVER
+# Enables the built-in web server for viewing the device state, internals and controls via web browser
+# on the same local network as the device.
+web_server:
+  include_internal: true
+
+####
+# LOGGER
+# more: https://esphome.io/components/logger.html
+logger:
+
+####
+# NATIVE API for HOME ASSISTANT
+# Enables the native API for Home Assistant
+# more: https://esphome.io/components/api.html
+api:
