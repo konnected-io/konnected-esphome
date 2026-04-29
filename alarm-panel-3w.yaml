@@ -1,9 +1,9 @@
 ####
 ##
-## Konnected Alarm Panel 3e (ESP32-S3 + W5500 Ethernet/PoE)
+## Konnected Alarm Panel 3w (ESP32-S3 + WiFi)
 ## Firmware configuration for ESPHome
 ##
-## filename: alarm-panel-3e.yaml
+## filename: alarm-panel-3w.yaml
 ## GitHub: https://github.com/konnected-io/konnected-esphome
 ## Buy Konnected hardware: https://konnected.io
 ## Help & Support: https://help@konnected.io (support is provided for purchasers of Konnected hardware)
@@ -36,8 +36,8 @@ substitutions:
   # hostname on your network is also defined by the name, defaulting to "konnected-xxxxxx.local". Edit this variable to
   # customize the name and hostname. Note: only lowercase characters, numbers and hyphen(-) are allowed.
   name: konnected
-  friendly_name: Alarm Panel 3e
-  project_name: konnected.alarm-panel-3e
+  friendly_name: Alarm Panel 3w
+  project_name: konnected.alarm-panel-3w
   project_version: "0.1.0"
 
   sensor_debounce_time: 200ms
@@ -75,16 +75,6 @@ substitutions:
   alarm2_ignore_strapping_warning: "true"   # GPIO45 is a strapping pin (VDD_SPI);  driver pull-down ensures safety
 
   ####
-  # ETHERNET (W5500) PIN MAPPING
-  # Do not edit this section.
-  ethernet_cs_pin: GPIO10
-  ethernet_mosi_pin: GPIO11
-  ethernet_clk_pin: GPIO12
-  ethernet_miso_pin: GPIO13
-  ethernet_int_pin: GPIO14
-  ethernet_rst_pin: GPIO15
-
-  ####
   # MISC HARDWARE
   status_led: GPIO35
   status_led_inverted: "false"
@@ -118,9 +108,9 @@ packages:
       - packages/core-esp32-s3.yaml
 
       ####
-      # ETHERNET (W5500)
-      # Enables W5500 SPI ethernet connectivity.
-      - packages/ethernet-w5500.yaml
+      # WIFI
+      # Enables WiFi connectivity, captive portal fallback, and Improv provisioning.
+      - packages/wifi-esp32.yaml
 
       ####
       # MDNS
@@ -170,7 +160,7 @@ packages:
       - packages/buzzer-rtttl.yaml
 
 dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-3e.yaml@master
+  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-3w.yaml@master
   import_full_config: false
 
 ####
