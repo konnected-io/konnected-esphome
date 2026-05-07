@@ -1,0 +1,1019 @@
+openapi: 3.1.0
+info:
+  title: GDO blaQ REST API
+  summary: Local REST API for the Konnected GDO blaQ (GDOv2-Q) — ESPHome ≥ 2026.7
+  description: |
+    ## API Version 2.0.0 — ESPHome 2026.7+ URL Format
+
+    This specification documents the Konnected GDO blaQ (model GDOv2-Q) REST API for devices
+    running **ESPHome firmware 2026.7.0 and later**. ESPHome 2026.7 introduces a new URL routing
+    format that uses entity display names instead of sanitized `object_id` slugs.
+
+    For devices running ESPHome < 2026.7, refer to the [v2 API specification](../v2/openapi-gdo-blaq-GDOv2-Q.yaml).
+
+    ### What Changed in ESPHome 2026.7
+
+    Prior to ESPHome 2026.7, REST endpoints used URL slugs derived from entity names by lowercasing
+    and replacing non-alphanumeric characters with underscores. For example, the garage door cover
+    was accessed at `/cover/garage_door`.
+
+    Starting with ESPHome 2026.7, entity display names are used directly in the path:
+    `/cover/Garage%20Door`.
+
+    | ESPHome version     | URL format accepted              | Notes                              |
+    |---------------------|----------------------------------|------------------------------------|
+    | ≤ 2026.1.2          | Old `object_id` slugs only       | e.g., `/cover/garage_door`         |
+    | 2026.1.3 – 2026.6.x | Both old and new URLs accepted   | Old format deprecated; logs warnings |
+    | ≥ 2026.7.0          | New display-name URLs only       | Old slugs return 404               |
+
+    ### URL Encoding
+
+    Entity names with spaces or special characters must be percent-encoded in HTTP requests:
+
+    | Character | Encoded | Example                                         |
+    |-----------|---------|-------------------------------------------------|
+    | Space     | `%20`   | `Garage Door` → `Garage%20Door`                 |
+    | `+`       | `%2B`   | `Security+ protocol` → `Security%2B%20protocol` |
+
+    ### Entity Names Are Firmware-Defined
+
+    Entity display names — and therefore URL paths — are compiled into firmware at build time.
+    If entity names are customized, all REST paths change accordingly. See the
+    [Endpoint Discovery Pattern](../endpoint-discovery-pattern.md) guide for a robust strategy
+    that discovers paths at runtime instead of hardcoding them.
+
+    ### SSE Event Stream
+
+    The device exposes a Server-Sent Events stream at `GET /events` for real-time state updates.
+    See the [SSE Events Reference](../sse-events.md) for full documentation, including the
+    `id`/`name_id` transition between ESPHome 2026.1.3 and 2026.8.0.
+
+    ### Further Reading
+
+    - [Migration Guide](../migration-guide.md) — step-by-step migration from v2 to v3 URLs
+    - [Endpoint Discovery Pattern](../endpoint-discovery-pattern.md) — resilient runtime discovery
+    - [SSE Events Reference](../sse-events.md) — real-time event stream documentation
+    - [ESPHome Web API](https://esphome.io/web-api/) — upstream ESPHome documentation
+
+  version: 2.0.0
+  termsOfService: https://konnected.io/terms
+  contact:
+    name: Konnected Support
+    url: https://support.konnected.io
+    email: help@konnected.io
+
+servers:
+  - url: http://{deviceHost}
+    description: Konnected GDO blaQ on the local network
+    variables:
+      deviceHost:
+        default: 192.168.1.100
+        description: |
+          Device IP address or mDNS hostname. GDO blaQ devices advertise themselves via mDNS as
+          `{device-name}.local` (default: `konnected.local`).
+
+tags:
+  - name: Garage Door
+    description: Garage door cover — open, close, stop, toggle, and position control
+  - name: Garage Light
+    description: Garage opener light control
+  - name: Remote Control Lock
+    description: Lock or unlock the garage opener's wireless remote controls
+  - name: Sensors
+    description: Binary and numeric sensors (motion, obstruction, motor, wall button, openings)
+  - name: Configuration
+    description: Protocol selection and learn mode configuration
+  - name: Device
+    description: Device diagnostics, metadata, and control
+
+paths:
+
+  # ──────────────────────────────────────────────────────────
+  # GARAGE DOOR COVER
+  # ──────────────────────────────────────────────────────────
+
+  /cover/Garage%20Door:
+    get:
+      tags: [Garage Door]
+      summary: Garage door state
+      description: |
+        Returns the current state and operation of the garage door.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/cover/garage_door`
+        - v3 (ESPHome ≥ 2026.7): `/cover/Garage%20Door`
+      responses:
+        '200':
+          description: Garage door state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cover'
+              examples:
+                open:
+                  summary: Door open and idle
+                  value:
+                    id: "cover-garage_door"
+                    name_id: "cover/Garage Door"
+                    state: "OPEN"
+                    current_operation: "IDLE"
+                    value: 1
+                closed:
+                  summary: Door closed and idle
+                  value:
+                    id: "cover-garage_door"
+                    name_id: "cover/Garage Door"
+                    state: "CLOSED"
+                    current_operation: "IDLE"
+                    value: 0
+                opening:
+                  summary: Door currently opening
+                  value:
+                    id: "cover-garage_door"
+                    name_id: "cover/Garage Door"
+                    state: "OPEN"
+                    current_operation: "OPENING"
+                    value: 1
+                closing:
+                  summary: Door currently closing
+                  value:
+                    id: "cover-garage_door"
+                    name_id: "cover/Garage Door"
+                    state: "CLOSED"
+                    current_operation: "CLOSING"
+                    value: 0
+
+  /cover/Garage%20Door/open:
+    post:
+      tags: [Garage Door]
+      summary: Open the garage door
+      description: |
+        Sends an open command to the garage opener. If the door is already open, the command
+        is ignored.
+
+        **v2 → v3:** `/cover/garage_door/open` → `/cover/Garage%20Door/open`
+      responses:
+        '200':
+          description: Open command sent
+
+  /cover/Garage%20Door/close:
+    post:
+      tags: [Garage Door]
+      summary: Close the garage door
+      description: |
+        Sends a close command to the garage opener after executing the pre-close warning sequence
+        (audible beeps and LED flash). If the door is already closed, the command is ignored.
+
+        **v2 → v3:** `/cover/garage_door/close` → `/cover/Garage%20Door/close`
+      responses:
+        '200':
+          description: Close command sent (pre-close warning will execute first)
+
+  /cover/Garage%20Door/stop:
+    post:
+      tags: [Garage Door]
+      summary: Stop the garage door
+      description: |
+        Sends a stop command while the door is in motion.
+
+        **v2 → v3:** `/cover/garage_door/stop` → `/cover/Garage%20Door/stop`
+      responses:
+        '200':
+          description: Stop command sent
+
+  /cover/Garage%20Door/toggle:
+    post:
+      tags: [Garage Door]
+      summary: Toggle the garage door
+      description: |
+        Toggles the garage door: opens it if closed, closes it if open (executing the pre-close
+        warning first).
+
+        **v2 → v3:** `/cover/garage_door/toggle` → `/cover/Garage%20Door/toggle`
+      responses:
+        '200':
+          description: Toggle command sent
+
+  /cover/Garage%20Door/set:
+    post:
+      tags: [Garage Door]
+      summary: Set garage door position
+      description: |
+        Moves the garage door to a specific position expressed as a decimal fraction from `0.0`
+        (fully closed) to `1.0` (fully open). For example, `0.5` is half-open.
+
+        **v2 → v3:** `/cover/garage_door/set` → `/cover/Garage%20Door/set`
+      parameters:
+        - name: position
+          in: query
+          required: true
+          schema:
+            type: number
+            minimum: 0.0
+            maximum: 1.0
+          description: Target position as a decimal fraction (0.0 = closed, 1.0 = open).
+          example: 0.5
+      responses:
+        '200':
+          description: Position command sent
+
+  # ──────────────────────────────────────────────────────────
+  # GARAGE LIGHT
+  # ──────────────────────────────────────────────────────────
+
+  /light/Garage%20Light:
+    get:
+      tags: [Garage Light]
+      summary: Garage light state
+      description: |
+        Returns the current state of the garage opener light.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/light/garage_light`
+        - v3 (ESPHome ≥ 2026.7): `/light/Garage%20Light`
+      responses:
+        '200':
+          description: Garage light state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/light'
+              examples:
+                on:
+                  summary: Light on
+                  value:
+                    id: "light-garage_light"
+                    name_id: "light/Garage Light"
+                    state: "ON"
+                off:
+                  summary: Light off
+                  value:
+                    id: "light-garage_light"
+                    name_id: "light/Garage Light"
+                    state: "OFF"
+
+  /light/Garage%20Light/turn_on:
+    post:
+      tags: [Garage Light]
+      summary: Turn on the garage light
+      description: |
+        **v2 → v3:** `/light/garage_light/turn_on` → `/light/Garage%20Light/turn_on`
+      responses:
+        '200':
+          description: Turn-on command sent
+
+  /light/Garage%20Light/turn_off:
+    post:
+      tags: [Garage Light]
+      summary: Turn off the garage light
+      description: |
+        **v2 → v3:** `/light/garage_light/turn_off` → `/light/Garage%20Light/turn_off`
+      responses:
+        '200':
+          description: Turn-off command sent
+
+  /light/Garage%20Light/toggle:
+    post:
+      tags: [Garage Light]
+      summary: Toggle the garage light
+      description: |
+        **v2 → v3:** `/light/garage_light/toggle` → `/light/Garage%20Light/toggle`
+      responses:
+        '200':
+          description: Toggle command sent
+
+  # ──────────────────────────────────────────────────────────
+  # REMOTE CONTROL LOCK
+  # ──────────────────────────────────────────────────────────
+
+  /lock/Lock:
+    get:
+      tags: [Remote Control Lock]
+      summary: Remote control lock state
+      description: |
+        Returns the state of the garage opener's Remote Control Lock feature. When locked, all
+        wireless remote controls (key fobs, wall buttons) are disabled at the opener. The GDO blaQ
+        itself continues to operate normally.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/lock/lock`
+        - v3 (ESPHome ≥ 2026.7): `/lock/Lock`
+      responses:
+        '200':
+          description: Lock state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/lock'
+              examples:
+                unlocked:
+                  summary: Remotes unlocked (normal operation)
+                  value:
+                    id: "lock-lock"
+                    name_id: "lock/Lock"
+                    state: "UNLOCKED"
+                    value: 0
+                locked:
+                  summary: Remotes locked
+                  value:
+                    id: "lock-lock"
+                    name_id: "lock/Lock"
+                    state: "LOCKED"
+                    value: 1
+
+  /lock/Lock/lock:
+    post:
+      tags: [Remote Control Lock]
+      summary: Lock remote controls
+      description: |
+        Activates the Remote Control Lock, disabling all wireless remotes.
+
+        **v2 → v3:** `/lock/lock/lock` → `/lock/Lock/lock`
+      responses:
+        '200':
+          description: Lock command sent
+
+  /lock/Lock/unlock:
+    post:
+      tags: [Remote Control Lock]
+      summary: Unlock remote controls
+      description: |
+        Deactivates the Remote Control Lock, re-enabling wireless remotes.
+
+        **v2 → v3:** `/lock/lock/unlock` → `/lock/Lock/unlock`
+      responses:
+        '200':
+          description: Unlock command sent
+
+  # ──────────────────────────────────────────────────────────
+  # BINARY SENSORS
+  # ──────────────────────────────────────────────────────────
+
+  /binary_sensor/Motion:
+    get:
+      tags: [Sensors]
+      summary: Motion sensor state
+      description: |
+        Returns the state of the garage opener's built-in motion sensor (if equipped).
+        `ON` indicates motion detected; `OFF` indicates no motion.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/binary_sensor/motion`
+        - v3 (ESPHome ≥ 2026.7): `/binary_sensor/Motion`
+      responses:
+        '200':
+          description: Motion sensor state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+              examples:
+                detected:
+                  summary: Motion detected
+                  value:
+                    id: "binary-sensor-motion"
+                    name_id: "binary_sensor/Motion"
+                    state: "ON"
+                    value: true
+                clear:
+                  summary: No motion
+                  value:
+                    id: "binary-sensor-motion"
+                    name_id: "binary_sensor/Motion"
+                    state: "OFF"
+                    value: false
+
+  /binary_sensor/Obstruction:
+    get:
+      tags: [Sensors]
+      summary: Safety beam obstruction state
+      description: |
+        Returns the state of the garage door safety beam (photo eye) obstruction sensor.
+        `ON` indicates an object is blocking the beam; `OFF` indicates the path is clear.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/binary_sensor/obstruction`
+        - v3 (ESPHome ≥ 2026.7): `/binary_sensor/Obstruction`
+      responses:
+        '200':
+          description: Obstruction sensor state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+              example:
+                id: "binary-sensor-obstruction"
+                name_id: "binary_sensor/Obstruction"
+                state: "OFF"
+                value: false
+
+  /binary_sensor/Motor:
+    get:
+      tags: [Sensors]
+      summary: Garage motor running state
+      description: |
+        Returns `ON` while the garage door motor is running (door in motion),
+        and `OFF` when the motor is idle.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/binary_sensor/motor`
+        - v3 (ESPHome ≥ 2026.7): `/binary_sensor/Motor`
+      responses:
+        '200':
+          description: Motor state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+              example:
+                id: "binary-sensor-motor"
+                name_id: "binary_sensor/Motor"
+                state: "OFF"
+                value: false
+
+  /binary_sensor/Wall%20Button:
+    get:
+      tags: [Sensors]
+      summary: Wall button state
+      description: |
+        Returns `ON` while the garage opener wall button is pressed, and `OFF` when released.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/binary_sensor/wall_button`
+        - v3 (ESPHome ≥ 2026.7): `/binary_sensor/Wall%20Button`
+      responses:
+        '200':
+          description: Wall button state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+              example:
+                id: "binary-sensor-wall_button"
+                name_id: "binary_sensor/Wall Button"
+                state: "OFF"
+                value: false
+
+  /binary_sensor/Synced:
+    get:
+      tags: [Sensors]
+      summary: Protocol sync state
+      description: |
+        Returns `ON` when the GDO blaQ is successfully synchronized with the garage opener's
+        rolling code. Returns `OFF` during initial pairing or after a sync loss. The garage door
+        cannot be controlled until this is `ON`.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/binary_sensor/synced`
+        - v3 (ESPHome ≥ 2026.7): `/binary_sensor/Synced`
+      responses:
+        '200':
+          description: Protocol sync state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+              examples:
+                synced:
+                  summary: Synced with opener
+                  value:
+                    id: "binary-sensor-synced"
+                    name_id: "binary_sensor/Synced"
+                    state: "ON"
+                    value: true
+                not_synced:
+                  summary: Not synced
+                  value:
+                    id: "binary-sensor-synced"
+                    name_id: "binary_sensor/Synced"
+                    state: "OFF"
+                    value: false
+
+  # ──────────────────────────────────────────────────────────
+  # NUMERIC SENSOR
+  # ──────────────────────────────────────────────────────────
+
+  /sensor/Garage%20Openings:
+    get:
+      tags: [Sensors]
+      summary: Cumulative garage door opening count
+      description: |
+        Returns the total number of times the garage door has opened since the GDO blaQ was paired
+        with the opener. This counter is maintained by the opener hardware and reflects its lifetime
+        cycle count.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/sensor/garage_openings`
+        - v3 (ESPHome ≥ 2026.7): `/sensor/Garage%20Openings`
+      responses:
+        '200':
+          description: Garage openings count
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sensor'
+              examples:
+                known:
+                  summary: Count available
+                  value:
+                    id: "sensor-garage_openings"
+                    name_id: "sensor/Garage Openings"
+                    state: "1247"
+                    value: 1247
+                unknown:
+                  summary: Count unavailable (not yet synced)
+                  value:
+                    id: "sensor-garage_openings"
+                    name_id: "sensor/Garage Openings"
+                    state: "NA"
+                    value: null
+
+  # ──────────────────────────────────────────────────────────
+  # SECURITY+ PROTOCOL SELECT
+  # ──────────────────────────────────────────────────────────
+
+  /select/Security%2B%20protocol:
+    get:
+      tags: [Configuration]
+      summary: Security+ protocol setting
+      description: |
+        Returns the currently selected Security+ communication protocol. The GDO blaQ supports
+        Security+ 1.0, Security+ 2.0, and Security+ 1.0 with Smart Panel.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/select/security__protocol`
+          *(double underscore because `+` and space both sanitize to `_`)*
+        - v3 (ESPHome ≥ 2026.7): `/select/Security%2B%20protocol`
+          *(URL-encode `+` as `%2B` and space as `%20`)*
+      responses:
+        '200':
+          description: Current Security+ protocol setting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/select'
+              example:
+                id: "select-security__protocol"
+                name_id: "select/Security+ protocol"
+                state: "auto"
+                value: "auto"
+
+  /select/Security%2B%20protocol/set:
+    post:
+      tags: [Configuration]
+      summary: Set Security+ protocol
+      description: |
+        Sets the Security+ communication protocol. In most cases `auto` (the default) will
+        correctly detect and use the appropriate protocol for your opener.
+
+        Pass the option value as a URL-encoded string in the `option` query parameter.
+
+        | Display option                        | `option` parameter value               |
+        |---------------------------------------|----------------------------------------|
+        | `auto`                                | `auto`                                 |
+        | `Security+ 1.0`                       | `security%2B1.0`                       |
+        | `Security+ 1.0 with smart panel`      | `security%2B1.0%20with%20smart%20panel`|
+        | `Security+ 2.0`                       | `security%2B2.0`                       |
+
+        **v2 → v3:** `/select/security__protocol/set` → `/select/Security%2B%20protocol/set`
+      parameters:
+        - name: option
+          in: query
+          required: true
+          schema:
+            type: string
+          description: URL-encoded protocol option value (see table above).
+          example: auto
+      responses:
+        '200':
+          description: Protocol option set
+
+  # ──────────────────────────────────────────────────────────
+  # LEARN MODE SWITCH
+  # ──────────────────────────────────────────────────────────
+
+  /switch/Learn:
+    get:
+      tags: [Configuration]
+      summary: Learn mode state
+      description: |
+        Returns the state of the opener's learn mode. Learn mode allows pairing new wireless
+        remote controls with the garage opener.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/switch/learn`
+        - v3 (ESPHome ≥ 2026.7): `/switch/Learn`
+      responses:
+        '200':
+          description: Learn mode state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+              example:
+                id: "switch-learn"
+                name_id: "switch/Learn"
+                state: "OFF"
+                value: false
+
+  /switch/Learn/turn_on:
+    post:
+      tags: [Configuration]
+      summary: Enable learn mode
+      description: |
+        Activates learn mode on the garage opener, enabling pairing of a new wireless remote.
+
+        **v2 → v3:** `/switch/learn/turn_on` → `/switch/Learn/turn_on`
+      responses:
+        '200':
+          description: Learn mode enabled
+
+  /switch/Learn/turn_off:
+    post:
+      tags: [Configuration]
+      summary: Disable learn mode
+      description: |
+        Deactivates learn mode on the garage opener.
+
+        **v2 → v3:** `/switch/learn/turn_off` → `/switch/Learn/turn_off`
+      responses:
+        '200':
+          description: Learn mode disabled
+
+  /switch/Learn/toggle:
+    post:
+      tags: [Configuration]
+      summary: Toggle learn mode
+      description: |
+        **v2 → v3:** `/switch/learn/toggle` → `/switch/Learn/toggle`
+      responses:
+        '200':
+          description: Learn mode toggled
+
+  # ──────────────────────────────────────────────────────────
+  # DEVICE SENSORS
+  # ──────────────────────────────────────────────────────────
+
+  /sensor/WiFi%20Signal:
+    get:
+      tags: [Device]
+      summary: Wi-Fi signal strength (dBm)
+      description: |
+        Returns the Wi-Fi RSSI in dBm.
+
+        **v2 → v3:** `/sensor/wifi_signal_rssi` → `/sensor/WiFi%20Signal`
+      responses:
+        '200':
+          description: Wi-Fi RSSI
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sensor'
+              example:
+                id: "sensor-wifi_signal_db"
+                name_id: "sensor/WiFi Signal"
+                state: "-58.0 dBm"
+                value: -58.0
+
+  /sensor/WiFi%20Signal%20%25:
+    get:
+      tags: [Device]
+      summary: Wi-Fi signal strength (%)
+      description: |
+        Returns Wi-Fi signal strength as a percentage (0–100%).
+
+        **v2 → v3:** `/sensor/wifi_signal__` → `/sensor/WiFi%20Signal%20%25`
+      responses:
+        '200':
+          description: Wi-Fi signal strength (%)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sensor'
+              example:
+                id: "sensor-wifi_signal_pct"
+                name_id: "sensor/WiFi Signal %"
+                state: "84.0 %"
+                value: 84.0
+
+  /sensor/Uptime:
+    get:
+      tags: [Device]
+      summary: Device uptime (seconds)
+      description: |
+        Returns seconds since last boot.
+
+        **v2 → v3:** `/sensor/uptime` → `/sensor/Uptime`
+      responses:
+        '200':
+          description: Uptime in seconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sensor'
+              example:
+                id: "sensor-uptime_sensor"
+                name_id: "sensor/Uptime"
+                state: "172800.0 s"
+                value: 172800.0
+
+  /text_sensor/Device%20ID:
+    get:
+      tags: [Device]
+      summary: Device ID (MAC address)
+      description: |
+        **v2 → v3:** `/text_sensor/device_id` → `/text_sensor/Device%20ID`
+      responses:
+        '200':
+          description: Device ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/text_sensor'
+              example:
+                id: "text-sensor-device_id"
+                name_id: "text_sensor/Device ID"
+                state: "a1b2c3d4e5f6"
+                value: "a1b2c3d4e5f6"
+
+  /text_sensor/IP%20Address:
+    get:
+      tags: [Device]
+      summary: IP Address
+      description: |
+        **v2 → v3:** `/text_sensor/ip_address` → `/text_sensor/IP%20Address`
+      responses:
+        '200':
+          description: Device IP address
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/text_sensor'
+              example:
+                id: "text-sensor-ip_address"
+                name_id: "text_sensor/IP Address"
+                state: "192.168.1.101"
+                value: "192.168.1.101"
+
+  /text_sensor/ESPHome%20Version:
+    get:
+      tags: [Device]
+      summary: ESPHome firmware version
+      description: |
+        Returns the ESPHome version the firmware was compiled with. Useful for detecting which
+        URL format the device expects.
+
+        **v2 → v3:** `/text_sensor/esphome_version` → `/text_sensor/ESPHome%20Version`
+      responses:
+        '200':
+          description: ESPHome version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/text_sensor'
+              example:
+                id: "text-sensor-esphome_version"
+                name_id: "text_sensor/ESPHome Version"
+                state: "2026.7.0"
+                value: "2026.7.0"
+
+  # ──────────────────────────────────────────────────────────
+  # DEVICE CONTROL BUTTONS
+  # ──────────────────────────────────────────────────────────
+
+  /button/Pre-close%20Warning/press:
+    post:
+      tags: [Garage Door]
+      summary: Trigger the pre-close warning
+      description: |
+        Manually triggers the pre-close warning sequence (audible beeps and LED flash). The
+        firmware automatically executes this before every close command — you do not need to call
+        this endpoint before calling `/cover/Garage%20Door/close`. Use it only if you want to
+        trigger the warning independently.
+
+        **v2 → v3:** `/button/pre_close_warning/press` → `/button/Pre-close%20Warning/press`
+      responses:
+        '200':
+          description: Pre-close warning triggered
+
+  /button/Play%20sound/press:
+    post:
+      tags: [Garage Door]
+      summary: Play the pre-close warning sound
+      description: |
+        Triggers the pre-close warning audio tone only (no LED flash).
+
+        **v2 → v3:** `/button/play_sound/press` → `/button/Play%20sound/press`
+      responses:
+        '200':
+          description: Sound triggered
+
+  /button/Re-sync/press:
+    post:
+      tags: [Configuration]
+      summary: Re-sync with garage opener
+      description: |
+        Forces a re-synchronization of the rolling code with the garage opener. Use this if the
+        GDO blaQ loses sync after power disruption or manual remote presses while disconnected.
+
+        This endpoint was not documented in the v2 spec. Available in all firmware versions.
+
+        **v3 URL:** `/button/Re-sync/press`
+      responses:
+        '200':
+          description: Re-sync triggered
+
+  /button/Restart/press:
+    post:
+      tags: [Device]
+      summary: Restart the device
+      description: |
+        Triggers a software reboot. The device briefly goes offline and reconnects.
+
+        **v2 → v3:** `/button/restart/press` → `/button/Restart/press`
+      responses:
+        '200':
+          description: Restart command received
+
+  /button/Factory%20Reset/press:
+    post:
+      tags: [Device]
+      summary: Factory reset the device
+      description: |
+        ⚠️ **Warning:** This performs a full factory reset. All configuration including Wi-Fi
+        credentials will be erased. The device will go offline and require physical proximity
+        for Wi-Fi reconfiguration.
+
+        **v2 → v3:** `/button/factory_reset/press` → `/button/Factory%20Reset/press`
+      responses:
+        '200':
+          description: Factory reset initiated
+
+components:
+  schemas:
+    binary_sensor:
+      type: object
+      description: Binary sensor state response
+      properties:
+        id:
+          type: string
+          description: |
+            Entity identifier. Format depends on ESPHome firmware version:
+            - **ESPHome < 2026.8.0 (legacy):** `"{domain}-{object_id}"` using hyphens
+              (e.g., `"binary-sensor-motion"`).
+            - **ESPHome ≥ 2026.8.0 (permanent):** `"{domain}/{Entity Name}"` using slash
+              (e.g., `"binary_sensor/Motion"`).
+          examples:
+            legacy:
+              summary: ESPHome < 2026.8.0
+              value: "binary-sensor-motion"
+            new_format:
+              summary: ESPHome ≥ 2026.8.0
+              value: "binary_sensor/Motion"
+        name_id:
+          type: string
+          description: |
+            **Present only in ESPHome 2026.1.3 through 2026.7.x (transition period).**
+            New-format entity identifier: `"{domain}/{Entity Name}"`. Prefer this field over `id`
+            during the transition. Removed in ESPHome 2026.8.0, when `id` permanently adopts
+            this format.
+          example: "binary_sensor/Motion"
+        state:
+          type: string
+          enum: [ON, OFF]
+          description: "`ON` = active/detected/triggered; `OFF` = inactive/clear"
+        value:
+          type: boolean
+          description: Boolean state. `true` = ON, `false` = OFF.
+
+    sensor:
+      type: object
+      description: Numeric sensor state response
+      properties:
+        id:
+          type: string
+          description: Entity identifier (see `binary_sensor.id` for version-dependent format).
+          example: "sensor-garage_openings"
+        name_id:
+          type: string
+          description: New-format identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "sensor/Garage Openings"
+        state:
+          type: string
+          description: Human-readable value with units.
+        value:
+          type:
+            - number
+            - "null"
+          description: Numeric value, or `null` if unavailable.
+
+    text_sensor:
+      type: object
+      description: Text sensor state response
+      properties:
+        id:
+          type: string
+          example: "text-sensor-device_id"
+        name_id:
+          type: string
+          description: New-format identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "text_sensor/Device ID"
+        state:
+          type: string
+        value:
+          type: string
+
+    light:
+      type: object
+      description: Light entity state response
+      properties:
+        id:
+          type: string
+          examples:
+            legacy:
+              value: "light-garage_light"
+            new_format:
+              value: "light/Garage Light"
+        name_id:
+          type: string
+          description: New-format identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "light/Garage Light"
+        state:
+          type: string
+          enum: [ON, OFF]
+
+    cover:
+      type: object
+      description: Garage door cover state response
+      properties:
+        id:
+          type: string
+          description: |
+            Entity identifier (see `binary_sensor.id` for version-dependent format details).
+          examples:
+            legacy:
+              summary: ESPHome < 2026.8.0
+              value: "cover-garage_door"
+            new_format:
+              summary: ESPHome ≥ 2026.8.0
+              value: "cover/Garage Door"
+        name_id:
+          type: string
+          description: New-format identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "cover/Garage Door"
+        state:
+          type: string
+          enum: [OPEN, CLOSED]
+          description: Door position state.
+        current_operation:
+          type: string
+          enum: [IDLE, OPENING, CLOSING]
+          description: Current movement state.
+        value:
+          type: integer
+          enum: [0, 1]
+          description: "`1` = open, `0` = closed"
+
+    lock:
+      type: object
+      description: Remote control lock state response
+      properties:
+        id:
+          type: string
+          examples:
+            legacy:
+              value: "lock-lock"
+            new_format:
+              value: "lock/Lock"
+        name_id:
+          type: string
+          description: New-format identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "lock/Lock"
+        state:
+          type: string
+          enum: [LOCKED, UNLOCKED, UNKNOWN]
+        value:
+          type: integer
+          description: "`1` = locked, `0` = unlocked"
+
+    select:
+      type: object
+      description: Select entity state response
+      properties:
+        id:
+          type: string
+          examples:
+            legacy:
+              value: "select-security__protocol"
+            new_format:
+              value: "select/Security+ protocol"
+        name_id:
+          type: string
+          description: New-format identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "select/Security+ protocol"
+        state:
+          type: string
+          description: Currently selected option value.
+        value:
+          type: string
+          description: Same as `state` for select entities.

@@ -1,0 +1,688 @@
+openapi: 3.1.0
+info:
+  title: GDO White REST API
+  summary: Local REST API for the Konnected GDO White (GDOv2-S / GDOv1-S) — ESPHome ≥ 2026.7
+  description: |
+    ## API Version 2.0.0 — ESPHome 2026.7+ URL Format
+
+    This specification documents the Konnected GDO White (models GDOv2-S and GDOv1-S) REST API
+    for devices running **ESPHome firmware 2026.7.0 and later**. ESPHome 2026.7 introduces a new
+    URL routing format that uses entity display names instead of sanitized `object_id` slugs.
+
+    For devices running ESPHome < 2026.7, refer to the [v2 API specification](../v2/openapi-gdo-white-GDOv2-S.yaml).
+
+    ### What Changed in ESPHome 2026.7
+
+    Prior to ESPHome 2026.7, REST endpoints used URL slugs derived from entity names by lowercasing
+    and replacing non-alphanumeric characters with underscores. For example, the wired sensor was
+    accessed at `/binary_sensor/wired_sensor`.
+
+    Starting with ESPHome 2026.7, the same sensor is accessed at `/binary_sensor/Wired%20Sensor`.
+
+    | ESPHome version     | URL format accepted              | Notes                              |
+    |---------------------|----------------------------------|------------------------------------|
+    | ≤ 2026.1.2          | Old `object_id` slugs only       | e.g., `/binary_sensor/wired_sensor`|
+    | 2026.1.3 – 2026.6.x | Both old and new URLs accepted   | Old format deprecated; logs warnings |
+    | ≥ 2026.7.0          | New display-name URLs only       | Old slugs return 404               |
+
+    ### URL Encoding
+
+    Entity names with spaces must be percent-encoded in HTTP requests:
+    - Space → `%20` (e.g., `Wired Sensor` → `Wired%20Sensor`)
+
+    ### GDO White Architecture
+
+    The GDO White uses a dry-contact relay output to trigger the garage door opener button, combined
+    with one or both of these door state sensors:
+
+    - **Wired sensor input** — a physical wired contact (magnetic reed switch or dry contact)
+      connected to the dedicated input terminal.
+    - **Optical laser range sensor** (GDOv2-S only) — a VL53L0X time-of-flight sensor that
+      measures the distance to the garage door. When the measured distance matches the calibrated
+      "open door" distance, the door is reported as open.
+
+    The garage door cover entity combines readings from both sensors to determine door state.
+
+    ### SSE Event Stream
+
+    The device exposes a Server-Sent Events stream at `GET /events` for real-time state updates.
+    See the [SSE Events Reference](../sse-events.md) for full documentation.
+
+    ### Further Reading
+
+    - [Migration Guide](../migration-guide.md) — step-by-step migration from v2 to v3 URLs
+    - [Endpoint Discovery Pattern](../endpoint-discovery-pattern.md) — resilient runtime discovery
+    - [SSE Events Reference](../sse-events.md) — real-time event stream documentation
+
+  version: 2.0.0
+  termsOfService: https://konnected.io/terms
+  contact:
+    name: Konnected Support
+    url: https://support.konnected.io
+    email: help@konnected.io
+
+servers:
+  - url: http://{deviceHost}
+    description: Konnected GDO White on the local network
+    variables:
+      deviceHost:
+        default: 192.168.1.100
+        description: |
+          Device IP address or mDNS hostname. GDO White devices advertise themselves via mDNS as
+          `{device-name}.local` (default: `konnected.local`).
+
+tags:
+  - name: Garage Door
+    description: Garage door cover — open, close, stop, toggle, and door state detection
+  - name: Sensors
+    description: Wired input, laser range sensor, and distance measurement
+  - name: STR Output
+    description: 12V strobe/trigger output (STR terminal)
+  - name: Configuration
+    description: Laser sensor calibration
+  - name: Device
+    description: Device diagnostics, metadata, and control
+
+paths:
+
+  # ──────────────────────────────────────────────────────────
+  # GARAGE DOOR COVER
+  # ──────────────────────────────────────────────────────────
+
+  /cover/Garage%20Door:
+    get:
+      tags: [Garage Door]
+      summary: Garage door state
+      description: |
+        Returns the current state and operation of the garage door. The GDO White determines door
+        state from the wired sensor input and/or the optical laser range sensor (GDOv2-S).
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/cover/garage_door`
+        - v3 (ESPHome ≥ 2026.7): `/cover/Garage%20Door`
+      responses:
+        '200':
+          description: Garage door state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cover'
+              examples:
+                open:
+                  summary: Door open
+                  value:
+                    id: "cover-garage_door"
+                    name_id: "cover/Garage Door"
+                    state: "OPEN"
+                    current_operation: "IDLE"
+                    value: 1
+                closed:
+                  summary: Door closed
+                  value:
+                    id: "cover-garage_door"
+                    name_id: "cover/Garage Door"
+                    state: "CLOSED"
+                    current_operation: "IDLE"
+                    value: 0
+
+  /cover/Garage%20Door/open:
+    post:
+      tags: [Garage Door]
+      summary: Open the garage door
+      description: |
+        Triggers the opener button relay to open the door. If the door is already open, this is
+        a no-op.
+
+        **v2 → v3:** `/cover/garage_door/open` → `/cover/Garage%20Door/open`
+      responses:
+        '200':
+          description: Open command sent
+
+  /cover/Garage%20Door/close:
+    post:
+      tags: [Garage Door]
+      summary: Close the garage door
+      description: |
+        Triggers the opener button relay to close the door, after executing the pre-close warning
+        sequence. If the door is already closed, this is a no-op.
+
+        **v2 → v3:** `/cover/garage_door/close` → `/cover/Garage%20Door/close`
+      responses:
+        '200':
+          description: Close command sent
+
+  /cover/Garage%20Door/stop:
+    post:
+      tags: [Garage Door]
+      summary: Stop the garage door
+      description: |
+        Triggers the opener button relay to stop door movement.
+
+        **v2 → v3:** `/cover/garage_door/stop` → `/cover/Garage%20Door/stop`
+      responses:
+        '200':
+          description: Stop command sent
+
+  /cover/Garage%20Door/toggle:
+    post:
+      tags: [Garage Door]
+      summary: Toggle the garage door
+      description: |
+        Triggers the opener button relay: opens if closed, closes if open (with pre-close warning).
+
+        **v2 → v3:** `/cover/garage_door/toggle` → `/cover/Garage%20Door/toggle`
+      responses:
+        '200':
+          description: Toggle command sent
+
+  # ──────────────────────────────────────────────────────────
+  # BINARY SENSORS
+  # ──────────────────────────────────────────────────────────
+
+  /binary_sensor/Wired%20Sensor:
+    get:
+      tags: [Sensors]
+      summary: Wired input sensor state
+      description: |
+        Returns the state of the wired input zone. This is typically connected to a magnetic reed
+        switch on the garage door, but can be used for any dry-contact input such as a motion
+        sensor or push button.
+
+        `ON` = contact open (door open, motion detected, button pressed).
+        `OFF` = contact closed (door closed, no motion, button released).
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/binary_sensor/wired_sensor`
+        - v3 (ESPHome ≥ 2026.7): `/binary_sensor/Wired%20Sensor`
+      responses:
+        '200':
+          description: Wired input state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+              examples:
+                open:
+                  summary: Input open (door open)
+                  value:
+                    id: "binary-sensor-garage_door_input"
+                    name_id: "binary_sensor/Wired Sensor"
+                    state: "ON"
+                    value: true
+                closed:
+                  summary: Input closed (door closed)
+                  value:
+                    id: "binary-sensor-garage_door_input"
+                    name_id: "binary_sensor/Wired Sensor"
+                    state: "OFF"
+                    value: false
+
+  /binary_sensor/Garage%20Door%20Range%20Sensor:
+    get:
+      tags: [Sensors]
+      summary: Laser range sensor door state (GDOv2-S)
+      description: |
+        Returns a binary door-state reading derived from the optical laser range sensor. The
+        sensor compares the current distance measurement to the calibrated open-door distance
+        (set via `/number/Sensor%20calibration`).
+
+        `ON` = door is open (measured distance matches calibrated open distance).
+        `OFF` = door is closed.
+
+        Available on GDOv2-S models only (requires the VL53L0X laser range sensor).
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/binary_sensor/garage_door_range_sensor`
+        - v3 (ESPHome ≥ 2026.7): `/binary_sensor/Garage%20Door%20Range%20Sensor`
+      responses:
+        '200':
+          description: Range-sensor-derived door state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+              example:
+                id: "binary-sensor-garage_door_range_sensor"
+                name_id: "binary_sensor/Garage Door Range Sensor"
+                state: "OFF"
+                value: false
+
+  # ──────────────────────────────────────────────────────────
+  # STR 12V STROBE OUTPUT
+  # ──────────────────────────────────────────────────────────
+
+  /switch/STR%20output:
+    get:
+      tags: [STR Output]
+      summary: STR output state
+      description: |
+        Returns the current state of the STR (12V strobe) output terminal. The red LED on the
+        device illuminates when this output is energized.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/switch/str_output`
+        - v3 (ESPHome ≥ 2026.7): `/switch/STR%20output`
+      responses:
+        '200':
+          description: STR output state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+              examples:
+                off:
+                  summary: Output off
+                  value:
+                    id: "switch-str_output"
+                    name_id: "switch/STR output"
+                    state: "OFF"
+                    value: false
+                on:
+                  summary: Output on (energized)
+                  value:
+                    id: "switch-str_output"
+                    name_id: "switch/STR output"
+                    state: "ON"
+                    value: true
+
+  /switch/STR%20output/turn_on:
+    post:
+      tags: [STR Output]
+      summary: Turn on STR output
+      description: |
+        Energizes the STR 12V strobe output. The red LED on the device will illuminate.
+
+        **v2 → v3:** `/switch/str_output/turn_on` → `/switch/STR%20output/turn_on`
+      responses:
+        '200':
+          description: STR output turned on
+
+  /switch/STR%20output/turn_off:
+    post:
+      tags: [STR Output]
+      summary: Turn off STR output
+      description: |
+        De-energizes the STR 12V strobe output.
+
+        **v2 → v3:** `/switch/str_output/turn_off` → `/switch/STR%20output/turn_off`
+      responses:
+        '200':
+          description: STR output turned off
+
+  /switch/STR%20output/toggle:
+    post:
+      tags: [STR Output]
+      summary: Toggle STR output
+      description: |
+        **v2 → v3:** `/switch/str_output/toggle` → `/switch/STR%20output/toggle`
+      responses:
+        '200':
+          description: STR output toggled
+
+  # ──────────────────────────────────────────────────────────
+  # LASER RANGE SENSOR (GDOv2-S)
+  # ──────────────────────────────────────────────────────────
+
+  /sensor/Sensor%20distance:
+    get:
+      tags: [Sensors]
+      summary: Laser distance measurement (GDOv2-S)
+      description: |
+        Returns the current distance measurement from the VL53L0X optical laser range sensor in
+        meters. The sensor is mounted on the ceiling and measures the distance to the garage door
+        panel (when closed) or to the floor/car (when open).
+
+        Available on GDOv2-S models only.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/sensor/sensor_distance`
+        - v3 (ESPHome ≥ 2026.7): `/sensor/Sensor%20distance`
+      responses:
+        '200':
+          description: Distance measurement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sensor'
+              examples:
+                door_closed:
+                  summary: Door closed (short distance to door panel)
+                  value:
+                    id: "sensor-range_sensor"
+                    name_id: "sensor/Sensor distance"
+                    state: "0.12 m"
+                    value: 0.12
+                door_open:
+                  summary: Door open (longer distance to floor/car)
+                  value:
+                    id: "sensor-range_sensor"
+                    name_id: "sensor/Sensor distance"
+                    state: "2.40 m"
+                    value: 2.40
+
+  /number/Sensor%20calibration:
+    get:
+      tags: [Configuration]
+      summary: Open door calibration distance (GDOv2-S)
+      description: |
+        Returns the calibrated distance value used to determine when the garage door is open. This
+        is the known distance from the ceiling-mounted sensor to the rolled-up door panel (or to
+        the floor/roof of a car parked in the garage).
+
+        The laser range sensor compares live readings to this value to determine open/closed state.
+        Readings within a tolerance margin of this value are considered "open".
+
+        Available on GDOv2-S models only.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/number/sensor_calibration`
+        - v3 (ESPHome ≥ 2026.7): `/number/Sensor%20calibration`
+      responses:
+        '200':
+          description: Calibrated open-door distance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/number'
+              example:
+                id: "number-open_garage_door_distance_from_ceiling"
+                name_id: "number/Sensor calibration"
+                state: "2.40 m"
+                value: 2.40
+
+  /number/Sensor%20calibration/set:
+    post:
+      tags: [Configuration]
+      summary: Set open door calibration distance (GDOv2-S)
+      description: |
+        Sets the calibrated open-door distance. To calibrate:
+        1. Open the garage door fully.
+        2. Read the current distance from `/sensor/Sensor%20distance`.
+        3. POST that value to this endpoint.
+
+        **v2 → v3:** `/number/sensor_calibration/set` → `/number/Sensor%20calibration/set`
+      parameters:
+        - name: value
+          in: query
+          required: true
+          schema:
+            type: number
+            minimum: 0.0
+            maximum: 4.0
+          description: Calibrated open-door distance in meters.
+          example: 2.40
+      responses:
+        '200':
+          description: Calibration value set
+
+  # ──────────────────────────────────────────────────────────
+  # DEVICE SENSORS
+  # ──────────────────────────────────────────────────────────
+
+  /sensor/WiFi%20Signal:
+    get:
+      tags: [Device]
+      summary: Wi-Fi signal strength (dBm)
+      description: |
+        **v2 → v3:** `/sensor/wifi_signal_rssi` → `/sensor/WiFi%20Signal`
+      responses:
+        '200':
+          description: Wi-Fi RSSI
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sensor'
+              example:
+                id: "sensor-wifi_signal_db"
+                name_id: "sensor/WiFi Signal"
+                state: "-65.0 dBm"
+                value: -65.0
+
+  /sensor/WiFi%20Signal%20%25:
+    get:
+      tags: [Device]
+      summary: Wi-Fi signal strength (%)
+      description: |
+        **v2 → v3:** `/sensor/wifi_signal__` → `/sensor/WiFi%20Signal%20%25`
+      responses:
+        '200':
+          description: Wi-Fi signal strength (%)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sensor'
+              example:
+                id: "sensor-wifi_signal_pct"
+                name_id: "sensor/WiFi Signal %"
+                state: "70.0 %"
+                value: 70.0
+
+  /sensor/Uptime:
+    get:
+      tags: [Device]
+      summary: Device uptime (seconds)
+      description: |
+        **v2 → v3:** `/sensor/uptime` → `/sensor/Uptime`
+      responses:
+        '200':
+          description: Uptime in seconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sensor'
+              example:
+                id: "sensor-uptime_sensor"
+                name_id: "sensor/Uptime"
+                state: "43200.0 s"
+                value: 43200.0
+
+  /text_sensor/Device%20ID:
+    get:
+      tags: [Device]
+      summary: Device ID (MAC address)
+      description: |
+        **v2 → v3:** `/text_sensor/device_id` → `/text_sensor/Device%20ID`
+      responses:
+        '200':
+          description: Device ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/text_sensor'
+              example:
+                id: "text-sensor-device_id"
+                name_id: "text_sensor/Device ID"
+                state: "b2c3d4e5f6a1"
+                value: "b2c3d4e5f6a1"
+
+  /text_sensor/IP%20Address:
+    get:
+      tags: [Device]
+      summary: IP Address
+      description: |
+        **v2 → v3:** `/text_sensor/ip_address` → `/text_sensor/IP%20Address`
+      responses:
+        '200':
+          description: IP address
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/text_sensor'
+              example:
+                id: "text-sensor-ip_address"
+                name_id: "text_sensor/IP Address"
+                state: "192.168.1.102"
+                value: "192.168.1.102"
+
+  /text_sensor/ESPHome%20Version:
+    get:
+      tags: [Device]
+      summary: ESPHome firmware version
+      description: |
+        Useful for detecting which URL format the device expects.
+
+        **v2 → v3:** `/text_sensor/esphome_version` → `/text_sensor/ESPHome%20Version`
+      responses:
+        '200':
+          description: ESPHome version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/text_sensor'
+              example:
+                id: "text-sensor-esphome_version"
+                name_id: "text_sensor/ESPHome Version"
+                state: "2026.7.0"
+                value: "2026.7.0"
+
+  # ──────────────────────────────────────────────────────────
+  # DEVICE CONTROL BUTTONS
+  # ──────────────────────────────────────────────────────────
+
+  /button/Pre-close%20Warning/press:
+    post:
+      tags: [Garage Door]
+      summary: Trigger the pre-close warning
+      description: |
+        Manually triggers the pre-close warning sequence (audible beeps and LED flash). The
+        firmware executes this automatically before every close command.
+
+        **v2 → v3:** `/button/pre_close_warning/press` → `/button/Pre-close%20Warning/press`
+      responses:
+        '200':
+          description: Pre-close warning triggered
+
+  /button/Play%20sound/press:
+    post:
+      tags: [Garage Door]
+      summary: Play the pre-close warning sound
+      description: |
+        Triggers the audio tone only.
+
+        **v2 → v3:** `/button/play_sound/press` → `/button/Play%20sound/press`
+      responses:
+        '200':
+          description: Sound triggered
+
+  /button/Restart/press:
+    post:
+      tags: [Device]
+      summary: Restart the device
+      description: |
+        Triggers a software reboot.
+
+        **v2 → v3:** `/button/restart/press` → `/button/Restart/press`
+      responses:
+        '200':
+          description: Restart command received
+
+components:
+  schemas:
+    binary_sensor:
+      type: object
+      description: Binary sensor state response
+      properties:
+        id:
+          type: string
+          description: |
+            Entity identifier. Format depends on ESPHome firmware version:
+            - **ESPHome < 2026.8.0 (legacy):** `"{domain}-{object_id}"` using hyphens.
+            - **ESPHome ≥ 2026.8.0 (permanent):** `"{domain}/{Entity Name}"` using slash.
+          examples:
+            legacy:
+              summary: ESPHome < 2026.8.0
+              value: "binary-sensor-garage_door_input"
+            new_format:
+              summary: ESPHome ≥ 2026.8.0
+              value: "binary_sensor/Wired Sensor"
+        name_id:
+          type: string
+          description: |
+            **Present only in ESPHome 2026.1.3 through 2026.7.x (transition period).**
+            New-format entity identifier. Removed in ESPHome 2026.8.0.
+          example: "binary_sensor/Wired Sensor"
+        state:
+          type: string
+          enum: [ON, OFF]
+        value:
+          type: boolean
+
+    sensor:
+      type: object
+      description: Numeric sensor state response
+      properties:
+        id:
+          type: string
+          example: "sensor-range_sensor"
+        name_id:
+          type: string
+          description: New-format identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "sensor/Sensor distance"
+        state:
+          type: string
+          description: Human-readable value with units (e.g., `"2.40 m"`, `"-65.0 dBm"`).
+        value:
+          type: number
+
+    text_sensor:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "text-sensor-device_id"
+        name_id:
+          type: string
+          description: New-format identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "text_sensor/Device ID"
+        state:
+          type: string
+        value:
+          type: string
+
+    number:
+      type: object
+      description: Number entity state response
+      properties:
+        id:
+          type: string
+          examples:
+            legacy:
+              value: "number-open_garage_door_distance_from_ceiling"
+            new_format:
+              value: "number/Sensor calibration"
+        name_id:
+          type: string
+          description: New-format identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "number/Sensor calibration"
+        state:
+          type: string
+          description: Human-readable value with units (e.g., `"2.40 m"`).
+        value:
+          type: number
+          description: Numeric value in meters.
+
+    cover:
+      type: object
+      description: Garage door cover state response
+      properties:
+        id:
+          type: string
+          examples:
+            legacy:
+              value: "cover-garage_door"
+            new_format:
+              value: "cover/Garage Door"
+        name_id:
+          type: string
+          description: New-format identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "cover/Garage Door"
+        state:
+          type: string
+          enum: [OPEN, CLOSED]
+        current_operation:
+          type: string
+          enum: [IDLE, OPENING, CLOSING]
+        value:
+          type: integer
+          enum: [0, 1]
+          description: "`1` = open, `0` = closed"

@@ -1,0 +1,734 @@
+openapi: 3.1.0
+info:
+  title: Alarm Panel REST API
+  summary: Local REST API for the Konnected Alarm Panel and Alarm Panel Pro (ESPHome ≥ 2026.7)
+  description: |
+    ## API Version 2.0.0 — ESPHome 2026.7+ URL Format
+
+    This specification documents the Konnected Alarm Panel and Alarm Panel Pro REST API for devices
+    running **ESPHome firmware 2026.7.0 and later**. ESPHome 2026.7 introduces a new URL routing
+    format that uses entity display names instead of sanitized `object_id` slugs.
+
+    For devices running ESPHome < 2026.7, refer to the [v2 API specification](../v2/openapi-alarm-panel.yaml).
+
+    ### What Changed in ESPHome 2026.7
+
+    Prior to ESPHome 2026.7, entity REST endpoints used a URL slug derived from the entity name by
+    lowercasing all characters and replacing non-alphanumeric characters with underscores. For example,
+    a zone named "Zone 1" was accessible at `/binary_sensor/zone_1`.
+
+    Starting with ESPHome 2026.7, the same zone is accessed at `/binary_sensor/Zone 1`
+    (URL-encoded in HTTP requests as `/binary_sensor/Zone%201`).
+
+    | ESPHome version     | URL format accepted              | Notes                                     |
+    |---------------------|----------------------------------|-------------------------------------------|
+    | ≤ 2026.1.2          | Old `object_id` slugs only       | e.g., `/binary_sensor/zone_1`             |
+    | 2026.1.3 – 2026.6.x | Both old and new URLs accepted   | Old format deprecated; device logs warnings |
+    | ≥ 2026.7.0          | New display-name URLs only       | Old slugs return 404                      |
+
+    ### URL Encoding
+
+    Entity names with spaces or special characters must be percent-encoded in HTTP requests:
+
+    | Character | Encoded | Example                                  |
+    |-----------|---------|------------------------------------------|
+    | Space     | `%20`   | `Zone 1` → `Zone%201`                   |
+    | `%`       | `%25`   | `WiFi Signal %` → `WiFi%20Signal%20%25` |
+
+    ### Entity Names Are Firmware-Defined
+
+    Entity display names — and therefore URL paths — are compiled into firmware at build time. The
+    default names documented here reflect the default Konnected firmware configuration. If an
+    integrator or end user customizes entity names, all REST paths change accordingly. See the
+    [Endpoint Discovery Pattern](../endpoint-discovery-pattern.md) guide for a robust strategy that
+    discovers paths at runtime instead of hardcoding them.
+
+    ### SSE Event Stream
+
+    In addition to polling individual REST endpoints, the device exposes a Server-Sent Events stream
+    at `GET /events` that pushes real-time state changes for all entities. See the
+    [Server-Sent Events reference](../sse-events.md) for full documentation, including the
+    `id`/`name_id` transition between ESPHome 2026.1.3 and 2026.8.0.
+
+    ### Further Reading
+
+    - [Migration Guide](../migration-guide.md) — step-by-step migration from v2 to v3 URLs
+    - [Endpoint Discovery Pattern](../endpoint-discovery-pattern.md) — resilient runtime discovery
+    - [SSE Events Reference](../sse-events.md) — real-time event stream documentation
+    - [ESPHome Web API](https://esphome.io/web-api/) — upstream ESPHome documentation
+
+  version: 2.0.0
+  termsOfService: https://konnected.io/terms
+  contact:
+    name: Konnected Support
+    url: https://support.konnected.io
+    email: help@konnected.io
+
+servers:
+  - url: http://{deviceHost}
+    description: Konnected device on the local network
+    variables:
+      deviceHost:
+        default: 192.168.1.100
+        description: |
+          Device IP address or mDNS hostname. Konnected devices advertise themselves via mDNS as
+          `{device-name}.local` (default: `konnected.local`).
+
+tags:
+  - name: Zones
+    description: Binary sensor zone inputs (door/window contacts, motion sensors, etc.)
+  - name: Outputs
+    description: Switched alarm outputs (sirens, strobe lights, relays)
+  - name: Warning Beep
+    description: Audible/visual warning beep output
+  - name: Alarm System
+    description: |
+      Optional ESPHome alarm control panel entity. This entity is only present if configured in
+      the firmware. It provides a unified arm/disarm interface over the individual zone sensors
+      and alarm outputs.
+  - name: Device
+    description: Device diagnostics, metadata, and control
+
+paths:
+
+  # ──────────────────────────────────────────────────────────
+  # ALARM CONTROL PANEL (optional — user-configured)
+  # ──────────────────────────────────────────────────────────
+
+  /alarm_control_panel/{name}:
+    get:
+      tags: [Alarm System]
+      summary: Alarm system state
+      description: |
+        Returns the current state of the ESPHome alarm control panel, if one is configured in the
+        firmware. The default entity name in Konnected firmware is **Konnected Alarm**, making the
+        default URL path `/alarm_control_panel/Konnected%20Alarm`.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/alarm_control_panel/konnected_alarm`
+        - v3 (ESPHome ≥ 2026.7): `/alarm_control_panel/Konnected%20Alarm`
+      parameters:
+        - $ref: '#/components/parameters/alarmName'
+      responses:
+        '200':
+          description: Alarm system state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/alarm_control_panel'
+              examples:
+                disarmed:
+                  summary: System disarmed
+                  value:
+                    id: "alarm-control-panel-konnected_alarm"
+                    name_id: "alarm_control_panel/Konnected Alarm"
+                    state: "DISARMED"
+                    value: 0
+                armed_away:
+                  summary: System armed away
+                  value:
+                    id: "alarm-control-panel-konnected_alarm"
+                    name_id: "alarm_control_panel/Konnected Alarm"
+                    state: "ARMED_AWAY"
+                    value: 2
+
+  /alarm_control_panel/{name}/{method}:
+    post:
+      tags: [Alarm System]
+      summary: Arm or disarm the alarm system
+      description: |
+        Sends an arm or disarm command to the alarm control panel. An optional numeric or
+        alphanumeric `code` may be required if a code is configured in the firmware.
+
+        A `200 OK` response indicates the command was received and validated — it does **not**
+        guarantee the state change was successful. Monitor the `/events` SSE stream or poll the
+        state endpoint to confirm the transition.
+
+        **v2 → v3 URL change:** Replace `konnected_alarm` with `Konnected%20Alarm` in the path.
+      parameters:
+        - $ref: '#/components/parameters/alarmName'
+        - name: method
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [arm_away, arm_home, arm_night, arm_vacation, disarm]
+          description: The arm or disarm action to execute.
+          example: arm_away
+        - name: code
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Arm/disarm code, if configured in firmware.
+      responses:
+        '200':
+          description: Command received
+
+  # ──────────────────────────────────────────────────────────
+  # BINARY SENSOR ZONES
+  # ──────────────────────────────────────────────────────────
+
+  /binary_sensor/{zone}:
+    get:
+      tags: [Zones]
+      summary: Zone state
+      description: |
+        Returns the current state of a binary sensor zone. A binary sensor has two states:
+        `ON` (open, detected, triggered) or `OFF` (closed, clear, not detected).
+
+        All door/window contacts, motion sensors, smoke/CO detectors, water/leak sensors, and
+        glass-break sensors connected to zone inputs are binary sensors.
+
+        ### Default Zone Names and URL Paths
+
+        Zones are named **Zone 1** through **Zone 12** in the default firmware. Encode the space
+        as `%20` in HTTP requests.
+
+        | Zone     | v3 URL (ESPHome ≥ 2026.7)        | v2 URL (ESPHome < 2026.7)        | Model    |
+        |----------|----------------------------------|----------------------------------|----------|
+        | Zone 1   | `/binary_sensor/Zone%201`        | `/binary_sensor/zone_1`          | All      |
+        | Zone 2   | `/binary_sensor/Zone%202`        | `/binary_sensor/zone_2`          | All      |
+        | Zone 3   | `/binary_sensor/Zone%203`        | `/binary_sensor/zone_3`          | All      |
+        | Zone 4   | `/binary_sensor/Zone%204`        | `/binary_sensor/zone_4`          | All      |
+        | Zone 5   | `/binary_sensor/Zone%205`        | `/binary_sensor/zone_5`          | All      |
+        | Zone 6   | `/binary_sensor/Zone%206`        | `/binary_sensor/zone_6`          | All      |
+        | Zone 7   | `/binary_sensor/Zone%207`        | `/binary_sensor/zone_7`          | Pro only |
+        | Zone 8   | `/binary_sensor/Zone%208`        | `/binary_sensor/zone_8`          | Pro only |
+        | Zone 9   | `/binary_sensor/Zone%209`        | `/binary_sensor/zone_9`          | Pro only |
+        | Zone 10  | `/binary_sensor/Zone%2010`       | `/binary_sensor/zone_10`         | Pro only |
+        | Zone 11  | `/binary_sensor/Zone%2011`       | `/binary_sensor/zone_11`         | Pro only |
+        | Zone 12  | `/binary_sensor/Zone%2012`       | `/binary_sensor/zone_12`         | Pro only |
+      parameters:
+        - name: zone
+          in: path
+          required: true
+          description: |
+            Zone display name, URL-encoded. Default names are `Zone 1` through `Zone 12`.
+            Encode the space as `%20` (e.g., `Zone%201`, `Zone%2010`).
+          schema:
+            type: string
+          example: Zone 1
+      responses:
+        '200':
+          description: Zone binary sensor state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+              examples:
+                open:
+                  summary: Zone open (sensor triggered)
+                  value:
+                    id: "binary-sensor-zone_1"
+                    name_id: "binary_sensor/Zone 1"
+                    state: "ON"
+                    value: true
+                closed:
+                  summary: Zone closed (sensor clear)
+                  value:
+                    id: "binary-sensor-zone_1"
+                    name_id: "binary_sensor/Zone 1"
+                    state: "OFF"
+                    value: false
+
+  # ──────────────────────────────────────────────────────────
+  # SWITCH OUTPUTS
+  # ──────────────────────────────────────────────────────────
+
+  /switch/{output}:
+    get:
+      tags: [Outputs]
+      summary: Output state
+      description: |
+        Returns the current state of a switched alarm output.
+
+        The Alarm Panel Pro default firmware exposes two outputs:
+
+        | Output  | v3 URL (ESPHome ≥ 2026.7) | v2 URL (ESPHome < 2026.7) | Description              |
+        |---------|---------------------------|---------------------------|--------------------------|
+        | Alarm 1 | `/switch/Alarm%201`        | `/switch/alarm_1`         | ALRM1 12V switched output |
+        | Alarm 2 | `/switch/Alarm%202`        | `/switch/alarm_2`         | ALRM2 12V switched output |
+
+        The 6-zone Alarm Panel (non-Pro) has a single output named **Siren**:
+        `/switch/Siren` (v3) or `/switch/siren` (v2).
+      parameters:
+        - $ref: '#/components/parameters/outputName'
+      responses:
+        '200':
+          description: Output switch state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/binary_sensor'
+              examples:
+                on:
+                  summary: Output energized (ON)
+                  value:
+                    id: "switch-alarm_1"
+                    name_id: "switch/Alarm 1"
+                    state: "ON"
+                    value: true
+                off:
+                  summary: Output de-energized (OFF)
+                  value:
+                    id: "switch-alarm_1"
+                    name_id: "switch/Alarm 1"
+                    state: "OFF"
+                    value: false
+
+  /switch/{output}/turn_on:
+    post:
+      tags: [Outputs]
+      summary: Turn on an output
+      description: |
+        Energizes the specified alarm output. For Alarm Panel Pro, use `Alarm%201` or `Alarm%202`.
+
+        **v2 → v3:** `/switch/alarm_1/turn_on` → `/switch/Alarm%201/turn_on`
+      parameters:
+        - $ref: '#/components/parameters/outputName'
+      responses:
+        '200':
+          description: Turn-on request received
+
+  /switch/{output}/turn_off:
+    post:
+      tags: [Outputs]
+      summary: Turn off an output
+      description: |
+        De-energizes the specified alarm output.
+
+        **v2 → v3:** `/switch/alarm_1/turn_off` → `/switch/Alarm%201/turn_off`
+      parameters:
+        - $ref: '#/components/parameters/outputName'
+      responses:
+        '200':
+          description: Turn-off request received
+
+  /switch/{output}/toggle:
+    post:
+      tags: [Outputs]
+      summary: Toggle an output
+      description: |
+        Toggles the specified alarm output between ON and OFF.
+
+        **v2 → v3:** `/switch/alarm_1/toggle` → `/switch/Alarm%201/toggle`
+      parameters:
+        - $ref: '#/components/parameters/outputName'
+      responses:
+        '200':
+          description: Toggle request received
+
+  # ──────────────────────────────────────────────────────────
+  # WARNING BEEP
+  # ──────────────────────────────────────────────────────────
+
+  /light/Warning%20Beep:
+    get:
+      tags: [Warning Beep]
+      summary: Warning Beep state
+      description: |
+        Returns the current state of the Warning Beep output. The Warning Beep is implemented as
+        an ESPHome `light` entity so that strobe effects can be used to produce a repeating beep
+        pattern. In practice it controls a buzzer, sounder, or indicator light output.
+
+        On the Alarm Panel Pro, the Warning Beep is connected to the OUT1 terminal.
+        On 6-zone Alarm Panels, it shares the ALRM/OUT output.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/light/warning_beep`
+        - v3 (ESPHome ≥ 2026.7): `/light/Warning%20Beep`
+      responses:
+        '200':
+          description: Warning Beep state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/light'
+              examples:
+                off:
+                  summary: Warning Beep off
+                  value:
+                    id: "light-warning_beep"
+                    name_id: "light/Warning Beep"
+                    state: "OFF"
+                on:
+                  summary: Warning Beep on (steady)
+                  value:
+                    id: "light-warning_beep"
+                    name_id: "light/Warning Beep"
+                    state: "ON"
+
+  /light/Warning%20Beep/turn_on:
+    post:
+      tags: [Warning Beep]
+      summary: Turn on the Warning Beep
+      description: |
+        Activates the Warning Beep output. Optionally specify an `effect` for a repeating beep
+        pattern, or `flash` for a one-shot timed pulse.
+
+        **v2 → v3:** `/light/warning_beep/turn_on` → `/light/Warning%20Beep/turn_on`
+      parameters:
+        - name: effect
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [Strobe, None]
+          description: |
+            `Strobe` — activates a repeating on/off beep pattern (default strobe rate applies).
+            `None` — steady on with no strobe.
+        - name: flash
+          in: query
+          required: false
+          schema:
+            type: number
+          description: |
+            Duration in milliseconds for a single timed pulse. The output turns on, then
+            automatically turns off after this many milliseconds.
+          example: 500
+      responses:
+        '200':
+          description: Warning Beep turned on
+
+  /light/Warning%20Beep/turn_off:
+    post:
+      tags: [Warning Beep]
+      summary: Turn off the Warning Beep
+      description: |
+        Deactivates the Warning Beep output, stopping any active strobe or steady-on state.
+
+        **v2 → v3:** `/light/warning_beep/turn_off` → `/light/Warning%20Beep/turn_off`
+      responses:
+        '200':
+          description: Warning Beep turned off
+
+  # ──────────────────────────────────────────────────────────
+  # DEVICE SENSORS
+  # ──────────────────────────────────────────────────────────
+
+  /sensor/WiFi%20Signal:
+    get:
+      tags: [Device]
+      summary: Wi-Fi signal strength (dBm)
+      description: |
+        Returns the Wi-Fi received signal strength indicator (RSSI) in dBm. More negative values
+        indicate a weaker signal (e.g., -50 dBm is strong, -85 dBm is weak).
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/sensor/wifi_signal_rssi` *(note: this label was inconsistent
+          with the actual entity name "WiFi Signal"; both resolved to the same entity)*
+        - v3 (ESPHome ≥ 2026.7): `/sensor/WiFi%20Signal`
+      responses:
+        '200':
+          description: Wi-Fi signal strength (RSSI)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sensor'
+              example:
+                id: "sensor-wifi_signal_db"
+                name_id: "sensor/WiFi Signal"
+                state: "-62.0 dBm"
+                value: -62.0
+
+  /sensor/WiFi%20Signal%20%25:
+    get:
+      tags: [Device]
+      summary: Wi-Fi signal strength (%)
+      description: |
+        Returns Wi-Fi signal strength as a percentage (0–100%), derived from the RSSI reading.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/sensor/wifi_signal__`
+        - v3 (ESPHome ≥ 2026.7): `/sensor/WiFi%20Signal%20%25`
+      responses:
+        '200':
+          description: Wi-Fi signal strength (%)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sensor'
+              example:
+                id: "sensor-wifi_signal_pct"
+                name_id: "sensor/WiFi Signal %"
+                state: "76.0 %"
+                value: 76.0
+
+  /sensor/Uptime:
+    get:
+      tags: [Device]
+      summary: Device uptime
+      description: |
+        Returns the number of seconds since the device last booted.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/sensor/uptime`
+        - v3 (ESPHome ≥ 2026.7): `/sensor/Uptime`
+      responses:
+        '200':
+          description: Device uptime in seconds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sensor'
+              example:
+                id: "sensor-uptime_sensor"
+                name_id: "sensor/Uptime"
+                state: "86400.0 s"
+                value: 86400.0
+
+  # ──────────────────────────────────────────────────────────
+  # DEVICE TEXT SENSORS
+  # ──────────────────────────────────────────────────────────
+
+  /text_sensor/Device%20ID:
+    get:
+      tags: [Device]
+      summary: Device ID
+      description: |
+        Returns the unique device identifier, which is the device's MAC address expressed as a
+        12-character hexadecimal string (e.g., `a1b2c3d4e5f6`).
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/text_sensor/device_id`
+        - v3 (ESPHome ≥ 2026.7): `/text_sensor/Device%20ID`
+      responses:
+        '200':
+          description: Device ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/text_sensor'
+              example:
+                id: "text-sensor-device_id"
+                name_id: "text_sensor/Device ID"
+                state: "a1b2c3d4e5f6"
+                value: "a1b2c3d4e5f6"
+
+  /text_sensor/IP%20Address:
+    get:
+      tags: [Device]
+      summary: IP Address
+      description: |
+        Returns the current IPv4 address of the device on the local network.
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/text_sensor/ip_address`
+        - v3 (ESPHome ≥ 2026.7): `/text_sensor/IP%20Address`
+      responses:
+        '200':
+          description: Device IP address
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/text_sensor'
+              example:
+                id: "text-sensor-ip_address"
+                name_id: "text_sensor/IP Address"
+                state: "192.168.1.100"
+                value: "192.168.1.100"
+
+  /text_sensor/ESPHome%20Version:
+    get:
+      tags: [Device]
+      summary: ESPHome firmware version
+      description: |
+        Returns the ESPHome framework version the firmware was compiled with.
+        This is useful for determining which URL format the device expects
+        (see the version compatibility table in the API overview above).
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/text_sensor/esphome_version`
+        - v3 (ESPHome ≥ 2026.7): `/text_sensor/ESPHome%20Version`
+      responses:
+        '200':
+          description: ESPHome version string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/text_sensor'
+              example:
+                id: "text-sensor-esphome_version"
+                name_id: "text_sensor/ESPHome Version"
+                state: "2026.7.0"
+                value: "2026.7.0"
+
+  # ──────────────────────────────────────────────────────────
+  # DEVICE CONTROL
+  # ──────────────────────────────────────────────────────────
+
+  /button/Restart/press:
+    post:
+      tags: [Device]
+      summary: Restart the device
+      description: |
+        Triggers a software reboot. The device disconnects from Wi-Fi (or Ethernet), reboots,
+        and reconnects. Clients should expect a brief period of unavailability (typically 10–30
+        seconds).
+
+        **v2 → v3 URL change:**
+        - v2 (ESPHome < 2026.7): `/button/restart/press`
+        - v3 (ESPHome ≥ 2026.7): `/button/Restart/press`
+      responses:
+        '200':
+          description: Restart command received
+
+components:
+  parameters:
+    alarmName:
+      name: name
+      in: path
+      required: true
+      description: |
+        Alarm control panel entity display name, URL-encoded. The default name in Konnected firmware
+        is `Konnected Alarm` → URL-encoded: `Konnected%20Alarm`.
+      schema:
+        type: string
+      example: Konnected Alarm
+
+    outputName:
+      name: output
+      in: path
+      required: true
+      description: |
+        Output switch display name, URL-encoded. Default names for the Alarm Panel Pro are
+        `Alarm 1` → `Alarm%201` and `Alarm 2` → `Alarm%202`. The 6-zone Alarm Panel uses
+        `Siren` (no encoding needed).
+      schema:
+        type: string
+      example: Alarm 1
+
+  schemas:
+    binary_sensor:
+      type: object
+      description: Binary sensor state response
+      properties:
+        id:
+          type: string
+          description: |
+            Entity identifier. Format depends on ESPHome firmware version:
+            - **ESPHome < 2026.8.0 (legacy):** `"{domain}-{object_id}"` using hyphens
+              (e.g., `"binary-sensor-zone_1"`).
+            - **ESPHome ≥ 2026.8.0 (permanent):** `"{domain}/{Entity Name}"` using slash
+              (e.g., `"binary_sensor/Zone 1"`).
+          examples:
+            legacy:
+              summary: ESPHome < 2026.8.0
+              value: "binary-sensor-zone_1"
+            new_format:
+              summary: ESPHome ≥ 2026.8.0
+              value: "binary_sensor/Zone 1"
+        name_id:
+          type: string
+          description: |
+            **Present only in ESPHome 2026.1.3 through 2026.7.x (transition period).**
+            New-format entity identifier: `"{domain}/{Entity Name}"`. Clients should prefer this
+            field over `id` during the transition. Removed in ESPHome 2026.8.0, when `id`
+            permanently adopts this format.
+          example: "binary_sensor/Zone 1"
+        state:
+          type: string
+          description: |
+            Human-readable state string. `ON` means open, detected, or triggered.
+            `OFF` means closed, clear, or not detected.
+          enum: [ON, OFF]
+        value:
+          type: boolean
+          description: Boolean state. `true` = ON (open/detected), `false` = OFF (closed/clear).
+
+    sensor:
+      type: object
+      description: Numeric sensor state response
+      properties:
+        id:
+          type: string
+          description: |
+            Entity identifier (see `binary_sensor.id` for version-dependent format details).
+          example: "sensor-wifi_signal_db"
+        name_id:
+          type: string
+          description: |
+            New-format entity identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "sensor/WiFi Signal"
+        state:
+          type: string
+          description: Human-readable state string with units (e.g., `"-62.0 dBm"`, `"86400.0 s"`).
+        value:
+          type: number
+          description: Numeric sensor value.
+
+    text_sensor:
+      type: object
+      description: Text sensor state response
+      properties:
+        id:
+          type: string
+          description: |
+            Entity identifier (see `binary_sensor.id` for version-dependent format details).
+          example: "text-sensor-device_id"
+        name_id:
+          type: string
+          description: |
+            New-format entity identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "text_sensor/Device ID"
+        state:
+          type: string
+          description: The text value of the sensor.
+        value:
+          type: string
+          description: Same as `state` for text sensors.
+
+    light:
+      type: object
+      description: Light entity state response (used for Warning Beep)
+      properties:
+        id:
+          type: string
+          description: |
+            Entity identifier (see `binary_sensor.id` for version-dependent format details).
+          example: "light-warning_beep"
+        name_id:
+          type: string
+          description: |
+            New-format entity identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "light/Warning Beep"
+        state:
+          type: string
+          description: Light state string.
+          enum: [ON, OFF]
+
+    alarm_control_panel:
+      type: object
+      description: Alarm control panel state response
+      properties:
+        id:
+          type: string
+          description: |
+            Entity identifier (see `binary_sensor.id` for version-dependent format details).
+          example: "alarm-control-panel-konnected_alarm"
+        name_id:
+          type: string
+          description: |
+            New-format entity identifier (present only in ESPHome 2026.1.3–2026.7.x).
+          example: "alarm_control_panel/Konnected Alarm"
+        state:
+          type: string
+          description: |
+            Current state of the alarm system.
+          enum:
+            - DISARMED
+            - ARMED_HOME
+            - ARMED_AWAY
+            - ARMED_NIGHT
+            - ARMED_VACATION
+            - ARMED_CUSTOM_BYPASS
+            - PENDING
+            - ARMING
+            - DISARMING
+            - TRIGGERED
+        value:
+          type: integer
+          description: |
+            Numeric representation of the alarm state as defined by the ESPHome
+            `AlarmControlPanelState` enum.

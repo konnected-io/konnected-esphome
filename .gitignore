@@ -5,3 +5,4 @@
 /secrets.yaml
 __pycache__/
 .vscode
+.claude
