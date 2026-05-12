@@ -72,7 +72,19 @@ jobs:
         with:
           file: './garage-door-GDOv2-Q.yaml'
           key-path: '["substitutions", "project_version"]'
-  
+
+      - id: alarm-panel-3e-version
+        uses: konnected-io/read-yaml@main
+        with:
+          file: './alarm-panel-3e.yaml'
+          key-path: '["substitutions", "project_version"]'
+
+      - id: alarm-panel-3w-version
+        uses: konnected-io/read-yaml@main
+        with:
+          file: './alarm-panel-3w.yaml'
+          key-path: '["substitutions", "project_version"]'
+
       - name: Build Alarm Panel ESP8266
         id: build-alarm-panel-esp8266
         run: |
@@ -142,7 +154,27 @@ jobs:
           cp $build_path/firmware.factory.bin assets/$fname
           cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
           echo "fname=$fname" >> $GITHUB_OUTPUT
-  
+
+      - name: Build AP3e
+        id: build-alarm-panel-3e
+        run: |
+          esphome compile alarm-panel-3e.yaml
+          build_path=.esphome/build/konnected/.pioenvs/konnected
+          fname=konnected-esphome-alarm-panel-3e-${{ steps.alarm-panel-3e-version.outputs.data }}.bin
+          cp $build_path/firmware.factory.bin assets/$fname
+          cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
+          echo "fname=$fname" >> $GITHUB_OUTPUT
+
+      - name: Build AP3w
+        id: build-alarm-panel-3w
+        run: |
+          esphome compile alarm-panel-3e.yaml
+          build_path=.esphome/build/konnected/.pioenvs/konnected
+          fname=konnected-esphome-alarm-panel-3w-${{ steps.alarm-panel-3w-version.outputs.data }}.bin
+          cp $build_path/firmware.factory.bin assets/$fname
+          cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
+          echo "fname=$fname" >> $GITHUB_OUTPUT
+
       - uses: keithweaver/aws-s3-github-action@v1.0.0
         name: Upload Builds
         with:
@@ -233,7 +265,27 @@ jobs:
           MANIFEST_FNAME: esphome-alarm-panel-rtl8201.json
           MANIFEST_VERSION: "${{ steps.alarm-panel-pro-v18-ethernet-version.outputs.data }}"
           ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ github.ref_name }}/${{ steps.build-alarm-panel-pro-esp32-rtl8201.outputs.fname }}
-      
+
+      - name: Build Manifest for Alarm Panel 3e
+        if: github.event.release  
+        run: |
+          ruby ./scripts/update-espwebtools-manifests.rb
+        env:
+          MANIFEST_NAME: Konnected Alarm Panel 3e (Ethernet)
+          MANIFEST_FNAME: esphome-alarm-panel-3e.json
+          MANIFEST_VERSION: "${{ steps.alarm-panel-3e-version.outputs.data }}"
+          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ github.ref_name }}/${{ steps.build-alarm-panel-3e.outputs.fname }}
+          
+      - name: Build Manifest for Alarm Panel 3w
+        if: github.event.release  
+        run: |
+          ruby ./scripts/update-espwebtools-manifests.rb
+        env:
+          MANIFEST_NAME: Konnected Alarm Panel 3w (WiFi)
+          MANIFEST_FNAME: esphome-alarm-panel-3w.json
+          MANIFEST_VERSION: "${{ steps.alarm-panel-3w-version.outputs.data }}"
+          ESP32_IMAGE_URI: https://konnected-io.s3.us-east-2.amazonaws.com/builds/esphome/${{ github.ref_name }}/${{ steps.build-alarm-panel-3w.outputs.fname }}
+
       - name: Deploy
         if: github.event.release  
         uses: reggionick/s3-deploy@v4
