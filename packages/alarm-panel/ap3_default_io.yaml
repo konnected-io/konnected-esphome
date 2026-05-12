@@ -1,0 +1,40 @@
+packages:
+  remote_package:
+    url: https://github.com/konnected-io/konnected-esphome
+    ref: master
+    refresh: 5min
+    files:
+
+    ####
+    # INPUTS
+    - packages/alarm-panel/zone1.yaml
+    - packages/alarm-panel/zone2.yaml
+    - packages/alarm-panel/zone3.yaml
+    - packages/alarm-panel/zone4.yaml
+    - packages/alarm-panel/zone5.yaml
+    - packages/alarm-panel/zone6.yaml
+    - packages/alarm-panel/zone7.yaml
+    - packages/alarm-panel/zone8.yaml
+    - path: packages/alarm-panel/zone9.yaml
+      vars:
+        mode: INPUT_PULLUP
+    - path: packages/alarm-panel/zone10.yaml
+      vars:
+        mode: INPUT_PULLUP
+    - path: packages/alarm-panel/zone11.yaml
+      vars:
+        mode: INPUT_PULLUP
+    - path: packages/alarm-panel/zone12.yaml
+      vars:
+        mode: INPUT_PULLUP
+    - packages/alarm-panel/zone13.yaml
+    - packages/alarm-panel/zone14.yaml
+    - packages/alarm-panel/zone15.yaml
+    - packages/alarm-panel/zone16.yaml
+
+    ####
+    # OUTPUTS
+    - packages/alarm-panel/alarm1.yaml
+    - packages/alarm-panel/alarm2.yaml
+    - packages/alarm-panel/relay1.yaml
+    - packages/alarm-panel/relay2.yaml

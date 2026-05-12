@@ -1,10 +1,13 @@
+defaults:
+  mode: INPUT
+
 binary_sensor:
 
   - id: zone9
     name: Zone 9    
     pin:
       number: $zone9
-      mode: INPUT
+      mode: ${mode}
     platform: gpio   
     filters:
       - delayed_on_off: $sensor_debounce_time
