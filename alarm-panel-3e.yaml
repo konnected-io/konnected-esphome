@@ -38,7 +38,7 @@ substitutions:
   name: konnected
   friendly_name: Alarm Panel 3e
   project_name: konnected.alarm-panel-3e
-  project_version: "0.1.0"
+  project_version: "0.2.0"
 
   sensor_debounce_time: 200ms
   blink_on_state: "true"
@@ -82,11 +82,11 @@ substitutions:
   ethernet_clk_pin: GPIO12
   ethernet_miso_pin: GPIO13
   ethernet_int_pin: GPIO14
-  ethernet_rst_pin: GPIO15
+  ethernet_rst_pin: GPIO9
 
   ####
   # MISC HARDWARE
-  status_led: GPIO35
+  status_led: GPIO18
   status_led_inverted: "false"
   voltage_monitor_pin: GPIO17
   # 12V → 24kΩ → ADC → 5kΩ (2×10kΩ ∥) → GND ⇒ V_rail = V_pin × (24+5)/5 = 5.8×V_pin.
@@ -123,6 +123,12 @@ packages:
       - packages/ethernet-w5500.yaml
 
       ####
+      # INPUT & OUTPUT ZONES
+      # Defines the default behavior of each alarm panel zone and output.
+      # To customize, remove the default package or override specific zones/outputs with additional configuration in this file or your own custom package.
+      - packages/alarm-panel/ap3_default_io.yaml
+
+      ####
       # MDNS
       # Enables the _konnected MDNS/zeroconf service advertisement needed for the Konnected App
       - packages/mdns.yaml
@@ -136,32 +142,6 @@ packages:
       # SUPPLY VOLTAGE MONITOR
       # Diagnostic sensor for the 12V supply rail (voltage divider on GPIO17)
       - packages/voltage-monitor.yaml
-
-      ####
-      # INPUT ZONES
-      - packages/alarm-panel/zone1.yaml
-      - packages/alarm-panel/zone2.yaml
-      - packages/alarm-panel/zone3.yaml
-      - packages/alarm-panel/zone4.yaml
-      - packages/alarm-panel/zone5.yaml
-      - packages/alarm-panel/zone6.yaml
-      - packages/alarm-panel/zone7.yaml
-      - packages/alarm-panel/zone8.yaml
-      - packages/alarm-panel/zone9.yaml
-      - packages/alarm-panel/zone10.yaml
-      - packages/alarm-panel/zone11.yaml
-      - packages/alarm-panel/zone12.yaml
-      - packages/alarm-panel/zone13.yaml
-      - packages/alarm-panel/zone14.yaml
-      - packages/alarm-panel/zone15.yaml
-      - packages/alarm-panel/zone16.yaml
-
-      ####
-      # OUTPUTS
-      - packages/alarm-panel/alarm1.yaml
-      - packages/alarm-panel/alarm2.yaml
-      - packages/alarm-panel/relay1.yaml
-      - packages/alarm-panel/relay2.yaml
 
       ####
       # BUZZER (RTTTL)
