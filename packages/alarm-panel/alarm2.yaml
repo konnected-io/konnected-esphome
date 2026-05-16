@@ -1,4 +1,5 @@
 substitutions:
+  # Override to "true" in device config if alarm2 pin is a strapping pin with a safe pull-down.
   alarm2_ignore_strapping_warning: "false"
 
 switch:
