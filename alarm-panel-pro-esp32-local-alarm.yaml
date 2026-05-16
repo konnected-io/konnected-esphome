@@ -280,18 +280,6 @@ button:
         - state_machine.transition: arm_away
 
   - platform: template
-    name: Arm Home
-    on_press:
-      then:
-        - state_machine.transition: arm_home
-
-  - platform: template
-    name: Arm Night
-    on_press:
-      then:
-        - state_machine.transition: arm_night
-
-  - platform: template
     name: Disarm
     on_press:
       then:
@@ -419,17 +407,12 @@ logger:
 # more: https://esphome.io/components/api.html
 api:
   services:
+    - service: arm
+      then:
+        - state_machine.transition: arm_away
     - service: arm_away
       then:
         - state_machine.transition: arm_away
-
-    - service: arm_home
-      then:
-        - state_machine.transition: arm_home
-
-    - service: arm_night
-      then:
-        - state_machine.transition: arm_night
 
     - service: disarm
       variables:
