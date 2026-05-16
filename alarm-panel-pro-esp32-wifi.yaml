@@ -65,7 +65,6 @@ substitutions:
   alarm1: GPIO12
   alarm2: GPIO5
   out1: GPIO23
-  out2: GPIO5
   status_led: GPIO3
   
   ####

@@ -1,3 +1,6 @@
+# REQUIRES: packages/vl53l0x-range-sensor.yaml must be included alongside this package.
+# References open_garage_door_distance_from_ceiling, garage_door_range_sensor, and range_sensor.
+
 substitutions:
   rtttl_boop: boop:d=32,o=5,b=100:d#
   rtttl_gotit: got_it:d=32,o=5,b=100:d#,a#,be
@@ -48,11 +51,6 @@ button:
     on_press:
       then:
         - script.execute: script_self_test_stop
-
-  - platform: factory_reset
-    name: Factory Reset
-    entity_category: diagnostic
-    internal: true
 
 script:
   - id: script_self_test
