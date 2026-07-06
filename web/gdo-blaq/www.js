@@ -41,7 +41,8 @@
     sun: "M3.55 19.09L4.96 20.5L6.76 18.71L5.34 17.29M12 6C8.69 6 6 8.69 6 12S8.69 18 12 18 18 15.31 18 12C18 8.68 15.31 6 12 6M20 13H23V11H20M17.24 18.71L19.04 20.5L20.45 19.09L18.66 17.29M20.45 5L19.04 3.6L17.24 5.39L18.66 6.81M13 1H11V4H13M6.76 5.39L4.96 3.6L3.55 5L5.34 6.81L6.76 5.39M1 13H4V11H1M13 20H11V23H13",
     moon: "M17.75,4.09L15.22,6.03L16.13,9.09L13.5,7.28L10.87,9.09L11.78,6.03L9.25,4.09L12.44,4L13.5,1L14.56,4L17.75,4.09M21.25,11L19.61,12.25L20.2,14.23L18.5,13.06L16.8,14.23L17.39,12.25L15.75,11L17.81,10.95L18.5,9L19.19,10.95L21.25,11M18.97,15.95C19.8,15.87 20.69,17.05 20.16,17.8C19.84,18.25 19.5,18.67 19.08,19.07C15.17,23 8.84,23 4.94,19.07C1.03,15.17 1.03,8.83 4.94,4.93C5.34,4.53 5.76,4.17 6.21,3.85C6.96,3.32 8.14,4.21 8.06,5.04C7.79,7.9 8.75,10.87 10.95,13.06C13.14,15.26 16.1,16.22 18.97,15.95M17.33,17.97C14.5,17.81 11.7,16.64 9.53,14.5C7.36,12.31 6.2,9.5 6.04,6.68C3.23,9.82 3.34,14.64 6.35,17.66C9.37,20.67 14.19,20.78 17.33,17.97Z",
     plusBox: "M17,13H13V17H11V13H7V11H11V7H13V11H17M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z",
-    bell: "M10,21H14A2,2 0 0,1 12,23A2,2 0 0,1 10,21M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M17,11A5,5 0 0,0 12,6A5,5 0 0,0 7,11V18H17V11M19.75,3.19L18.33,4.61C20.04,6.3 21,8.6 21,11H23C23,8.07 21.84,5.25 19.75,3.19M1,11H3C3,8.6 3.96,6.3 5.67,4.61L4.25,3.19C2.16,5.25 1,8.07 1,11Z",
+    // Device section: clear "device details" glyph (MDI information-outline)
+    info: "M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z",
   };
   const ic = (name) =>
     '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="' + ICONS[name] + '"/></svg>';
@@ -162,7 +163,7 @@
     // Device
     '<section class="gdo-card gdo-sect" id="g-dev">' +
     '<button class="gdo-sect-head" id="g-dev-h" aria-expanded="false">' +
-    ic("chip") + '<span class="gdo-sect-title">Device</span><span class="gdo-flex"></span>' +
+    ic("info") + '<span class="gdo-sect-title">Device</span><span class="gdo-flex"></span>' +
     '<span class="gdo-wifi" id="g-wifi" hidden></span>' +
     '<span class="gdo-sect-sum" id="g-dev-sum"></span>' +
     '<span class="gdo-chev">' + ic("chevDown") + "</span></button>" +
@@ -174,7 +175,7 @@
     '<span class="gdo-sect-sum" id="g-set-sum"></span>' +
     '<span class="gdo-chev">' + ic("chevDown") + "</span></button>" +
     '<div class="gdo-setbody" id="g-setbody" hidden>' +
-    '<div id="g-rows" style="display:flex;flex-direction:column;gap:15px;"></div>' +
+    '<div id="g-rows" style="display:flex;flex-direction:column;gap:17px;"></div>' +
     '<div class="gdo-btngrid" id="g-btns"></div>' +
     "</div></section>" +
     // Logs
@@ -245,6 +246,10 @@
     pill.classList.toggle("off", !S.online);
     $("g-pill-tx").textContent = S.online ? "Online" : S.everConnected ? "Reconnecting…" : "Connecting…";
     $("g-livedot").classList.toggle("off", !S.online);
+    // Once we've seen the device, a dropped connection makes controls inert
+    // (see [data-offline] in www.css). Skip during the first connect so the
+    // initial skeleton doesn't flash a disabled state.
+    root.toggleAttribute("data-offline", S.everConnected && !S.online);
     if (S.title && document.title !== S.title) document.title = S.title;
   }
 
@@ -354,7 +359,7 @@
 
   /* ---------- Safety strip ---------- */
   const SAFETY = [
-    { oid: "obstruction", icon: "ray", label: "Obstruction", on: ["Detected", "c-dg"], off: ["Clear", "c-ok"] },
+    { oid: "obstruction", icon: "ray", label: "Obstruction", on: ["Detected", "c-wa"], off: ["Clear", "c-tx"] },
     { oid: "motor", icon: "engine", label: "Motor", on: ["Running", "c-acc"], off: ["Idle", "c-tx"] },
     { oid: "wall_button", icon: "tap", label: "Wall button", on: ["Pressed", "c-acc"], off: ["Released", "c-tx"] },
     { oid: "synced", icon: "syncCircle", label: "Synced", on: ["Yes", "c-ok"], off: ["No", "c-wa"] },
@@ -375,8 +380,7 @@
         '<div><div class="gdo-safety-lb"></div><div class="gdo-safety-val"></div></div>';
       return n;
     }, (n, it) => {
-      n.querySelector(".gdo-safety-ic").className = "gdo-safety-ic ic-wrap " + it.cls;
-      n.querySelector(".gdo-safety-ic").style.fontSize = "19px";
+      n.querySelector(".gdo-safety-ic").className = "gdo-safety-ic " + it.cls;
       n.querySelector(".gdo-safety-lb").textContent = it.label;
       const v = n.querySelector(".gdo-safety-val");
       v.textContent = it.val;
@@ -440,15 +444,14 @@
   }
 
   /* ---------- Settings ---------- */
-  const SELECT_DESC = { security__protocol: "Opener radio protocol" };
+  const SELECT_DESC = { security__protocol: "Communication protocol" };
   const SWITCH_META = {
-    toggle_only: { name: "Toggle-only mode", desc: "Send a single toggle command instead of directional commands" },
+    toggle_only: { name: "Toggle-only mode", desc: "Send only toggle commands instead of directional commands" },
     learn: { name: "Learn mode", desc: "Pair a wireless remote or keypad" },
   };
   const BTN_META = {
     "re-sync": { icon: "sync", ord: 0 },
     reset_door_timings: { icon: "timerRefresh", ord: 1 },
-    "pre-close_warning": { icon: "bell", ord: 2 },
     restart: { hold: true, cls: "warn", icon: "restart", label: "Hold to reboot", ord: 8 },
     factory_reset: { hold: true, cls: "danger", icon: "alert", label: "Hold to factory reset", ord: 9 },
   };
@@ -502,6 +505,7 @@
 
     // Buttons (design order, hold-to-confirm entries last)
     const btns = allOf("button")
+      .filter((e) => objId(e) !== "pre-close_warning")
       .map((e) => ({ e, meta: BTN_META[objId(e)] || { icon: "tap", ord: 5 } }))
       .sort((a, b) => a.meta.ord - b.meta.ord);
     syncList($("g-btns"), btns.map((b) => ({ key: b.e.id, ...b })), (it) => {
@@ -560,6 +564,13 @@
     n.addEventListener("pointerup", end);
     n.addEventListener("pointercancel", end);
     n.addEventListener("pointerleave", end);
+    // Keyboard: hold Space/Enter to arm, release to cancel — keeps these
+    // destructive actions operable without a pointer.
+    n.addEventListener("keydown", (ev) => {
+      if ((ev.key === " " || ev.key === "Enter") && !ev.repeat) start(ev);
+    });
+    n.addEventListener("keyup", (ev) => { if (ev.key === " " || ev.key === "Enter") end(); });
+    n.addEventListener("blur", end);
     return n;
   }
   function escapeHtml(s) {
