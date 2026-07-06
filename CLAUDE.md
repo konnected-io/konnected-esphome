@@ -83,3 +83,56 @@ external_components:
 ```
 
 Comment out the corresponding remote `external_components` reference when testing local changes.
+
+## Device Web UI (`web/gdo-blaq/`)
+
+Custom frontend for the ESPHome internal web server (`web_server: version: 2`), replacing the
+stock `https://oi.esphome.io/v2/www.js`. Plain JS/CSS, no framework, no build step:
+
+- `www.js` — the entire app (renders into its own root; hides the stock `<esp-app>` element)
+- `www.css` — design tokens + components; dark theme default, light via `data-theme`
+- `mockup.html` — dev harness with a simulated device (see below)
+- `logo-icon.svg` — brand asset, inlined verbatim into `www.js` (keep in sync if it changes)
+
+Production: the device's HTML shell loads the JS/CSS from the CDN URLs set by the `web_ui_base`
+substitution in `garage-door-GDOv2-Q.yaml`. Deploying = uploading `www.js`/`www.css` to that
+CDN path (bump the version segment, e.g. `/v1/` → `/v2/`, to bust caches).
+
+### Run / develop locally
+
+```bash
+cd web/gdo-blaq && python3 -m http.server 8765
+# open http://127.0.0.1:8765/mockup.html  (file:// also works)
+```
+
+`mockup.html` stubs the device entirely — fake `EventSource` replaying a real GDOv2-Q entity
+snapshot, fake `fetch` handling the REST action endpoints with a simulated door/light/lock —
+then loads the local `www.js`/`www.css` relatively. Edit either file and reload. A "SIM" panel
+(bottom-right) triggers motion/obstruction pulses, error logs, and connection drops. Set
+`EMIT_INTERMEDIATE = false` in `mockup.html` for hardware-faithful cover events (the real
+firmware only broadcasts on operation change, not intermediate positions).
+
+To test against a live device, load the page at `http://<device-ip>/` and inject the local
+build from the browser console (the stock UI stays hidden via CSS):
+
+```js
+const l = Object.assign(document.createElement("link"),
+  { rel: "stylesheet", href: "http://127.0.0.1:8765/www.css" });
+l.setAttribute("data-gdo-css", "");
+document.head.appendChild(l);
+document.body.appendChild(Object.assign(document.createElement("script"),
+  { src: "http://127.0.0.1:8765/www.js" }));
+```
+
+### ESPHome web server API facts the UI depends on
+
+- **Action URLs are built from the SSE `name_id` field** (`"cover/Garage Door"` →
+  `POST /cover/Garage%20Door/open`) with legacy object_id fallback — required for
+  ESPHome ≥ 2026.7 which removes slug URLs (see `openapi/migration-guide.md`).
+- **Incremental `state` broadcasts are slim payloads** — no `domain`/`name`/`entity_category`
+  (only the connect replay has them). Always merge into stored entities, never replace.
+- **The connect replay can drop events** (small deferred queue, worse with multiple SSE
+  clients) and the stream advertises `retry: 30000`. `www.js` runs short second-connection
+  "backfill sweeps" after connect to adopt missed entities.
+- Cover state is only broadcast on operation change (IDLE↔OPENING/CLOSING), so position
+  jumps rather than streaming during travel.
