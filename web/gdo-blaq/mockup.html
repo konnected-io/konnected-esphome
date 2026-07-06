@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GDO blaQ — UI dev mockup</title>
+<link rel="icon" href="data:">
+<!--
+  Local dev harness for the GDO blaQ web UI.
+  Stubs the ESPHome device (SSE /events stream + REST action endpoints)
+  with data captured from a real GDOv2-Q, then loads the local www.js /
+  www.css. Open directly (file://) or via any static server; edit
+  www.js / www.css and reload to see changes.
+-->
+<link rel="stylesheet" href="www.css" data-gdo-css>
+</head>
+<body>
+
+<script>
+/* ============ Simulated GDO blaQ device ============ */
+(() => {
+  "use strict";
+
+  /* ---- Entity snapshot (captured from a live GDOv2-Q, fw 1.5.8.1) ---- */
+  const ENT = [
+    { name_id: "binary_sensor/Motion", id: "binary_sensor-motion", domain: "binary_sensor", name: "Motion", icon: "", entity_category: 0, value: false, state: "OFF" },
+    { name_id: "binary_sensor/Obstruction", id: "binary_sensor-obstruction", domain: "binary_sensor", name: "Obstruction", icon: "", entity_category: 0, value: false, state: "OFF" },
+    { name_id: "binary_sensor/Motor", id: "binary_sensor-motor", domain: "binary_sensor", name: "Motor", icon: "", entity_category: 0, value: false, state: "OFF" },
+    { name_id: "binary_sensor/Wall Button", id: "binary_sensor-wall_button", domain: "binary_sensor", name: "Wall Button", icon: "", entity_category: 0, value: false, state: "OFF" },
+    { name_id: "binary_sensor/Synced", id: "binary_sensor-synced", domain: "binary_sensor", name: "Synced", icon: "", entity_category: 0, value: true, state: "ON" },
+    { name_id: "cover/Garage Door", id: "cover-garage_door", domain: "cover", name: "Garage Door", icon: "", entity_category: 0, value: 1, state: "OPEN", current_operation: "IDLE", position: 1 },
+    { name_id: "light/Garage Light", id: "light-garage_light", domain: "light", name: "Garage Light", icon: "", entity_category: 0, value: "OFF", color_mode: "onoff", state: "OFF", color: {}, effects: ["None"] },
+    { name_id: "sensor/Uptime", id: "sensor-uptime", domain: "sensor", name: "Uptime", icon: "mdi:timer-outline", entity_category: 2, value: 339603.6, state: "339604 s", uom: "s" },
+    { name_id: "sensor/WiFi Signal", id: "sensor-wifi_signal", domain: "sensor", name: "WiFi Signal", icon: "", entity_category: 2, value: -55, state: "-55 dBm", uom: "dBm" },
+    { name_id: "sensor/WiFi Signal %", id: "sensor-wifi_signal__", domain: "sensor", name: "WiFi Signal %", icon: "", entity_category: 2, value: 90, state: "90 %", uom: "%" },
+    { name_id: "sensor/Garage Openings", id: "sensor-garage_openings", domain: "sensor", name: "Garage Openings", icon: "mdi:open-in-app", entity_category: 0, value: 328, state: "328 openings", uom: "openings" },
+    { name_id: "sensor/Heap Free", id: "sensor-heap_free", domain: "sensor", name: "Heap Free", icon: "mdi:counter", entity_category: 2, value: 201188, state: "201188 B", uom: "B" },
+    { name_id: "switch/Learn", id: "switch-learn", domain: "switch", name: "Learn", icon: "mdi:plus-box", entity_category: 0, value: false, state: "OFF", assumed_state: false },
+    { name_id: "switch/Toggle Only", id: "switch-toggle_only", domain: "switch", name: "Toggle Only", icon: "mdi:plus-box", entity_category: 1, value: false, state: "OFF", assumed_state: false },
+    { name_id: "button/Restart", id: "button-restart", domain: "button", name: "Restart", icon: "mdi:restart", entity_category: 1 },
+    { name_id: "button/Factory Reset", id: "button-factory_reset", domain: "button", name: "Factory Reset", icon: "mdi:restart-alert", entity_category: 1 },
+    { name_id: "button/Pre-close Warning", id: "button-pre-close_warning", domain: "button", name: "Pre-close Warning", icon: "", entity_category: 0 },
+    { name_id: "button/Reset door timings", id: "button-reset_door_timings", domain: "button", name: "Reset door timings", icon: "", entity_category: 1 },
+    { name_id: "button/Re-sync", id: "button-re-sync", domain: "button", name: "Re-sync", icon: "", entity_category: 1 },
+    { name_id: "text_sensor/Device ID", id: "text_sensor-device_id", domain: "text_sensor", name: "Device ID", icon: "", entity_category: 2, value: "64e833692dec", state: "64e833692dec" },
+    { name_id: "text_sensor/ESPHome Version", id: "text_sensor-esphome_version", domain: "text_sensor", name: "ESPHome Version", icon: "mdi:new-box", entity_category: 2, value: "2026.6.4 (config hash 0x1c47490a)", state: "2026.6.4 (config hash 0x1c47490a)" },
+    { name_id: "text_sensor/Project version", id: "text_sensor-project_version", domain: "text_sensor", name: "Project version", icon: "", entity_category: 2, value: "1.5.8.1", state: "1.5.8.1" },
+    { name_id: "text_sensor/IP Address", id: "text_sensor-ip_address", domain: "text_sensor", name: "IP Address", icon: "", entity_category: 2, value: "10.0.1.45", state: "10.0.1.45" },
+    { name_id: "text_sensor/Reboot Reason", id: "text_sensor-reboot_reason", domain: "text_sensor", name: "Reboot Reason", icon: "mdi:restart", entity_category: 2, value: "power-on event", state: "power-on event" },
+    { name_id: "select/Security+ protocol", id: "select-security__protocol", domain: "select", name: "Security+ protocol", icon: "mdi:settings", entity_category: 1, value: "security+2.0", state: "security+2.0", option: ["auto", "security+1.0", "security+2.0", "security+1.0 with smart panel"] },
+    { name_id: "lock/Lock", id: "lock-lock", domain: "lock", name: "Lock", icon: "", entity_category: 0, value: 2, state: "UNLOCKED" },
+  ];
+  const byId = Object.fromEntries(ENT.map((e) => [e.id, e]));
+  const byName = Object.fromEntries(ENT.map((e) => [e.name_id, e]));
+  const PING0 = { title: "GDO blaQ 692dec (mockup)", comment: "", ota: false, log: true, lang: "en", uptime: 339710 };
+
+  /* Real device quirk: incremental broadcasts are SLIM payloads —
+     no domain/name/icon/entity_category. Mimic that here so the UI
+     is exercised the same way as against hardware. */
+  const SLIM_DROP = ["domain", "name", "icon", "entity_category", "effects", "option", "uom", "assumed_state"];
+  const slim = (e) => {
+    const s = { ...e };
+    for (const k of SLIM_DROP) delete s[k];
+    return s;
+  };
+
+  /* ---- Fake EventSource (auto-reconnects like the real one) ---- */
+  const sources = new Set();
+  class FakeEventSource {
+    constructor(url) {
+      this.url = url;
+      this.listeners = {};
+      this.readyState = 0;
+      this.onopen = this.onerror = null;
+      setTimeout(() => this._connect(), 60);
+    }
+    _connect() {
+      if (this.readyState === 2) return;
+      if (SIM.offline) {
+        if (this.onerror) this.onerror();
+        setTimeout(() => this._connect(), 1000); // harness retry (real device: 30s)
+        return;
+      }
+      this.readyState = 1;
+      sources.add(this);
+      if (this.onopen) this.onopen();
+      // connect replay: ping + full entity states
+      this._emit("ping", JSON.stringify(PING0));
+      for (const e of ENT) this._emit("state", JSON.stringify(e));
+    }
+    _drop() {
+      if (this.readyState === 2) return;
+      this.readyState = 0;
+      sources.delete(this);
+      if (this.onerror) this.onerror();
+      setTimeout(() => this._connect(), 1000);
+    }
+    addEventListener(type, fn) { (this.listeners[type] = this.listeners[type] || []).push(fn); }
+    _emit(type, data) {
+      if (this.readyState !== 1) return;
+      (this.listeners[type] || []).forEach((fn) => fn({ data }));
+    }
+    close() { this.readyState = 2; sources.delete(this); }
+  }
+  window.EventSource = FakeEventSource;
+
+  /* ---- Simulator core ---- */
+  const SIM = (window.SIM = {
+    offline: false,
+    broadcast(type, data) { for (const s of [...sources]) s._emit(type, typeof data === "string" ? data : JSON.stringify(data)); },
+    push(e) { this.broadcast("state", slim(e)); },
+    log(lvl, tag, msg) {
+      const colors = { D: "36", I: "32", W: "33", E: "31" };
+      this.broadcast("log", "\x1b[0;" + (colors[lvl] || "37") + "m[" + lvl + "][" + tag + "]: " + msg + "\x1b[0m");
+    },
+    drop(ms) {
+      this.offline = true;
+      for (const s of [...sources]) s._drop();
+      setTimeout(() => { this.offline = false; }, ms || 3000);
+    },
+    pulse(id, ms) { // momentary binary sensor
+      const e = byId[id];
+      e.value = true; e.state = "ON"; this.push(e);
+      this.log("D", e.id.replace("binary_sensor-", "gdo_") + ":042", e.name + ": ON");
+      setTimeout(() => { e.value = false; e.state = "OFF"; this.push(e); this.log("D", e.id.replace("binary_sensor-", "gdo_") + ":042", e.name + ": OFF"); }, ms || 2500);
+    },
+  });
+
+  /* ---- Door state machine ---- */
+  // The real device only broadcasts on operation change; the harness also
+  // emits intermediate positions (EMIT_INTERMEDIATE) so animation tweaks are
+  // easier to see. Set to false for hardware-faithful behavior.
+  const EMIT_INTERMEDIATE = true;
+  const door = byId["cover-garage_door"];
+  const motor = byId["binary_sensor-motor"];
+  let doorTimer = null;
+  function setMotor(on) {
+    if (!!motor.value === on) return;
+    motor.value = on; motor.state = on ? "ON" : "OFF";
+    SIM.push(motor);
+  }
+  function doorTo(target) {
+    clearInterval(doorTimer);
+    target = Math.max(0, Math.min(1, target));
+    if (Math.abs(target - door.position) < 0.005) return;
+    const opening = target > door.position;
+    door.current_operation = opening ? "OPENING" : "CLOSING";
+    door.state = opening ? "OPENING" : "CLOSING";
+    door.value = door.position;
+    SIM.log("D", "gdo_cover:030", "[gdo_main_task] Door state: " + (opening ? "Opening" : "Closing") + ", position: " + Math.round(door.position * 100) + "%");
+    SIM.push(door);
+    setMotor(true);
+    doorTimer = setInterval(() => {
+      const step = 0.04;
+      door.position += opening ? step : -step;
+      const arrived = opening ? door.position >= target : door.position <= target;
+      if (arrived) {
+        clearInterval(doorTimer);
+        door.position = target;
+        door.current_operation = "IDLE";
+        door.state = target <= 0 ? "CLOSED" : "OPEN";
+        door.value = target;
+        setMotor(false);
+        SIM.log("D", "gdo_cover:030", "[gdo_main_task] Door state: " + door.state.toLowerCase() + ", position: " + Math.round(target * 100) + "%");
+        SIM.push(door);
+      } else if (EMIT_INTERMEDIATE) {
+        SIM.log("D", "gdo_cover:030", "[gdo_main_task] Door state: " + (opening ? "Opening" : "Closing") + ", position: " + Math.round(door.position * 100) + "%");
+        SIM.push(door);
+      }
+    }, 350);
+  }
+  function stopDoor() {
+    clearInterval(doorTimer);
+    door.current_operation = "IDLE";
+    door.state = door.position <= 0 ? "CLOSED" : "OPEN";
+    door.value = door.position;
+    setMotor(false);
+    SIM.log("W", "gdo_cover:051", "[gdo_main_task] Door stopped at " + Math.round(door.position * 100) + "%");
+    SIM.push(door);
+  }
+
+  /* ---- REST action endpoints ---- */
+  const realFetch = window.fetch.bind(window);
+  window.fetch = (input, init) => {
+    const url = typeof input === "string" ? input : input.url;
+    if (!url.startsWith("/")) return realFetch(input, init);
+    const [path, query] = url.split("?");
+    const seg = path.split("/").filter(Boolean).map(decodeURIComponent);
+    const q = new URLSearchParams(query || "");
+    const e = byName[seg[0] + "/" + seg[1]];
+    const action = seg[2];
+    setTimeout(() => handleAction(e, action, q), 120); // device round-trip
+    return Promise.resolve(new Response("", { status: e ? 200 : 404 }));
+  };
+
+  function handleAction(e, action, q) {
+    if (!e) return;
+    switch (e.domain) {
+      case "cover":
+        if (action === "open") doorTo(1);
+        else if (action === "close") doorTo(0);
+        else if (action === "stop") stopDoor();
+        else if (action === "set" && q.has("position")) doorTo(parseFloat(q.get("position")));
+        break;
+      case "light": {
+        const on = action === "turn_on" || (action === "toggle" && e.state !== "ON");
+        e.state = e.value = on ? "ON" : "OFF";
+        SIM.log("I", "light:035", "'" + e.name + "' Setting state: " + e.state);
+        SIM.push(e);
+        break;
+      }
+      case "lock": {
+        const locked = action === "lock";
+        e.state = locked ? "LOCKED" : "UNLOCKED";
+        e.value = locked ? 1 : 2;
+        SIM.log("I", "gdo_lock:022", "Remote lockout " + (locked ? "enabled" : "disabled"));
+        SIM.push(e);
+        break;
+      }
+      case "switch": {
+        const on = action === "turn_on" || (action === "toggle" && e.state !== "ON");
+        e.state = on ? "ON" : "OFF";
+        e.value = on;
+        SIM.log("I", "switch:012", "'" + e.name + "': " + e.state);
+        SIM.push(e);
+        break;
+      }
+      case "select":
+        if (action === "set" && q.has("option")) {
+          e.state = e.value = q.get("option");
+          SIM.log("I", "select:028", "'" + e.name + "' → " + e.value);
+          SIM.push(e);
+        }
+        break;
+      case "button":
+        SIM.log("I", "button:013", "'" + e.name + "' pressed");
+        if (e.id === "button-restart") SIM.drop(3000);
+        break;
+    }
+  }
+
+  /* ---- Ambient activity: pings, uptime, heap, occasional logs ---- */
+  let uptime = PING0.uptime;
+  setInterval(() => {
+    uptime += 10;
+    SIM.broadcast("ping", JSON.stringify({ uptime }));
+  }, 10000);
+  setInterval(() => {
+    const up = byId["sensor-uptime"], heap = byId["sensor-heap_free"], wifi = byId["sensor-wifi_signal"], wifip = byId["sensor-wifi_signal__"];
+    up.value += 15; up.state = Math.round(up.value) + " s"; SIM.push(up);
+    heap.value = 199000 + Math.round(Math.random() * 4000); heap.state = heap.value + " B"; SIM.push(heap);
+    wifi.value = -53 - Math.round(Math.random() * 6); wifi.state = wifi.value + " dBm"; SIM.push(wifi);
+    wifip.value = Math.max(0, Math.min(100, 2 * (wifi.value + 100))); wifip.state = wifip.value + " %"; SIM.push(wifip);
+    SIM.log("D", "sensor:098", "'WiFi Signal': Sending state " + wifi.value + " dBm");
+  }, 15000);
+
+  /* ---- Dev control panel ---- */
+  addEventListener("DOMContentLoaded", () => {
+    const p = document.createElement("div");
+    p.style.cssText = "position:fixed;bottom:12px;right:12px;z-index:9999;background:#000c;color:#9fe;backdrop-filter:blur(4px);font:11px ui-monospace,monospace;padding:8px 10px;border-radius:8px;display:flex;flex-direction:column;gap:5px;border:1px solid #ffffff30";
+    p.innerHTML = "<b style='color:#fff'>SIM</b>";
+    const mk = (label, fn) => {
+      const b = document.createElement("button");
+      b.textContent = label;
+      b.style.cssText = "font:inherit;background:#ffffff14;color:inherit;border:1px solid #ffffff25;border-radius:5px;padding:3px 8px;cursor:pointer;text-align:left";
+      b.onclick = fn;
+      p.appendChild(b);
+    };
+    mk("motion pulse", () => SIM.pulse("binary_sensor-motion", 3000));
+    mk("obstruction pulse", () => SIM.pulse("binary_sensor-obstruction", 2500));
+    mk("wall button press", () => SIM.pulse("binary_sensor-wall_button", 800));
+    mk("toggle synced", () => { const e = byId["binary_sensor-synced"]; e.value = !e.value; e.state = e.value ? "ON" : "OFF"; SIM.push(e); });
+    mk("error log line", () => SIM.log("E", "secplus_gdo:120", "Rolling code mismatch — resyncing"));
+    mk("drop connection 3s", () => SIM.drop(3000));
+    document.body.appendChild(p);
+  });
+})();
+</script>
+
+<esp-app></esp-app>
+<script src="www.js"></script>
+</body>
+</html>
