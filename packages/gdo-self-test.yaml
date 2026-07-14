@@ -59,9 +59,9 @@ button:
         - script.execute: script_self_test_stop
 
   - platform: factory_reset
+    id: hard_reset
     name: Factory Reset
     entity_category: diagnostic
-    internal: true
 
 script:
   - id: script_self_test
