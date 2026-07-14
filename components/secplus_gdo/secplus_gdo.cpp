@@ -152,7 +152,30 @@ namespace secplus_gdo {
         ESP_LOGCONFIG(TAG, "Setting up secplus GDO ...");
     }
 
+    // Motion is a Security+2.0-only feature; the Security+1.0 protocol has no motion
+    // command. gdolib's protocol probe can transiently run the Security+2.0 decoder
+    // against a Security+1.0 bus (konnected-io/gdolib#30), where a corrupt frame can
+    // decode as GDO_CMD_MOTION. A single publish here is unrecoverable downstream: the
+    // cloud infers a motion sensor exists the moment this entity leaves its "unknown"
+    // state, so leaving it unpublished is strictly safer than publishing a guess.
+    void GDOComponent::set_motion_state(gdo_motion_state_t state) {
+        if (!this->f_motion) {
+            return;
+        }
+
+        if (!this->synced_ || this->protocol_ != GDO_PROTOCOL_SEC_PLUS_V2) {
+            ESP_LOGW(TAG, "Ignoring motion state %s; not synced on Security+2.0 (synced: %s, protocol: %s)",
+                     gdo_motion_state_to_string(state), this->synced_ ? "true" : "false",
+                     gdo_protocol_type_to_string(this->protocol_));
+            return;
+        }
+
+        this->f_motion(state == GDO_MOTION_STATE_DETECTED);
+    }
+
     void GDOComponent::set_sync_state(bool synced) {
+        this->synced_ = synced;
+
         if (this->door_) {
             this->door_->set_sync_state(synced);
         }

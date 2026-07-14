@@ -41,12 +41,15 @@ namespace secplus_gdo {
         float get_setup_priority() const override { return setup_priority::BEFORE_CONNECTION; }
 
         void register_protocol_select(GDOSelect *select) { this->protocol_select_ = select; }
-        void set_protocol_state(gdo_protocol_type_t protocol) { if (this->protocol_select_) {
-            this->protocol_select_->update_state(protocol); }
+        void set_protocol_state(gdo_protocol_type_t protocol) {
+            this->protocol_ = protocol;
+            if (this->protocol_select_) {
+                this->protocol_select_->update_state(protocol);
+            }
         }
 
         void register_motion(std::function<void(bool)> f) { f_motion = f; }
-        void set_motion_state(gdo_motion_state_t state) { if (f_motion) { f_motion(state == GDO_MOTION_STATE_DETECTED); } }
+        void set_motion_state(gdo_motion_state_t state);
 
         void register_obstruction(std::function<void(bool)> f) { f_obstruction = f; }
         void set_obstruction(gdo_obstruction_state_t state) {
@@ -118,6 +121,8 @@ namespace secplus_gdo {
         GDOSwitch*                                   learn_switch_{nullptr};
         GDOSwitch*                                   toggle_only_switch_{nullptr};
         bool                                         start_gdo_{false};
+        bool                                         synced_{false};
+        gdo_protocol_type_t                          protocol_{GDO_PROTOCOL_MAX};
 
     }; // GDOComponent
 } // namespace secplus_gdo
