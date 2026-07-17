@@ -93,6 +93,13 @@ external_components:
   #     path: components
   #   components: [ secplus_gdo ]
 
+esp32:
+  framework:
+    components:
+      - name: gdolib
+        source: https://github.com/konnected-io/gdolib
+        ref: 4a55112e5adc623f8ae58fdae7006a22a3ff72b8
+
 ####
 # PACKAGES
 # Each package includes a Garage Door Opener feature described
@@ -181,8 +188,3 @@ esphome:
     - priority: 220
       then:
         lambda: id(gdo_blaq).start_gdo();
-  platformio_options:
-    lib_deps:
-      - https://github.com/konnected-io/gdolib#4a55112
-    build_flags:
-      - -DUART_SCLK_DEFAULT=UART_SCLK_APB

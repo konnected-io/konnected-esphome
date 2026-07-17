@@ -177,7 +177,9 @@ api:
 
 web_server:
 
-esphome:
-  platformio_options:
-    lib_deps:
-      - https://github.com/konnected-io/gdolib#v1.1.1
+esp32:
+  framework:
+    components:
+      - name: gdolib
+        source: https://github.com/konnected-io/gdolib
+        ref: v1.1.1
