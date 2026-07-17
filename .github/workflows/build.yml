@@ -89,7 +89,7 @@ jobs:
         id: build-alarm-panel-esp8266
         run: |
           esphome compile alarm-panel-esp8266.yaml
-          build_path=.esphome/build/konnected/.pioenvs/konnected
+          build_path=.esphome/build/konnected/build
           fname=konnected-esphome-alarm-panel-esp8266-${{ steps.alarm-panel-esp8266-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
           cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
@@ -99,7 +99,7 @@ jobs:
         id: build-alarm-panel-pro-esp32-wifi
         run: |
           esphome compile alarm-panel-pro-esp32-wifi.yaml
-          build_path=.esphome/build/konnected/.pioenvs/konnected
+          build_path=.esphome/build/konnected/build
           fname=konnected-esphome-alarm-panel-pro-v1-wifi-${{ steps.alarm-panel-pro-wifi-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
           cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
@@ -109,7 +109,7 @@ jobs:
         id: build-alarm-panel-pro-esp32-lan8720
         run: |
           esphome compile alarm-panel-pro-esp32-ethernet.yaml
-          build_path=.esphome/build/konnected/.pioenvs/konnected
+          build_path=.esphome/build/konnected/build
           fname=konnected-esphome-alarm-panel-pro-v1-ethernet-${{ steps.alarm-panel-pro-ethernet-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
           cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
@@ -119,7 +119,7 @@ jobs:
         id: build-alarm-panel-pro-esp32-rtl8201
         run: |
           esphome compile alarm-panel-pro-v1.8-ethernet.yaml
-          build_path=.esphome/build/konnected/.pioenvs/konnected
+          build_path=.esphome/build/konnected/build
           fname=konnected-esphome-alarm-panel-pro-v1.8-ethernet-${{ steps.alarm-panel-pro-v18-ethernet-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
           cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
@@ -129,7 +129,7 @@ jobs:
         id: build-garage-door-gdov1-s
         run: |
           esphome compile garage-door-GDOv1-S.yaml
-          build_path=.esphome/build/konnected/.pioenvs/konnected
+          build_path=.esphome/build/konnected/build
           fname=konnected-esphome-garage-door-GDOv1-S-${{ steps.garage-door-gdov1-s-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
           cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
@@ -139,7 +139,7 @@ jobs:
         id: build-garage-door-gdov2-s
         run: |
           esphome compile garage-door-GDOv2-S.yaml
-          build_path=.esphome/build/konnected/.pioenvs/konnected
+          build_path=.esphome/build/konnected/build
           fname=konnected-esphome-garage-door-GDOv2-S-${{ steps.garage-door-gdov2-s-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
           cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
@@ -149,7 +149,7 @@ jobs:
         id: build-garage-door-gdov2-q
         run: |
           esphome compile garage-door-GDOv2-Q.yaml
-          build_path=.esphome/build/konnected/.pioenvs/konnected
+          build_path=.esphome/build/konnected/build
           fname=konnected-esphome-garage-door-GDOv2-Q-${{ steps.garage-door-gdov2-q-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
           cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
@@ -159,7 +159,7 @@ jobs:
         id: build-alarm-panel-3e
         run: |
           esphome compile alarm-panel-3e.yaml
-          build_path=.esphome/build/konnected/.pioenvs/konnected
+          build_path=.esphome/build/konnected/build
           fname=konnected-esphome-alarm-panel-3e-${{ steps.alarm-panel-3e-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
           cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
@@ -169,7 +169,7 @@ jobs:
         id: build-alarm-panel-3w
         run: |
           esphome compile alarm-panel-3e.yaml
-          build_path=.esphome/build/konnected/.pioenvs/konnected
+          build_path=.esphome/build/konnected/build
           fname=konnected-esphome-alarm-panel-3w-${{ steps.alarm-panel-3w-version.outputs.data }}.bin
           cp $build_path/firmware.factory.bin assets/$fname
           cp $build_path/firmware.ota.bin assets/${fname%.bin}.ota.bin
