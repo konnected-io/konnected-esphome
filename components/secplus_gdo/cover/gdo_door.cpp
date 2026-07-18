@@ -1,3 +1,4 @@
+#include <cinttypes>
 #include "esphome/core/log.h"
 #include "gdo_door.h"
 
@@ -70,7 +71,7 @@ void GDODoor::do_action_after_warning(const cover::CoverCall& call) {
 
     this->set_state(GDO_DOOR_STATE_CLOSING, this->position);
 
-    ESP_LOGD(TAG, "WARNING for %dms", this->pre_close_duration_);
+    ESP_LOGD(TAG, "WARNING for %" PRIu32 "ms", this->pre_close_duration_);
     if (this->pre_close_start_trigger) {
         this->pre_close_start_trigger->trigger();
     }
