@@ -123,7 +123,7 @@ button:
           // Generate random upper 16 bits, keep lower 16 bits as 0x2908
           uint32_t random_upper = (random_uint32() & 0x7F7F) << 16;
           uint32_t client_id = random_upper | 0x2908;
-          ESP_LOGW("lambda","Re-syncing with Client ID: 0x%08X (%" PRIu32 ")", client_id, random_upper);
+          ESP_LOGW("lambda","Re-syncing with Client ID: 0x%08" PRIX32 " (%" PRIu32 ")", client_id, random_upper);
           id(gdo_client_id).update_state(client_id);
       - number.set:
           id: gdo_rolling_code
