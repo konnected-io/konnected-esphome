@@ -77,7 +77,7 @@ substitutions:
   input2: GPIO9
 
 external_components:
-  - source: github://kesawi/konnected-esphome@fix/format-string-warnings
+  - source: github://konnected-io/konnected-esphome@master
     refresh: 5min
     components: [ secplus_gdo ]
 
@@ -92,18 +92,51 @@ external_components:
 # Each package includes a Garage Door Opener feature described
 # Remove or comment out any packages that you do not need or want.
 packages:
+
   remote_package:
-    url: https://github.com/kesawi/konnected-esphome
-    ref: fix/format-string-warnings
+    url: https://github.com/konnected-io/konnected-esphome
+    ref: master
     refresh: 5min
     files:
+
+      ####
+      # CORE
+      # This package is required and sets up core ESPHome features.
       - packages/core-esp32-s3.yaml
+
+      ####
+      # WIFI
+      # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
+      # wifi: !include packages/wifi.yaml
       - packages/wifi-esp32.yaml
+
+      ####
+      # MDNS
+      # Enables the _konnected MDNS/zeroconf service advertisement needed for the Konnected App
       - packages/mdns.yaml
+
+      ####
+      # WARNING LED
+      # Enables the onboard warning LED light, with strobe effect. Used to visually warn of garage door automatic closing.
+      # warning_led: !include packages/warning-led.yaml
       - packages/warning-led.yaml
+
+      ####
+      # PRE-CLOSE WARNING
+      # Enables a pleasant and customizable pre-close warning tone  using the onboard piezo buzzer. Used to audibly
+      # warn of a garage door automatic closing.
       - packages/buzzer-rtttl.yaml
       - packages/pre-close-warning-tones.yaml
+
+      ####
+      # STATUS LED
+      # Enables the onboard blue status LED as an activity/error indicator
+      # status_led: !include packages/status-led.yaml
       - packages/status-led.yaml
+
+      ####
+      # SECPLUS GDO
+      # The logic and capabilities of the GDO communication
       - packages/secplus-gdo.yaml
       - packages/debug.yaml
 
