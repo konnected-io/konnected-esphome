@@ -23,7 +23,22 @@
 namespace esphome {
 namespace secplus_gdo {
 
-class GDOBinarySensor : public binary_sensor::BinarySensor, public Component {};
+class GDOBinarySensor : public binary_sensor::BinarySensor, public Component {
+ public:
+  // Event-only sensor types (button, motion, motor) receive state exclusively
+  // from GDO events and would otherwise remain stateless (unavailable in Home
+  // Assistant) after every boot until their first physical event occurs.
+  // Seed those with an initial OFF at setup; a real event overrides it.
+  void set_event_only(bool event_only) { this->event_only_ = event_only; }
+  void setup() override {
+    if (this->event_only_ && !this->has_state()) {
+      this->publish_initial_state(false);
+    }
+  }
+
+ protected:
+  bool event_only_{false};
+};
 
 } // namespace secplus_gdo
 } // namespace esphome

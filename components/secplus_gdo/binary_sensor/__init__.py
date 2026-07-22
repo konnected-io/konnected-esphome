@@ -39,6 +39,11 @@ TYPES = {
     "sync": "register_sync",
 }
 
+# Types that only receive state from GDO events and therefore have no state
+# after boot until the first event occurs. These get an initial OFF published
+# at setup so they are never unavailable in Home Assistant.
+EVENT_ONLY_TYPES = ["motion", "motor", "button"]
+
 
 CONFIG_SCHEMA = (
     binary_sensor.binary_sensor_schema(GDOBinarySensor)
@@ -55,6 +60,8 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await binary_sensor.register_binary_sensor(var, config)
     await cg.register_component(var, config)
+    if config[CONF_TYPE] in EVENT_ONLY_TYPES:
+        cg.add(var.set_event_only(True))
     parent = await cg.get_variable(config[CONF_SECPLUS_GDO_ID])
     fcall = str(parent) + "->" + str(TYPES[config[CONF_TYPE]])
     text = fcall + "(std::bind(&" + str(GDOBinarySensor) + "::publish_state," + str(config[CONF_ID]) + ",std::placeholders::_1))"
