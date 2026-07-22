@@ -197,7 +197,7 @@ esp-app { display: none; }
 .gdo-safety-item .ic { font-size: 21px; flex-shrink: 0; }
 .gdo-safety-lb { font-size: 11.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--eyebrow); }
 .gdo-safety-val { font-size: 15px; font-weight: 600; margin-top: 2px; }
-.c-ok { color: var(--ok); } .c-acc { color: var(--acc); } .c-tx { color: var(--tx); } .c-wa { color: var(--wa); } .c-dg { color: var(--dg); }
+.c-ok { color: var(--ok); } .c-acc { color: var(--acc); } .c-tx { color: var(--tx); } .c-tx3 { color: var(--tx3); } .c-wa { color: var(--wa); } .c-dg { color: var(--dg); }
 
 /* ---------- Collapsible sections ---------- */
 .gdo-sect { overflow: hidden; }
