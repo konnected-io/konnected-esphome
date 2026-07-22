@@ -254,6 +254,21 @@ esp-app { display: none; }
 .gdo-caret { font-family: var(--font-mono); font-size: 12px; color: #22BEFF; padding-top: 4px; animation: gdo-blink 1.2s step-end infinite; }
 .gdo-log-empty { font-family: var(--font-mono); font-size: 12px; color: rgba(255,255,255,.38); padding: 2px 0 6px; }
 
+/* ---------- Footer ---------- */
+/* Deliberately quiet: sits below the last card as page furniture, not as
+   another control surface. Separated by space alone — no rule, no card. */
+/* Wider gap between the link group and the copyright than between the links
+   themselves, so the copyright doesn't read as a fourth link. */
+.gdo-footer { display: flex; align-items: center; justify-content: center; gap: 10px 28px; flex-wrap: wrap; padding: 34px 4px 4px; text-align: center; }
+.gdo-foot-links { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; justify-content: center; }
+.gdo-foot-a { font-size: 13px; color: var(--tx3); text-decoration: none; transition: color .15s; }
+.gdo-foot-a:hover { color: var(--acc); text-decoration: underline; text-underline-offset: 3px; }
+.gdo-foot-sep { width: 3px; height: 3px; border-radius: 50%; background: var(--tx3); opacity: .5; flex-shrink: 0; }
+.gdo-foot-copy { font-size: 13px; color: var(--tx3); opacity: .8; }
+/* Below the link row on narrow screens, the inline separator between the
+   links and the copyright would dangle; stack them instead. */
+@media (max-width: 420px) { .gdo-footer { flex-direction: column; gap: 10px; } }
+
 @media (max-width: 480px) {
   .gdo-stlabel { font-size: 34px; }
   .gdo-hero { padding: 18px; gap: 18px; }
