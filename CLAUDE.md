@@ -95,8 +95,24 @@ stock `https://oi.esphome.io/v2/www.js`. Plain JS/CSS, no framework, no build st
 - `logo-icon.svg` — brand asset, inlined verbatim into `www.js` (keep in sync if it changes)
 
 Production: the device's HTML shell loads the JS/CSS from the CDN URLs set by the `web_ui_base`
-substitution in `garage-door-GDOv2-Q.yaml`. Deploying = uploading `www.js`/`www.css` to that
-CDN path (bump the version segment, e.g. `/v1/` → `/v2/`, to bust caches).
+substitution in `garage-door-GDOv2-Q.yaml`. Deploy with:
+
+```bash
+scripts/deploy-web-ui.sh --dry-run     # show what would change
+scripts/deploy-web-ui.sh               # publish (prompts before uploading)
+```
+
+Assets live in the `app.konnected.io` S3 bucket behind CloudFront, scoped by platform and
+model so other product UIs can share the bucket:
+
+- `https://app.konnected.io/esp/gdo-blaq/www.js` — rolling latest, `max-age=300`, invalidated
+  on every deploy. This is what firmware points at, so UI fixes ship without reflashing.
+- `https://app.konnected.io/esp/gdo-blaq/<version>/www.js` — immutable snapshot,
+  `max-age=31536000`. Point `web_ui_base` here to freeze the UI with a firmware build.
+
+Each deploy writes both. The script refuses to overwrite an existing snapshot whose content
+differs (bump `--version`, or `--force`), then verifies the live bytes against local. Do not
+pre-gzip — CloudFront compresses on the fly (brotli/gzip).
 
 ### Run / develop locally
 
