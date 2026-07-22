@@ -68,8 +68,10 @@ substitutions:
   ####
   # WEB UI
   # Base URL of the Konnected web UI assets (www.js / www.css) served from CDN.
-  # Source: web/gdo-blaq/ in this repository.
-  web_ui_base: https://cdn.konnected.io/web-ui/gdo-blaq/v1/
+  # Source: web/gdo-blaq/ in this repository; publish with scripts/deploy-web-ui.sh.
+  # This rolling path lets UI fixes ship without reflashing; append a version
+  # segment (e.g. .../gdo-blaq/v1/) to pin a build to an immutable snapshot.
+  web_ui_base: https://app.konnected.io/esp/gdo-blaq/
 
   ####
   # INTERNAL MAPPINGS
