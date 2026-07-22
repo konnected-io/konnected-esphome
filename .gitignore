@@ -6,3 +6,6 @@
 __pycache__/
 .vscode
 .claude
+/.impeccable/
+/DESIGN.md
+/PRODUCT.md
