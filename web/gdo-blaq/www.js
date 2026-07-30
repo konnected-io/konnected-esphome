@@ -78,6 +78,8 @@
     dragging: false,
     lastLog: "",
     logCount: 0,
+    motionSeen: false, // this opener has reported motion at least once
+    motionKey: "",
   };
   let theme = "dark";
   try {
@@ -96,6 +98,65 @@
   const bSensor = (oid) => byId("binary_sensor-" + oid);
   const tSensor = (oid) => byId("text_sensor-" + oid);
   const nSensor = (oid) => byId("sensor-" + oid);
+
+  /* ---------- Availability ----------
+     Two different reasons a value may not be showable:
+
+     UNKNOWN — the device is up but the opener hasn't reported yet. Everything
+     the opener owns (door, light, lock, obstruction, motor, wall button,
+     cycles) holds a constructor default until the Security+ handshake lands,
+     and the firmware silently drops commands until then (GDODoor / GDOLight /
+     GDOLock `control()` return early while `!synced_`). Reachable on every
+     boot and on every failed re-sync.
+
+     `synced` is the only trustworthy signal for this: the ESPHome web server
+     has no wire representation for an unpublished binary_sensor — it
+     serializes `obj->state`, so "never reported" and "OFF" are the same bytes.
+     (Numeric sensors do carry it: state "NA" with a null value.)
+
+     UNSUPPORTED — the attached opener cannot produce the value at all. The
+     Security+ 1.0 wall-panel frames carry door / light / lock / obstruction /
+     wall button only (gdolib `decode_v1_packet`); motion, motor, openings and
+     learn mode are Security+ 2.0-only, and gdolib hard-gates them
+     (`update_motion_state` bails on non-v2, `gdo_activate_learn` returns
+     ESP_ERR_NOT_SUPPORTED). Those entities still exist in the firmware and
+     still stream a state that will never change, so hide them outright. */
+  const protocolEntity = () => byId("select-security__protocol") || firstOf("select");
+  function isSecPlusV1() {
+    const p = protocolEntity();
+    // "security+1.0" and "security+1.0 with smart panel"; "auto" means the
+    // protocol hasn't been detected yet — assume full capability until it is.
+    return !!p && /^security\+1\.0/i.test(String(p.value || ""));
+  }
+  function isSynced() {
+    const e = bSensor("synced");
+    return e ? !!e.value : true; // absent (pre-replay): don't flash a waiting state
+  }
+
+  /* A motion sensor is optional hardware. Openers without one simply never
+     send a motion frame, which — per the note above — is indistinguishable
+     from a steady "clear" on the wire. So treat "this opener has reported
+     motion at least once" as proof one is installed, and remember that per
+     device so the tile doesn't vanish again on the next page load. */
+  function motionKey() {
+    const d = tSensor("device_id");
+    return "konnected-gdo-motion:" + ((d && d.value) || location.hostname || "dev");
+  }
+  function hasMotionSensor() {
+    if (S.motionSeen) return true;
+    const k = motionKey();
+    if (k !== S.motionKey) {
+      // Key firms up once the device_id text sensor arrives; re-read then.
+      S.motionKey = k;
+      try { S.motionSeen = localStorage.getItem(k) === "1"; } catch (e) {}
+    }
+    return S.motionSeen;
+  }
+  function noteMotion() {
+    if (S.motionSeen) return;
+    S.motionSeen = true;
+    try { localStorage.setItem(motionKey(), "1"); } catch (e) {}
+  }
 
   /* Action URL from name_id (new display-name format, ESPHome >= 2026.1.3)
      with legacy object_id fallback. */
@@ -268,6 +329,9 @@
     // (see [data-offline] in www.css). Skip during the first connect so the
     // initial skeleton doesn't flash a disabled state.
     root.toggleAttribute("data-offline", S.everConnected && !S.online);
+    // Handshake incomplete: the door controls would be dropped by the firmware,
+    // so make them inert too. Device settings stay live — they're the fix.
+    root.toggleAttribute("data-unsynced", !isSynced());
     if (S.title && document.title !== S.title) document.title = S.title;
   }
 
@@ -288,24 +352,30 @@
   function renderHero() {
     const c = firstOf("cover");
     if (!c) return;
+    // Before the handshake the cover reports its constructor default (closed,
+    // idle) — not a reading. Say so instead of claiming the door is closed.
+    const unknown = !isSynced();
     const { pos, st } = doorState(c);
-    const moving = st === "opening" || st === "closing";
-    root.dataset.st = st;
+    const moving = !unknown && (st === "opening" || st === "closing");
+    root.dataset.st = unknown ? "unknown" : st;
     $("g-eyebrow").textContent = c.name || "Garage door";
-    $("g-stlabel").textContent = ST_LABEL[st];
-    $("g-stpos").textContent = pos + "% open";
-    $("g-slats").style.transform = "translateY(" + -((pos / 100) * 37).toFixed(1) + "px)";
+    $("g-stlabel").textContent = unknown ? "Unknown" : ST_LABEL[st];
+    $("g-stpos").textContent = unknown ? "Waiting for opener…" : pos + "% open";
+    $("g-slats").style.transform =
+      "translateY(" + -(((unknown ? 0 : pos) / 100) * 37).toFixed(1) + "px)";
     const up = st === "opening";
     $("g-chevp1").setAttribute("d", up ? "M52 58 l8 -6 l8 6" : "M52 52 l8 6 l8 -6");
     $("g-chevp2").setAttribute("d", up ? "M52 68 l8 -6 l8 6" : "M52 62 l8 6 l8 -6");
-    $("g-open").hidden = moving || pos >= 100;
-    $("g-close").hidden = moving || pos <= 0;
+    // Keep both direction buttons in place while unknown (dimmed and inert via
+    // [data-unsynced]) so the hero doesn't reflow when the opener comes up.
+    $("g-open").hidden = !unknown && (moving || pos >= 100);
+    $("g-close").hidden = !unknown && (moving || pos <= 0);
     $("g-stop").hidden = !moving;
     const hasPos = "position" in c;
     $("g-sliderbox").hidden = !hasPos;
     if (hasPos && !S.dragging) {
-      $("g-slider").value = pos;
-      $("g-sliderval").textContent = pos + "%";
+      $("g-slider").value = unknown ? 0 : pos;
+      $("g-sliderval").textContent = unknown ? "—" : pos + "%";
     }
   }
   $("g-open").addEventListener("click", () => { const c = firstOf("cover"); if (c) act(c, "open"); });
@@ -333,21 +403,34 @@
   }
   function renderTiles() {
     const items = [];
+    const unknown = !isSynced();
     for (const e of allOf("light")) {
       const on = e.state === "ON";
-      items.push({ key: e.id, icon: "bulb", name: e.name || "Light", state: on ? "On" : "Off", on, sw: () => act(e, "toggle") });
+      items.push({
+        key: e.id, icon: "bulb", name: e.name || "Light",
+        state: unknown ? "Unknown" : on ? "On" : "Off",
+        on: on && !unknown, unknown, sw: () => act(e, "toggle"),
+      });
     }
     for (const e of allOf("lock")) {
       const locked = e.state === "LOCKED" || e.state === "LOCKING";
       items.push({
-        key: e.id, icon: locked ? "lock" : "lockOpen",
+        key: e.id, icon: locked && !unknown ? "lock" : "lockOpen",
         name: objId(e) === "lock" ? "Remote lock" : e.name,
-        state: locked ? "Locked — remotes disabled" : "Unlocked",
-        on: locked, sw: () => act(e, locked ? "unlock" : "lock"),
+        state: unknown ? "Unknown" : locked ? "Locked — remotes disabled" : "Unlocked",
+        on: locked && !unknown, unknown,
+        sw: () => act(e, locked ? "unlock" : "lock"),
       });
     }
+    // Motion needs both a Security+ 2.0 opener and a motion sensor wired to it.
     const m = bSensor("motion");
-    if (m) items.push({ key: m.id, icon: "motion", name: m.name || "Motion", state: m.value ? "Motion detected" : "Clear", on: !!m.value, dot: true });
+    if (m && !isSecPlusV1() && hasMotionSensor()) {
+      items.push({
+        key: m.id, icon: "motion", name: m.name || "Motion",
+        state: unknown ? "Unknown" : m.value ? "Motion detected" : "Clear",
+        on: !!m.value && !unknown, unknown, dot: true,
+      });
+    }
 
     syncList($("g-tiles"), items, (it) => {
       const n = tileNode();
@@ -362,14 +445,18 @@
       return n;
     }, (n, it) => {
       n.classList.toggle("on", it.on);
+      n.classList.toggle("is-unknown", !!it.unknown);
       n.querySelector(".gdo-tile-ic").innerHTML = ic(it.icon);
       n.querySelector(".gdo-tile-name").textContent = it.name;
       n.querySelector(".gdo-tile-state").textContent = it.state;
       const sw = n.querySelector(".gdo-sw");
       if (sw) {
         sw.classList.toggle("on", it.on);
+        // aria-checked can't express "unknown", but aria-disabled + the
+        // disabled attribute do, and the visible state text says so too.
         sw.setAttribute("aria-checked", String(it.on));
         sw.setAttribute("aria-label", it.name);
+        sw.disabled = !!it.unknown;
         sw.onclick = it.sw;
       }
     });
@@ -385,30 +472,41 @@
       nSensor("openings") ||
       allOf("sensor").find((s) => /opening/i.test(s.name || ""));
     if (!e) return null;
+    // Numeric sensors *do* carry "no reading" on the wire: state "NA", value null.
     const n = Number(e.value);
     const known = e.value != null && e.value !== "" && isFinite(n);
-    return { key: e.id, val: known ? Math.round(n).toLocaleString("en-US") : "—", cls: known ? "c-tx" : "c-tx3" };
+    return { key: e.id, val: known ? Math.round(n).toLocaleString("en-US") : "—", unknown: !known };
   }
 
+  /* `v2only`: the opener can't report it over Security+ 1.0 — hide, don't dim.
+     `always`: reports independently of the handshake (it *is* the handshake). */
   const SAFETY = [
     { oid: "obstruction", icon: "ray", label: "Obstruction", on: ["Detected", "c-wa"], off: ["Clear", "c-tx"] },
-    { oid: "motor", icon: "engine", label: "Motor", on: ["Running", "c-acc"], off: ["Idle", "c-tx"] },
+    { oid: "motor", icon: "engine", label: "Motor", on: ["Running", "c-acc"], off: ["Idle", "c-tx"], v2only: true },
     { oid: "wall_button", icon: "tap", label: "Wall button", on: ["Pressed", "c-acc"], off: ["Released", "c-tx"] },
-    { icon: "cycle", label: "Cycles", resolve: openingsItem },
-    { oid: "synced", icon: "syncCircle", label: "Synced", on: ["Yes", "c-ok"], off: ["No", "c-wa"] },
+    { icon: "cycle", label: "Cycles", resolve: openingsItem, v2only: true },
+    { oid: "synced", icon: "syncCircle", label: "Synced", on: ["Yes", "c-ok"], off: ["No", "c-wa"], always: true },
   ];
   function renderSafety() {
     const items = [];
+    const v1 = isSecPlusV1();
+    const stale = !isSynced();
     for (const cfg of SAFETY) {
+      if (cfg.v2only && v1) continue;
       if (cfg.resolve) {
         const r = cfg.resolve();
-        if (r) items.push({ key: r.key, icon: cfg.icon, label: cfg.label, val: r.val, cls: r.cls });
+        if (!r) continue;
+        const unknown = stale || r.unknown;
+        items.push({ key: r.key, icon: cfg.icon, label: cfg.label, unknown,
+                     val: unknown ? "—" : r.val, cls: unknown ? "c-tx3" : "c-tx" });
         continue;
       }
       const e = bSensor(cfg.oid);
       if (!e) continue;
+      const unknown = stale && !cfg.always;
       const [val, cls] = e.value ? cfg.on : cfg.off;
-      items.push({ key: e.id, icon: cfg.icon, label: cfg.label, val, cls });
+      items.push({ key: e.id, icon: cfg.icon, label: cfg.label, unknown,
+                   val: unknown ? "—" : val, cls: unknown ? "c-tx3" : cls });
     }
     syncList($("g-safety"), items, (it) => {
       const n = document.createElement("div");
@@ -418,6 +516,7 @@
         '<div><div class="gdo-safety-lb"></div><div class="gdo-safety-val"></div></div>';
       return n;
     }, (n, it) => {
+      n.classList.toggle("is-unknown", !!it.unknown);
       n.querySelector(".gdo-safety-ic").className = "gdo-safety-ic " + it.cls;
       n.querySelector(".gdo-safety-lb").textContent = it.label;
       const v = n.querySelector(".gdo-safety-val");
@@ -494,12 +593,20 @@
     factory_reset: { hold: true, cls: "danger", icon: "alert", label: "Hold to factory reset", ord: 9 },
   };
 
+  /* Security+ 2.0-only controls. Learn mode is refused outright by gdolib on
+     v1 (`gdo_activate_learn` -> ESP_ERR_NOT_SUPPORTED), and Re-sync only
+     rewrites the client ID / rolling code, which v1 doesn't use. */
+  const V2_ONLY_SWITCHES = { learn: true };
+  const V2_ONLY_BUTTONS = { "re-sync": true };
+
   function renderSettings() {
     const rows = [];
+    const v1 = isSecPlusV1();
     for (const e of allOf("select")) {
       rows.push({ key: e.id, kind: "select", name: e.name, desc: SELECT_DESC[objId(e)] || "", options: e.option || [], value: e.value, e });
     }
     for (const e of allOf("switch")) {
+      if (v1 && V2_ONLY_SWITCHES[objId(e)]) continue;
       const meta = SWITCH_META[objId(e)] || { name: e.name, desc: "" };
       rows.push({ key: e.id, kind: "switch", name: meta.name, desc: meta.desc, on: e.state === "ON", e });
     }
@@ -544,6 +651,7 @@
     // Buttons (design order, hold-to-confirm entries last)
     const btns = allOf("button")
       .filter((e) => objId(e) !== "pre-close_warning")
+      .filter((e) => !(v1 && V2_ONLY_BUTTONS[objId(e)]))
       .map((e) => ({ e, meta: BTN_META[objId(e)] || { icon: "tap", ord: 5 } }))
       .sort((a, b) => a.meta.ord - b.meta.ord);
     syncList($("g-btns"), btns.map((b) => ({ key: b.e.id, ...b })), (it) => {
@@ -681,6 +789,9 @@
         d.id.split("-")[0];
     }
     S.ent[d.id] = prev ? Object.assign(prev, d) : d;
+    // A motion frame is the only proof that a motion sensor exists (see the
+    // availability notes above); latch it before the tile is rendered.
+    if (d.id === "binary_sensor-motion" && d.value === true) noteMotion();
     return true;
   }
   const source = new EventSource("/events");
