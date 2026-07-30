@@ -152,3 +152,28 @@ document.body.appendChild(Object.assign(document.createElement("script"),
   "backfill sweeps" after connect to adopt missed entities.
 - Cover state is only broadcast on operation change (IDLE↔OPENING/CLOSING), so position
   jumps rather than streaming during travel.
+- **A `binary_sensor` has no "unknown" on the wire.** `binary_sensor_json_()` serializes
+  `obj->state` unconditionally, so "never published" and "OFF" are identical bytes.
+  Numeric `sensor`s *do* carry it (state `"NA"`, value `null` from NaN), and so do `number`s.
+
+### Availability rules the UI applies
+
+Two separate reasons a value may not be showable, handled differently in `www.js`:
+
+- **Unknown** → dim + disable (`.is-unknown`, `[data-unsynced]`). Everything the opener
+  owns (door, light, lock, obstruction, motor, wall button, cycles) holds a constructor
+  default until the Security+ handshake lands, and the firmware *silently drops* commands
+  until then — `GDODoor` / `GDOLight` / `GDOLock` `control()` return early while `!synced_`.
+  Because binary sensors can't express unknown (above), the `synced` binary sensor is the
+  only trustworthy signal. It is set once by `gdo_sync_task` and republished on each failed
+  re-sync attempt; the Settings card deliberately stays live, since the protocol select and
+  Re-sync are how you recover.
+- **Unsupported** → hide outright. Security+ 1.0 wall-panel frames carry only door, light,
+  lock, obstruction and wall button (gdolib `decode_v1_packet`). Motion, motor, openings
+  and learn mode are Security+ 2.0-only and hard-gated in gdolib (`update_motion_state`
+  bails on non-v2; `gdo_activate_learn` returns `ESP_ERR_NOT_SUPPORTED`). Detected from
+  the protocol `select` value (`security+1.0`, `security+1.0 with smart panel`).
+- **Motion sensor presence** is optional hardware with no discovery mechanism — an opener
+  without one just never sends a motion frame, which is indistinguishable from "clear".
+  The UI shows the tile only after motion has been reported once, and remembers that per
+  device in `localStorage` under `konnected-gdo-motion:<device_id>`.

@@ -158,18 +158,30 @@ esp-app { display: none; }
 
 /* Offline: the device is unreachable, so nothing is actionable. Dim and
    inert the controls (status stays readable) rather than letting presses
-   silently no-op. */
+   silently no-op.
+   Unsynced: the device is reachable but the opener hasn't completed the
+   Security+ handshake, and the firmware drops door commands until it has.
+   Only the door controls go inert — the Settings card below stays live,
+   since the protocol select and Re-sync are how you recover from this. */
 .gdo[data-offline] .gdo-actions,
 .gdo[data-offline] .gdo-sliderbox,
 .gdo[data-offline] .gdo-sw,
 .gdo[data-offline] .gdo-select,
 .gdo[data-offline] .gdo-ghost,
-.gdo[data-offline] .gdo-hold {
+.gdo[data-offline] .gdo-hold,
+.gdo[data-unsynced] .gdo-actions,
+.gdo[data-unsynced] .gdo-sliderbox {
   opacity: .45;
   pointer-events: none;
   filter: saturate(.6);
   transition: opacity .2s, filter .2s;
 }
+
+/* Door state not yet known: neutral outline, no travel color, slats parked
+   closed but visibly inactive so they don't read as a real "closed". */
+.gdo[data-st="unknown"] .gdo-stlabel { color: var(--tx3); }
+.gdo[data-st="unknown"] .viz-edge { stroke: var(--vizOutline); }
+.gdo[data-st="unknown"] .viz-slats { opacity: .4; }
 
 /* ---------- Tiles ---------- */
 .gdo-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
@@ -189,6 +201,19 @@ esp-app { display: none; }
 .gdo-sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 19px; height: 19px; border-radius: 50%; background: #fff; transition: left .15s; }
 .gdo-sw.on { background: var(--blue); }
 .gdo-sw.on::after { left: 22px; }
+.gdo-sw:disabled { cursor: default; }
+
+/* Unknown: the entity exists but the opener hasn't reported a value, so what's
+   shown is a default rather than a reading. Recede the whole tile and make its
+   control inert — the firmware would drop the command anyway. Kept legible
+   (not hidden) so the missing reading is visible rather than silently absent. */
+.gdo-tile.is-unknown .gdo-tile-ic,
+.gdo-safety-item.is-unknown .gdo-safety-ic { opacity: .45; }
+.gdo-tile.is-unknown .gdo-tile-name,
+.gdo-safety-item.is-unknown .gdo-safety-lb { opacity: .65; }
+.gdo-tile.is-unknown .gdo-tile-state { color: var(--tx3); font-style: italic; }
+.gdo-tile.is-unknown .gdo-sw,
+.gdo-tile.is-unknown .gdo-tile-dot { opacity: .35; pointer-events: none; }
 
 /* ---------- Safety strip ---------- */
 .gdo-safety { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; }

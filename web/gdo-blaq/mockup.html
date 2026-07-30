@@ -124,6 +124,41 @@
       this.log("D", e.id.replace("binary_sensor-", "gdo_") + ":042", e.name + ": ON");
       setTimeout(() => { e.value = false; e.state = "OFF"; this.push(e); this.log("D", e.id.replace("binary_sensor-", "gdo_") + ":042", e.name + ": OFF"); }, ms || 2500);
     },
+    setSynced(v) {
+      const e = byId["binary_sensor-synced"];
+      e.value = v; e.state = v ? "ON" : "OFF";
+      this.push(e);
+      this.log(v ? "D" : "W", "secplus_gdo:031", "Synced: " + v + ", protocol: " + byId["select-security__protocol"].value);
+    },
+    /* Reboot: the opener-owned entities revert to their firmware defaults and
+       `synced` goes false until the Security+ handshake completes again. This
+       is the window the UI has to render as unknown rather than as real state.
+       Note the binary sensors go to plain OFF, not to a distinguishable
+       "unknown" — the ESPHome web server has no wire form for that. */
+    reboot(syncMs) {
+      this.drop(2500);
+      this.setSynced(false);
+      const openings = byId["sensor-garage_openings"];
+      openings.value = null; openings.state = "NA"; this.push(openings);
+      for (const id of ["binary_sensor-obstruction", "binary_sensor-motor", "binary_sensor-wall_button", "binary_sensor-motion"]) {
+        const e = byId[id]; e.value = false; e.state = "OFF"; this.push(e);
+      }
+      const l = byId["light-garage_light"]; l.value = l.state = "OFF"; this.push(l);
+      const lk = byId["lock-lock"]; lk.value = 2; lk.state = "UNLOCKED"; this.push(lk);
+      const d = byId["cover-garage_door"];
+      d.position = d.value = 0; d.state = "CLOSED"; d.current_operation = "IDLE"; this.push(d);
+      setTimeout(() => {
+        this.setSynced(true);
+        openings.value = 328; openings.state = "328 openings"; this.push(openings);
+        d.position = d.value = 1; d.state = "OPEN"; this.push(d);
+      }, syncMs || 8000);
+    },
+    setProtocol(v) {
+      const e = byId["select-security__protocol"];
+      e.value = e.state = v;
+      this.push(e);
+      this.log("I", "select:028", "'Security+ protocol' → " + v);
+    },
   });
 
   /* ---- Door state machine ---- */
@@ -269,7 +304,20 @@
     mk("motion pulse", () => SIM.pulse("binary_sensor-motion", 3000));
     mk("obstruction pulse", () => SIM.pulse("binary_sensor-obstruction", 2500));
     mk("wall button press", () => SIM.pulse("binary_sensor-wall_button", 800));
-    mk("toggle synced", () => { const e = byId["binary_sensor-synced"]; e.value = !e.value; e.state = e.value ? "ON" : "OFF"; SIM.push(e); });
+    mk("toggle synced", () => SIM.setSynced(!byId["binary_sensor-synced"].value));
+    mk("reboot (unsynced 8s)", () => SIM.reboot(8000));
+    mk("protocol: sec+1.0", () => SIM.setProtocol("security+1.0"));
+    mk("protocol: sec+2.0", () => SIM.setProtocol("security+2.0"));
+    // The UI remembers per device that a motion sensor exists; this forgets it
+    // so the "no motion sensor installed" path can be re-tested.
+    mk("forget motion sensor", () => {
+      try {
+        for (const k of Object.keys(localStorage)) {
+          if (k.indexOf("konnected-gdo-motion:") === 0) localStorage.removeItem(k);
+        }
+      } catch (e) {}
+      location.reload();
+    });
     mk("error log line", () => SIM.log("E", "secplus_gdo:120", "Rolling code mismatch — resyncing"));
     mk("drop connection 3s", () => SIM.drop(3000));
     document.body.appendChild(p);
