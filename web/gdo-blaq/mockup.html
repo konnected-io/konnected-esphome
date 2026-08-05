@@ -107,6 +107,7 @@
   /* ---- Simulator core ---- */
   const SIM = (window.SIM = {
     offline: false,
+    otaFail: false,
     broadcast(type, data) { for (const s of [...sources]) s._emit(type, typeof data === "string" ? data : JSON.stringify(data)); },
     push(e) { this.broadcast("state", slim(e)); },
     log(lvl, tag, msg) {
@@ -214,11 +215,27 @@
     SIM.push(door);
   }
 
+  /* ---- Fake OTA upload endpoint ---- */
+  function handleOtaUpload() {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (SIM.otaFail) {
+          SIM.otaFail = false;
+          resolve(new Response("Update Failed!", { status: 200 }));
+          return;
+        }
+        resolve(new Response("Update Successful!", { status: 200 }));
+        SIM.reboot(6000);
+      }, 900);
+    });
+  }
+
   /* ---- REST action endpoints ---- */
   const realFetch = window.fetch.bind(window);
   window.fetch = (input, init) => {
     const url = typeof input === "string" ? input : input.url;
     if (!url.startsWith("/")) return realFetch(input, init);
+    if (url === "/update" && init && init.method === "POST") return handleOtaUpload();
     const [path, query] = url.split("?");
     const seg = path.split("/").filter(Boolean).map(decodeURIComponent);
     const q = new URLSearchParams(query || "");
@@ -320,6 +337,7 @@
     });
     mk("error log line", () => SIM.log("E", "secplus_gdo:120", "Rolling code mismatch — resyncing"));
     mk("drop connection 3s", () => SIM.drop(3000));
+    mk("force OTA failure (next upload)", () => { SIM.otaFail = true; });
     document.body.appendChild(p);
   });
 })();
