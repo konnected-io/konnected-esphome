@@ -264,6 +264,18 @@ esp-app { display: none; }
 .gdo-hold.warn .gdo-hold-fill { background: var(--waFill); }
 .gdo-hold.danger .gdo-hold-fill { background: var(--dgFill); }
 .gdo-hold-lb { position: relative; display: inline-flex; align-items: center; gap: 8px; }
+.gdo-ota { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--bd2); }
+.gdo-ota-head { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: var(--tx); margin-bottom: 10px; }
+.gdo-ota-head .ic { font-size: 16px; }
+.gdo-ota-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.gdo-ota-fname { font-family: var(--font-mono); font-size: 13px; color: var(--tx2); }
+.gdo-ota-clear { background: transparent; border: none; color: var(--tx3); font-size: 18px; line-height: 1; cursor: pointer; padding: 2px 6px; }
+.gdo-ota-clear:hover { color: var(--dg); }
+.gdo-ota-status { margin-top: 10px; font-size: 13.5px; color: var(--tx2); display: flex; align-items: center; gap: 8px; }
+.gdo-ota-status.ok { color: var(--ok); }
+.gdo-ota-status.err { color: var(--dg); }
+.gdo-ota-spin { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--bd2); border-top-color: var(--acc); animation: gdo-spin .7s linear infinite; flex-shrink: 0; }
+@keyframes gdo-spin { to { transform: rotate(360deg); } }
 
 /* Logs */
 .gdo-logbox { background: #001322; border-top: 1px solid var(--bd2); padding: 14px 22px 18px; max-height: 280px; overflow: auto; }
