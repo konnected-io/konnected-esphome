@@ -909,7 +909,7 @@
   function setOnline(v) {
     if (v) {
       if (!S.everConnected) setTimeout(backfill, 4000);
-      else if (otaBusy) otaReset(); // reconnect after a post-upload reboot
+      else if (otaBusy && !S.online) otaReset(); // reset only on a genuine reconnect after the post-upload reboot
       S.everConnected = true;
     }
     if (S.online === v) return;
