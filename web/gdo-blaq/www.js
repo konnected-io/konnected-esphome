@@ -777,6 +777,35 @@
     otaChoose.hidden = true;
     otaSetStatus("", "");
   });
+  otaUpload.addEventListener("click", () => {
+    const f = otaInput.files && otaInput.files[0];
+    if (!f || otaBusy) return;
+    otaBusy = true;
+    otaChoose.disabled = otaUpload.disabled = otaClear.disabled = true;
+    otaSetStatus("", "busy");
+    otaStatus.innerHTML = '<span class="gdo-ota-spin"></span><span>Uploading…</span>';
+    const fd = new FormData();
+    fd.append("update", f);
+    fetch("/update", { method: "POST", body: fd })
+      .then((r) => r.text())
+      .then((t) => {
+        if (/Update Successful/i.test(t)) {
+          otaStatus.className = "gdo-ota-status ok";
+          otaStatus.textContent = "Update uploaded — device is rebooting";
+          // otaBusy stays true: controls stay inert until the post-reboot
+          // reconnect resets the block (see setOnline()).
+        } else {
+          otaBusy = false;
+          otaChoose.disabled = otaUpload.disabled = otaClear.disabled = false;
+          otaSetStatus(t || "Upload failed — check the file and try again", "err");
+        }
+      })
+      .catch(() => {
+        otaBusy = false;
+        otaChoose.disabled = otaUpload.disabled = otaClear.disabled = false;
+        otaSetStatus("Upload failed — check your connection and try again", "err");
+      });
+  });
 
   function renderOta() {
     $("g-ota").hidden = !S.ota;
@@ -880,6 +909,7 @@
   function setOnline(v) {
     if (v) {
       if (!S.everConnected) setTimeout(backfill, 4000);
+      else if (otaBusy) otaReset(); // reconnect after a post-upload reboot
       S.everConnected = true;
     }
     if (S.online === v) return;
