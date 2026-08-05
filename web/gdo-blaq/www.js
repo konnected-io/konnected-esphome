@@ -44,6 +44,7 @@
     plusBox: "M17,13H13V17H11V13H7V11H11V7H13V11H17M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z",
     // Device section: clear "device details" glyph (MDI information-outline)
     info: "M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z",
+    upload: "M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z",
   };
   const ic = (name) =>
     '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="' + ICONS[name] + '"/></svg>';
@@ -80,6 +81,7 @@
     logCount: 0,
     motionSeen: false, // this opener has reported motion at least once
     motionKey: "",
+    ota: false, // OTA-upload capability, from the SSE ping payload
   };
   let theme = "dark";
   try {
@@ -244,6 +246,17 @@
     '<div class="gdo-setbody" id="g-setbody" hidden>' +
     '<div id="g-rows" style="display:flex;flex-direction:column;gap:17px;"></div>' +
     '<div class="gdo-btngrid" id="g-btns"></div>' +
+    '<div class="gdo-ota" id="g-ota" hidden>' +
+    '<div class="gdo-ota-head">' + ic("upload") + "<span>Firmware update</span></div>" +
+    '<div class="gdo-ota-row">' +
+    '<input type="file" id="g-ota-input" accept=".bin" hidden>' +
+    '<button class="gdo-ghost" id="g-ota-choose">Choose file</button>' +
+    '<span class="gdo-ota-fname" id="g-ota-fname" hidden></span>' +
+    '<button class="gdo-ota-clear" id="g-ota-clear" hidden aria-label="Clear selected file">&times;</button>' +
+    '<button class="gdo-ghost" id="g-ota-upload" hidden>' + ic("upload") + " Upload firmware</button>" +
+    "</div>" +
+    '<div class="gdo-ota-status" id="g-ota-status"></div>' +
+    "</div>" +
     "</div></section>" +
     // Logs
     '<section class="gdo-card gdo-sect" id="g-logs" hidden>' +
@@ -723,6 +736,52 @@
     return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   }
 
+  /* ---------- Firmware update (OTA) ---------- */
+  const otaInput = $("g-ota-input");
+  const otaChoose = $("g-ota-choose");
+  const otaClear = $("g-ota-clear");
+  const otaUpload = $("g-ota-upload");
+  const otaFname = $("g-ota-fname");
+  const otaStatus = $("g-ota-status");
+  let otaBusy = false;
+
+  function fmtBytes(n) {
+    if (n < 1024) return n + " B";
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " KB";
+    return (n / (1024 * 1024)).toFixed(1) + " MB";
+  }
+  function otaSetStatus(text, kind) {
+    otaStatus.textContent = text;
+    otaStatus.className = "gdo-ota-status" + (kind ? " " + kind : "");
+  }
+  function otaReset() {
+    otaBusy = false;
+    otaInput.value = "";
+    otaFname.hidden = true;
+    otaFname.textContent = "";
+    otaClear.hidden = true;
+    otaUpload.hidden = true;
+    otaChoose.hidden = false;
+    otaChoose.disabled = otaUpload.disabled = otaClear.disabled = false;
+    otaSetStatus("", "");
+  }
+  otaChoose.addEventListener("click", () => otaInput.click());
+  otaClear.addEventListener("click", () => { if (!otaBusy) otaReset(); });
+  otaInput.addEventListener("change", () => {
+    const f = otaInput.files && otaInput.files[0];
+    if (!f) return;
+    otaFname.hidden = false;
+    otaFname.textContent = f.name + " · " + fmtBytes(f.size);
+    otaClear.hidden = false;
+    otaUpload.hidden = false;
+    otaChoose.hidden = true;
+    otaSetStatus("", "");
+  });
+
+  function renderOta() {
+    $("g-ota").hidden = !S.ota;
+  }
+
   /* ---------- Logs ---------- */
   const LVL = { V: "VERBOSE", D: "DEBUG", C: "CONFIG", I: "INFO", W: "WARN", E: "ERROR" };
   const MAX_LOGS = 300;
@@ -771,6 +830,7 @@
       renderSafety();
       renderDevice();
       renderSettings();
+      renderOta();
     });
   }
 
@@ -806,6 +866,10 @@
         const p = JSON.parse(ev.data);
         if (p.title) S.title = p.title;
         if (p.log) $("g-logs").hidden = false;
+        if (typeof p.ota === "boolean" && p.ota !== S.ota) {
+          S.ota = p.ota;
+          scheduleRender();
+        }
       } catch (e) {}
     }
     setOnline(true);
