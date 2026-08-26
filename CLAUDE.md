@@ -98,8 +98,24 @@ Production: the device's HTML shell loads the JS/CSS from the CDN URLs set by th
 substitution in `garage-door-GDOv2-Q.yaml`. Deploy with:
 
 ```bash
-scripts/deploy-web-ui.sh --dry-run     # show what would change
-scripts/deploy-web-ui.sh               # publish (prompts before uploading)
+scripts/deploy-web-ui.sh --dry-run                  # show what would change
+scripts/deploy-web-ui.sh --version vN               # publish (prompts before uploading)
+```
+
+Always pass `--version`: the default is `v1`, and snapshots are immutable, so a bare run just
+fails the conflict check. Use the next unused dir (`aws s3 ls s3://app.konnected.io/esp/gdo-blaq/`
+to see what's taken — v4 is current as of 2026-08-26).
+
+**Use the default AWS profile.** The `app.konnected.io` bucket lives in account
+`652695076726`, which is what an unset `AWS_PROFILE` resolves to. The
+`konnected-production-*` profiles are a *different* account (`684083964462`) and can read
+the bucket but not write it — so `--dry-run` passes and the real run then dies on the very
+first `PutObject` with `AccessDenied` (nothing partial gets written; the snapshot upload is
+the first step). Symptom to recognize:
+
+```
+An error occurred (AccessDenied) ... User: arn:aws:iam::684083964462:user/nate
+is not authorized to perform: s3:PutObject on .../esp/gdo-blaq/v4/www.js
 ```
 
 Assets live in the `app.konnected.io` S3 bucket behind CloudFront, scoped by platform and
