@@ -747,7 +747,11 @@
   const otaStatus = $("g-ota-status");
   const otaProg = $("g-ota-prog");
   const otaProgBar = $("g-ota-prog-bar");
+  // otaBusy: controls are inert (upload running, or finished and waiting for the
+  // reboot). otaInFlight: the POST itself is still open — an SSE drop/reconnect
+  // during it must not tear down the progress UI.
   let otaBusy = false;
+  let otaInFlight = false;
 
   function fmtBytes(n) {
     if (n < 1024) return n + " B";
@@ -821,6 +825,7 @@
     }
     function otaFail(msg) {
       otaBusy = false;
+      otaInFlight = false;
       otaChoose.disabled = otaUpload.disabled = otaClear.disabled = false;
       otaSetProgress(null);
       otaSetStatus(msg, "err");
@@ -831,6 +836,7 @@
     const fd = new FormData();
     fd.append("update", f);
     const xhr = new XMLHttpRequest();
+    otaInFlight = true;
     xhr.open("POST", "/update");
     xhr.upload.addEventListener("progress", (e) => {
       if (!otaBusy) return;
@@ -847,8 +853,14 @@
     }
     xhr.upload.addEventListener("load", () => { if (otaBusy) otaWriting(); });
     xhr.addEventListener("load", () => {
+      otaInFlight = false;
       const t = xhr.responseText || "";
-      if (/Update Successful/i.test(t)) {
+      // ESPHome's /update always answers 200 and encodes the outcome in the body.
+      // Anything else is a transport-level failure (multipart parse error, recv
+      // timeout) whose body is an HTML error page, not a message worth showing.
+      if (xhr.status < 200 || xhr.status >= 300) {
+        otaFail("Upload failed (HTTP " + xhr.status + ") — check the connection and try again");
+      } else if (/Update Successful/i.test(t)) {
         otaSetProgress(100);
         otaStatus.className = "gdo-ota-status ok";
         otaStatus.textContent = "Update uploaded — device is rebooting";
@@ -967,7 +979,9 @@
   function setOnline(v) {
     if (v) {
       if (!S.everConnected) setTimeout(backfill, 4000);
-      else if (otaBusy && !S.online) otaReset(); // reset only on a genuine reconnect after the post-upload reboot
+      // Reset only on a genuine reconnect after the post-upload reboot — never
+      // while the POST is still open (the SSE stream can drop mid-flash).
+      else if (otaBusy && !otaInFlight && !S.online) otaReset();
       S.everConnected = true;
     }
     if (S.online === v) return;

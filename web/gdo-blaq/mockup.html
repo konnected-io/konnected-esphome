@@ -108,6 +108,7 @@
   const SIM = (window.SIM = {
     offline: false,
     otaFail: false,
+    otaHttpError: false,
     broadcast(type, data) { for (const s of [...sources]) s._emit(type, typeof data === "string" ? data : JSON.stringify(data)); },
     push(e) { this.broadcast("state", slim(e)); },
     log(lvl, tag, msg) {
@@ -258,7 +259,14 @@
           emit("upload", xhr, "load", {});
           setTimeout(() => {
             xhr.status = 200;
-            if (SIM.otaFail) { SIM.otaFail = false; xhr.responseText = "Update Failed!"; }
+            if (SIM.otaHttpError) {
+              // Transport-level failure (multipart parse / recv timeout): the
+              // device answers non-2xx with an HTML error page, not a message.
+              SIM.otaHttpError = false;
+              xhr.status = 400;
+              xhr.responseText = "<html><head><title>400 Bad Request</title></head>" +
+                "<body><h1>400 Bad Request</h1></body></html>";
+            } else if (SIM.otaFail) { SIM.otaFail = false; xhr.responseText = "Update Failed!"; }
             else { xhr.responseText = "Update Successful!"; }
             emit("self", xhr, "load", {});
             if (/Successful/.test(xhr.responseText)) SIM.reboot(6000);
@@ -377,6 +385,7 @@
     mk("error log line", () => SIM.log("E", "secplus_gdo:120", "Rolling code mismatch — resyncing"));
     mk("drop connection 3s", () => SIM.drop(3000));
     mk("force OTA failure (next upload)", () => { SIM.otaFail = true; });
+    mk("force OTA HTTP 400 (next upload)", () => { SIM.otaHttpError = true; });
     document.body.appendChild(p);
   });
 })();
