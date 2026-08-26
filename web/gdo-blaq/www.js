@@ -255,6 +255,8 @@
     '<button class="gdo-ota-clear" id="g-ota-clear" hidden aria-label="Clear selected file">&times;</button>' +
     '<button class="gdo-ghost" id="g-ota-upload" hidden>' + ic("upload") + " Upload firmware</button>" +
     "</div>" +
+    '<div class="gdo-ota-prog" id="g-ota-prog" hidden role="progressbar" aria-label="Firmware upload progress" aria-valuemin="0" aria-valuemax="100">' +
+    '<div class="gdo-ota-prog-bar" id="g-ota-prog-bar"></div></div>' +
     '<div class="gdo-ota-status" id="g-ota-status"></div>' +
     "</div>" +
     "</div></section>" +
@@ -743,6 +745,8 @@
   const otaUpload = $("g-ota-upload");
   const otaFname = $("g-ota-fname");
   const otaStatus = $("g-ota-status");
+  const otaProg = $("g-ota-prog");
+  const otaProgBar = $("g-ota-prog-bar");
   let otaBusy = false;
 
   function fmtBytes(n) {
@@ -754,8 +758,30 @@
     otaStatus.textContent = text;
     otaStatus.className = "gdo-ota-status" + (kind ? " " + kind : "");
   }
+  // pct null => hide the bar; -1 => indeterminate (device is writing flash,
+  // the browser has no visibility into it); 0..100 => determinate.
+  function otaSetProgress(pct) {
+    if (pct == null) {
+      otaProg.hidden = true;
+      otaProg.classList.remove("is-indet");
+      otaProgBar.style.width = "0%";
+      otaProg.removeAttribute("aria-valuenow");
+      return;
+    }
+    otaProg.hidden = false;
+    if (pct < 0) {
+      otaProg.classList.add("is-indet");
+      otaProgBar.style.width = "100%";
+      otaProg.removeAttribute("aria-valuenow");
+    } else {
+      otaProg.classList.remove("is-indet");
+      otaProgBar.style.width = pct + "%";
+      otaProg.setAttribute("aria-valuenow", String(Math.round(pct)));
+    }
+  }
   function otaReset() {
     otaBusy = false;
+    otaSetProgress(null);
     otaInput.value = "";
     otaFname.hidden = true;
     otaFname.textContent = "";
@@ -782,29 +808,61 @@
     if (!f || otaBusy) return;
     otaBusy = true;
     otaChoose.disabled = otaUpload.disabled = otaClear.disabled = true;
-    otaSetStatus("", "busy");
-    otaStatus.innerHTML = '<span class="gdo-ota-spin"></span><span>Uploading…</span>';
+    const total = f.size;
+
+    function otaProgressText(loaded) {
+      otaStatus.className = "gdo-ota-status";
+      otaStatus.innerHTML =
+        '<span class="gdo-ota-spin"></span><span id="g-ota-prog-txt"></span>';
+      const pct = total ? Math.floor((loaded / total) * 100) : 0;
+      $("g-ota-prog-txt").textContent =
+        "Uploading… " + pct + "% · " + fmtBytes(loaded) + " of " + fmtBytes(total);
+      otaSetProgress(total ? pct : -1);
+    }
+    function otaFail(msg) {
+      otaBusy = false;
+      otaChoose.disabled = otaUpload.disabled = otaClear.disabled = false;
+      otaSetProgress(null);
+      otaSetStatus(msg, "err");
+    }
+
+    otaProgressText(0);
+
     const fd = new FormData();
     fd.append("update", f);
-    fetch("/update", { method: "POST", body: fd })
-      .then((r) => r.text())
-      .then((t) => {
-        if (/Update Successful/i.test(t)) {
-          otaStatus.className = "gdo-ota-status ok";
-          otaStatus.textContent = "Update uploaded — device is rebooting";
-          // otaBusy stays true: controls stay inert until the post-reboot
-          // reconnect resets the block (see setOnline()).
-        } else {
-          otaBusy = false;
-          otaChoose.disabled = otaUpload.disabled = otaClear.disabled = false;
-          otaSetStatus(t || "Upload failed — check the file and try again", "err");
-        }
-      })
-      .catch(() => {
-        otaBusy = false;
-        otaChoose.disabled = otaUpload.disabled = otaClear.disabled = false;
-        otaSetStatus("Upload failed — check your connection and try again", "err");
-      });
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/update");
+    xhr.upload.addEventListener("progress", (e) => {
+      if (!otaBusy) return;
+      if (e.lengthComputable && e.loaded < e.total) otaProgressText(e.loaded);
+      else otaWriting();
+    });
+    // Bytes are all out the door but the ESP32 is still writing flash and has
+    // not answered yet — nothing left to measure, so go indeterminate.
+    function otaWriting() {
+      otaStatus.className = "gdo-ota-status";
+      otaStatus.innerHTML =
+        '<span class="gdo-ota-spin"></span><span>Writing to flash… do not power off the device</span>';
+      otaSetProgress(-1);
+    }
+    xhr.upload.addEventListener("load", () => { if (otaBusy) otaWriting(); });
+    xhr.addEventListener("load", () => {
+      const t = xhr.responseText || "";
+      if (/Update Successful/i.test(t)) {
+        otaSetProgress(100);
+        otaStatus.className = "gdo-ota-status ok";
+        otaStatus.textContent = "Update uploaded — device is rebooting";
+        // otaBusy stays true: controls stay inert until the post-reboot
+        // reconnect resets the block (see setOnline()).
+      } else {
+        otaFail(t || "Upload failed — check the file and try again");
+      }
+    });
+    xhr.addEventListener("error", () =>
+      otaFail("Upload failed — check your connection and try again"));
+    xhr.addEventListener("abort", () =>
+      otaFail("Upload cancelled"));
+    xhr.send(fd);
   });
 
   function renderOta() {

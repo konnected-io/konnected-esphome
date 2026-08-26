@@ -215,27 +215,66 @@
     SIM.push(door);
   }
 
-  /* ---- Fake OTA upload endpoint ---- */
-  function handleOtaUpload() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (SIM.otaFail) {
-          SIM.otaFail = false;
-          resolve(new Response("Update Failed!", { status: 200 }));
+  /* ---- Fake OTA upload endpoint ----
+     Real firmware answers HTTP 200 either way; the outcome is only in the body.
+     Served over XMLHttpRequest (not fetch) so `upload.onprogress` fires — that
+     is what drives the UI's progress bar. Non-/update XHRs pass through. ---- */
+  const OTA_UPLOAD_MS = 3000; // simulated transfer time, so progress is watchable
+  const OTA_FLASH_MS = 1200;  // device writing flash after the last byte lands
+  const RealXHR = window.XMLHttpRequest;
+  window.XMLHttpRequest = function FakeXHR() {
+    const listeners = { self: [], upload: [] };
+    let method = "GET", url = "";
+    const upload = {
+      addEventListener: (t, fn) => listeners.upload.push([t, fn]),
+    };
+    const emit = (bucket, target, type, ev) => {
+      listeners[bucket].forEach(([t, fn]) => { if (t === type) fn(Object.assign({ type: type, target: target }, ev)); });
+    };
+    const xhr = {
+      upload: upload,
+      status: 0,
+      responseText: "",
+      addEventListener: (t, fn) => listeners.self.push([t, fn]),
+      open: (m, u) => { method = m; url = u; },
+      setRequestHeader: () => {},
+      abort: () => emit("self", xhr, "abort", {}),
+      send: (body) => {
+        if (!(method.toUpperCase() === "POST" && url === "/update")) {
+          const real = new RealXHR();
+          listeners.self.forEach(([t, fn]) => real.addEventListener(t, fn));
+          listeners.upload.forEach(([t, fn]) => real.upload.addEventListener(t, fn));
+          real.open(method, url);
+          real.send(body);
           return;
         }
-        resolve(new Response("Update Successful!", { status: 200 }));
-        SIM.reboot(6000);
-      }, 900);
-    });
-  }
+        const f = body && body.get && body.get("update");
+        const total = (f && f.size) || 1835008; // ~1.8 MB, a realistic image
+        const t0 = performance.now();
+        const tick = () => {
+          const frac = Math.min(1, (performance.now() - t0) / OTA_UPLOAD_MS);
+          emit("upload", xhr, "progress", { lengthComputable: true, loaded: Math.floor(total * frac), total: total });
+          if (frac < 1) { setTimeout(tick, 100); return; }
+          emit("upload", xhr, "load", {});
+          setTimeout(() => {
+            xhr.status = 200;
+            if (SIM.otaFail) { SIM.otaFail = false; xhr.responseText = "Update Failed!"; }
+            else { xhr.responseText = "Update Successful!"; }
+            emit("self", xhr, "load", {});
+            if (/Successful/.test(xhr.responseText)) SIM.reboot(6000);
+          }, OTA_FLASH_MS);
+        };
+        setTimeout(tick, 100);
+      },
+    };
+    return xhr;
+  };
 
   /* ---- REST action endpoints ---- */
   const realFetch = window.fetch.bind(window);
   window.fetch = (input, init) => {
     const url = typeof input === "string" ? input : input.url;
     if (!url.startsWith("/")) return realFetch(input, init);
-    if (url === "/update" && init && init.method === "POST") return handleOtaUpload();
     const [path, query] = url.split("?");
     const seg = path.split("/").filter(Boolean).map(decodeURIComponent);
     const q = new URLSearchParams(query || "");
