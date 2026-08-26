@@ -1,0 +1,25 @@
+output:
+  - id: 'chime_pin'
+    platform: gpio
+    pin:
+      number: $warning_beep_pin
+      allow_other_uses: $warning_beep_shared
+
+
+button:
+  - platform: template
+    id: buzzer
+    name: Buzzer
+    on_press:
+      - repeat:
+          count: $buzzer_repeat
+          then:
+            - output.turn_on: chime_pin
+            - delay: $buzzer_pulse
+            - output.turn_off: chime_pin
+            - delay: $buzzer_pause
+
+substitutions:
+  buzzer_pulse: 24ms
+  buzzer_pause: 54ms
+  buzzer_repeat: "6"
