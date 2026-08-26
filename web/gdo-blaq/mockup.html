@@ -64,6 +64,20 @@
     return s;
   };
 
+  /* Wire format of the entity identifier. ESPHome 2026.1.3–2026.7.x send
+     `name_id` ("domain/Display Name") alongside the legacy `id`
+     ("domain-object_id"); 2026.8.0 drops `name_id` and `id` itself becomes
+     the name form. The snapshot above is stored in the older shape — flip
+     WIRE to "2026.7" to replay it verbatim, or "2026.8" to rewrite it on
+     the way out. Both must render identically. */
+  const WIRE = "2026.8"; // "2026.7" | "2026.8"
+  const wire = (e) => {
+    if (WIRE !== "2026.8") return e;
+    const w = { ...e, id: e.name_id };
+    delete w.name_id;
+    return w;
+  };
+
   /* ---- Fake EventSource (auto-reconnects like the real one) ---- */
   const sources = new Set();
   class FakeEventSource {
@@ -86,7 +100,7 @@
       if (this.onopen) this.onopen();
       // connect replay: ping + full entity states
       this._emit("ping", JSON.stringify(PING0));
-      for (const e of ENT) this._emit("state", JSON.stringify(e));
+      for (const e of ENT) this._emit("state", JSON.stringify(wire(e)));
     }
     _drop() {
       if (this.readyState === 2) return;
@@ -110,7 +124,7 @@
     otaFail: false,
     otaHttpError: false,
     broadcast(type, data) { for (const s of [...sources]) s._emit(type, typeof data === "string" ? data : JSON.stringify(data)); },
-    push(e) { this.broadcast("state", slim(e)); },
+    push(e) { this.broadcast("state", wire(slim(e))); },
     log(lvl, tag, msg) {
       const colors = { D: "36", I: "32", W: "33", E: "31" };
       this.broadcast("log", "\x1b[0;" + (colors[lvl] || "37") + "m[" + lvl + "][" + tag + "]: " + msg + "\x1b[0m");

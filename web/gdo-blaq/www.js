@@ -5,10 +5,11 @@
    consumes the unmodified ESPHome /events SSE stream and REST
    action endpoints.
 
-   Entity action URLs are built from the SSE `name_id` field
-   (display-name URL format, ESPHome >= 2026.1.3) with a
-   fallback to the legacy object_id slug in `id`, so the UI
-   works before and after the 2026.7 URL format change.
+   Entities are identified by the SSE `name_id || id` pair —
+   both spell "{domain}/{Display Name}" once one of them is
+   present, so the UI works before and after the 2026.7 URL
+   format change and the 2026.8 SSE `id` change. See the
+   "Entity identity" note below.
    ============================================================ */
 (() => {
   "use strict";
@@ -72,7 +73,8 @@
 
   /* ---------- State ---------- */
   const S = {
-    ent: Object.create(null), // entity id -> latest state event payload
+    ent: Object.create(null), // "domain/Display Name" -> latest state event payload
+    oid: Object.create(null), // "domain-object_id" -> the same objects, by slug
     title: document.title || "Konnected GDO",
     online: false,
     everConnected: false,
@@ -89,8 +91,29 @@
     if (t === "light" || t === "dark") theme = t;
   } catch (e) {}
 
-  const byId = (id) => S.ent[id] || null;
-  const objId = (e) => e.id.slice(e.domain.length + 1);
+  /* ---------- Entity identity ----------
+     Every payload carries the entity's "{domain}/{Display Name}" form: as
+     `name_id` next to the legacy `id` ("{domain}-{object_id}") on ESPHome
+     2026.1.3–2026.7.x, and as `id` itself from 2026.8.0, which drops
+     `name_id`. So `name_id || id` is the one identifier that means the same
+     thing on both sides of the change — and unlike `name`, it rides on the
+     slim state broadcasts too, not just the connect replay.
+
+     The UI matches on ESPHome's object_id slug, which it derives from the
+     display name: lowercase, and anything outside [a-z0-9_-] becomes "_"
+     (`to_sanitized_char(to_snake_case_char(c))`). Recomputing it here keeps
+     every `bSensor("wall_button")`-style lookup working no matter which
+     field the firmware sent. */
+  const keyOf = (e) => e.name_id || e.id;
+  const slug = (s) => s.toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+  /* -> [domain, name]. Pre-2026.1.3 ids have no "/" and no display name;
+     split those on the stored domain and keep the object_id as the name. */
+  const splitKey = (e) => {
+    const k = keyOf(e), i = k.indexOf("/");
+    return i < 0 ? [k.slice(0, e.domain.length), k.slice(e.domain.length + 1)] : [k.slice(0, i), k.slice(i + 1)];
+  };
+  const objId = (e) => slug(splitKey(e)[1]);
+  const byId = (oidKey) => S.oid[oidKey] || null;
   const allOf = (domain) => {
     const out = [];
     for (const k in S.ent) if (S.ent[k].domain === domain) out.push(S.ent[k]);
@@ -160,17 +183,11 @@
     try { localStorage.setItem(motionKey(), "1"); } catch (e) {}
   }
 
-  /* Action URL from name_id (new display-name format, ESPHome >= 2026.1.3)
-     with legacy object_id fallback. */
+  /* Action URL: the display-name format (ESPHome >= 2026.1.3), or the legacy
+     object_id slug on older firmware — splitKey yields whichever we were given. */
   function actUrl(e, action) {
-    let seg;
-    if (e.name_id) {
-      const i = e.name_id.indexOf("/");
-      seg = e.name_id.slice(0, i) + "/" + encodeURIComponent(e.name_id.slice(i + 1));
-    } else {
-      seg = e.domain + "/" + objId(e);
-    }
-    return "/" + seg + (action ? "/" + action : "");
+    const p = splitKey(e);
+    return "/" + p[0] + "/" + encodeURIComponent(p[1]) + (action ? "/" + action : "");
   }
   const act = (e, action) => fetch(actUrl(e, action), { method: "POST" }).catch(() => {});
 
@@ -939,18 +956,19 @@
      entity rather than replacing it. */
   function ingest(d, onlyNew) {
     if (!d || !d.id) return false;
-    const prev = S.ent[d.id];
+    const key = keyOf(d);
+    const prev = S.ent[key];
     if (prev && onlyNew) return false;
     if (!d.domain) {
-      d.domain =
-        (d.name_id && d.name_id.slice(0, d.name_id.indexOf("/"))) ||
-        (prev && prev.domain) ||
-        d.id.split("-")[0];
+      const i = key.indexOf("/");
+      d.domain = (i > 0 && key.slice(0, i)) || (prev && prev.domain) || d.id.split("-")[0];
     }
-    S.ent[d.id] = prev ? Object.assign(prev, d) : d;
+    const e = prev ? Object.assign(prev, d) : d;
+    S.ent[key] = e;
+    S.oid[e.domain + "-" + objId(e)] = e;
     // A motion frame is the only proof that a motion sensor exists (see the
     // availability notes above); latch it before the tile is rendered.
-    if (d.id === "binary_sensor-motion" && d.value === true) noteMotion();
+    if (e.domain === "binary_sensor" && objId(e) === "motion" && d.value === true) noteMotion();
     return true;
   }
   const source = new EventSource("/events");
