@@ -169,6 +169,7 @@ esp-app { display: none; }
 .gdo[data-offline] .gdo-select,
 .gdo[data-offline] .gdo-ghost,
 .gdo[data-offline] .gdo-hold,
+.gdo[data-offline] .gdo-ota-clear,
 .gdo[data-unsynced] .gdo-actions,
 .gdo[data-unsynced] .gdo-sliderbox {
   opacity: .45;
