@@ -7,10 +7,20 @@
 # to core 1, the handshake starves loopTask and can trip its 5s task watchdog, boot-looping
 # the device. Re-enabling the accelerator halves the block (1.35s -> 0.66s measured on an
 # ESP32-S3) with no TLS errors on IDF 5.5. See issue #141.
+#
+# Halving it is not enough on its own -- the remaining ~650ms is ECDHE/ECP point math, which
+# neither the ESP32 nor the S3 can accelerate. So also pin esp-mqtt's task to core 0. It is
+# priority 5 and unpinned by default, so it lands on core 1 and preempts loopTask outright;
+# on core 0 the handshake runs beside the WiFi stack (which is higher priority and preempts
+# it) and loopTask keeps feeding its watchdog no matter how long the crypto takes. Measured
+# on the same rig: loopTask starvation 671ms -> 0ms.
 esp32:
   framework:
     sdkconfig_options:
       CONFIG_MBEDTLS_HARDWARE_MPI: y
+      CONFIG_MQTT_USE_CUSTOM_CONFIG: y
+      CONFIG_MQTT_TASK_CORE_SELECTION_ENABLED: y
+      CONFIG_MQTT_USE_CORE_0: y
 
 mqtt:
   id: konnected_cloud
