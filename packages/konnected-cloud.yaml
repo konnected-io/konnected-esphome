@@ -1,5 +1,17 @@
 # MQTT settings for Konnected Cloud on AwS IoT
 
+# The mqtt component sets CONFIG_MBEDTLS_HARDWARE_MPI=n whenever TLS certificates are
+# configured, working around esp-idf#139 (a 2016 bug). That leaves all big-integer crypto
+# in software, so the AWS IoT handshake blocks esp-mqtt's task for well over a second.
+# Because that task is priority 5 and unpinned while ESPHome's loopTask is priority 1 pinned
+# to core 1, the handshake starves loopTask and can trip its 5s task watchdog, boot-looping
+# the device. Re-enabling the accelerator halves the block (1.35s -> 0.66s measured on an
+# ESP32-S3) with no TLS errors on IDF 5.5. See issue #141.
+esp32:
+  framework:
+    sdkconfig_options:
+      CONFIG_MBEDTLS_HARDWARE_MPI: y
+
 mqtt:
   id: konnected_cloud
   broker: $mqtt_addr
