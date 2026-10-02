@@ -35,6 +35,10 @@ substitutions:
   project_name: konnected.alarm-panel-pro-esp32-local
   project_version: "0.2.2"
 
+  # ETHERNET CONFIG
+  # On the Alarm Panel Pro v1.5, v1.6 and v1.7 use LAN8720. On the v1.8 set this variable to RTL8201.
+  ethernet_type: RTL8201
+
   sensor_debounce_time: 200ms
   warning_beep_pulse_time: 100ms
   warning_beep_pause_time: 130ms
@@ -126,12 +130,12 @@ state_machine:
     - name: 'arming'
       on_enter:
         - light.turn_on:
-            id: warning_beep
+            id: warning_beep_1
             effect: strobe
         - delay: !lambda return id(arming_timeout).state * 1000;
         - state_machine.transition: arm_away
       on_leave:
-        - light.turn_off: warning_beep       
+        - light.turn_off: warning_beep_1       
 
     - name: 'armed_away'
     - name: 'armed_home'
@@ -140,12 +144,12 @@ state_machine:
     - name: 'pending'
       on_enter:
         - light.turn_on:
-            id: warning_beep
+            id: warning_beep_1
             effect: strobe
         - delay: !lambda return id(pending_timeout).state * 1000;
         - state_machine.transition: trigger
       on_leave:
-        - light.turn_off: warning_beep
+        - light.turn_off: warning_beep_1
 
     - name: 'triggered'
       on_enter:
@@ -155,14 +159,14 @@ state_machine:
             then:
               - switch.turn_on: alarm1
         - light.turn_on:
-            id: warning_beep
+            id: warning_beep_1
             effect: strobe
 
         - delay: !lambda return id(trigger_timeout).state * 60 * 1000;
         - state_machine.transition: arm_away
       on_leave:
         - switch.turn_off: alarm1
-        - light.turn_off: warning_beep
+        - light.turn_off: warning_beep_1
 
   inputs:
     - name: arm_away
@@ -348,7 +352,12 @@ packages:
       ####
       # WIFI
       # Enables WiFi connectivity and diagnostics. Uncommet below to enable WiFi.
-      - packages/wifi.yaml
+      #- packages/wifi.yaml
+
+      ####
+      # ETHERNET
+      # Enables ethernet connectivity.
+      - packages/ethernet.yaml
 
       ####
       # STATUS LED
@@ -384,8 +393,18 @@ packages:
 
 
 dashboard_import:
-  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-pro-esp32-local-alarm.yaml@master
+  package_import_url: github://konnected-io/konnected-esphome/alarm-panel-pro-v1.8-ethernet.yaml@master
   import_full_config: false
+
+# Update for Ethernet issue on v1.8 and v1.9 (batch 2406)
+# requires ESPHome 2024.6.0 and newer
+esphome:
+  min_version: '2024.6.0'
+ethernet:
+  phy_registers:
+    - address: 0x10
+      value: 0x1FFA
+      page_id: 0x07
 
 ####
 # WEB SEVER
