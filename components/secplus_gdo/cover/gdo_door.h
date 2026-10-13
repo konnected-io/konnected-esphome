@@ -57,6 +57,7 @@ using namespace esphome::cover;
 
     protected:
         void control(const cover::CoverCall& call);
+        void check_close_started();
 
         CoverClosingStartTrigger *pre_close_start_trigger{nullptr};
         CoverClosingEndTrigger   *pre_close_end_trigger{nullptr};
