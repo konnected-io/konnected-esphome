@@ -179,14 +179,9 @@ void GDODoor::control(const cover::CoverCall& call) {
     if (call.get_toggle()) {
         ESP_LOGD(TAG, "Toggle command received");
         if (this->pre_close_active_) {
-            // A close is pending behind the warning (current_operation is the optimistic CLOSING);
-            // toggling again aborts it, the same as Stop.
             this->cancel_pre_close_warning();
         } else if (this->current_operation == COVER_OPERATION_OPENING ||
                    this->current_operation == COVER_OPERATION_CLOSING) {
-            // The door is moving: gdo_door_toggle() stops it. Send it now, not after the close warning --
-            // a warning would be wrong for a stop, and while closing, the opener's own position updates
-            // cancel the pending pre_close timeout in set_state(), so the toggle would never be sent (#143).
             this->do_action(call);
         } else if (this->position != COVER_CLOSED) {
             this->target_position_ = COVER_CLOSED;
