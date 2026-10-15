@@ -38,7 +38,7 @@ substitutions:
   name: konnected
   friendly_name: Alarm Panel 3w
   project_name: konnected.alarm-panel-3w
-  project_version: "0.2.0"
+  project_version: "0.2.1"
 
   sensor_debounce_time: 200ms
   blink_on_state: "true"
