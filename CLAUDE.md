@@ -59,7 +59,7 @@ The secplus_gdo component requires:
 esphome:
   platformio_options:
     lib_deps:
-      - https://github.com/konnected-io/gdolib#v1.0.0
+      - https://github.com/konnected-io/gdolib#v1.2.0
 ```
 
 ## Key Substitution Variables
