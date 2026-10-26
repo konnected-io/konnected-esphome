@@ -18,6 +18,8 @@
 #pragma once
 
 #include "esphome/core/component.h"
+#include "esphome/core/event_pool.h"
+#include "esphome/core/lock_free_queue.h"
 #include "number/gdo_number.h"
 #include "esphome/core/defines.h"
 #include "select/gdo_select.h"
@@ -27,15 +29,33 @@
 #include "lock/gdo_lock.h"
 #include "gdo.h"
 
+#include <atomic>
+
 namespace esphome {
 namespace secplus_gdo {
+    // A gdolib event, copied on gdo_main_task and handled on the main loop. The status is a
+    // snapshot because gdolib keeps changing its own copy while the event waits in the queue.
+    struct GDOEvent {
+        gdo_cb_event_t event;
+        gdo_status_t   status;
+        esp_err_t      retry_err; // result of the sync retry done on gdo_main_task, see gdo_event_handler
+
+        void release() {} // required by EventPool
+    };
+
+    // Covers a burst between two loop passes, e.g. the flurry of events after a sync
+    static constexpr uint8_t GDO_EVENT_QUEUE_LENGTH = 32;
+
     class GDOComponent : public Component {
     public:
         void setup() override;
-        void loop() override {};
+        void loop() override;
         void dump_config() override;
         void on_shutdown() override { gdo_deinit(); }
         void start_gdo() { start_gdo_ = true; }
+
+        // Called from gdo_main_task only
+        void queue_event(const gdo_status_t *status, gdo_cb_event_t event, esp_err_t retry_err);
 
         // Use Late priority so we do not start the GDO lib until all saved preferences are loaded
         float get_setup_priority() const override { return setup_priority::BEFORE_CONNECTION; }
@@ -100,6 +120,17 @@ namespace secplus_gdo {
         void set_sync_state(bool synced);
 
     protected:
+        void handle_event_(const GDOEvent &ev);
+        void republish_status_();
+
+        // gdolib calls back from its own task, where nothing ESPHome owns is safe to touch:
+        // gdo_main_task pushes, loop() pops. The pool holds one less than the queue, so
+        // allocate() fails before push() can.
+        EventPool<GDOEvent, GDO_EVENT_QUEUE_LENGTH - 1> event_pool_;
+        LockFreeQueue<GDOEvent, GDO_EVENT_QUEUE_LENGTH> event_queue_;
+        // Set when an event was dropped; loop() then republishes everything from gdo_get_status()
+        std::atomic<bool>                            refresh_needed_{false};
+
         gdo_status_t                                 status_{};
         std::function<void(uint16_t)>                f_openings{nullptr};
         std::function<void(bool)>                    f_motion{nullptr};
