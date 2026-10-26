@@ -31,6 +31,27 @@ env:
   FIRMWARE_REGION: us-east-2
 
 jobs:
+  vl53l0x-compatibility:
+    name: VL53L0X / ESPHome ${{ matrix.esphome }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        esphome: [ '2025.9.1', '2026.9.0', '2026.10.0' ]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install ESPHome
+        run: pip install "esphome==${{ matrix.esphome }}"
+
+      - name: Compile VL53L0X test firmware
+        run: esphome compile test/vl53l0x-component.yaml
+
   build:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
@@ -97,7 +118,9 @@ jobs:
             exit 1
           fi
 
-          esphome compile "${{ matrix.config }}"
+          # Build custom components from the exact branch/tag being tested.
+          # The package defaults to master for customer/dashboard builds.
+          esphome -s vl53l0x_component_ref "${GITHUB_REF_NAME}" compile "${{ matrix.config }}"
 
           # esp8266 (PlatformIO) writes to .pioenvs/<name>, esp32 (esp-idf) to build/
           factory=$(find .esphome/build -name firmware.factory.bin -print -quit)
@@ -123,7 +146,7 @@ jobs:
 
   publish:
     name: Publish
-    needs: build
+    needs: [ build, vl53l0x-compatibility ]
     runs-on: ubuntu-latest
     permissions:
       contents: write # gh release upload

@@ -1,0 +1,26 @@
+esphome:
+  name: vl53l0x-component-test
+  friendly_name: VL53L0X Component Test
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+logger:
+
+i2c:
+  sda: GPIO6
+  scl: GPIO7
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: [ vl53l0x ]
+
+sensor:
+  - platform: vl53l0x
+    name: Sensor distance
+    update_interval: 2500ms
+    long_range: true

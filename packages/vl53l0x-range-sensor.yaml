@@ -1,3 +1,13 @@
+substitutions:
+  # Branch/tag override used by CI; customer builds default to the released
+  # component on master.
+  vl53l0x_component_ref: master
+
+external_components:
+  - source: github://konnected-io/konnected-esphome@${vl53l0x_component_ref}
+    refresh: 5min
+    components: [ vl53l0x ]
+
 globals:
   - id: gdo_err_margin
     type: float
