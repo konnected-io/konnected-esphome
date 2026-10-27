@@ -387,7 +387,7 @@ Also add the `gdolib` dependency to your `esphome:` block:
 esphome:
   platformio_options:
     lib_deps:
-      - https://github.com/konnected-io/gdolib#v1.2.0
+      - https://github.com/konnected-io/gdolib#v1.3.0
 ```
 
 ### Core Configuration

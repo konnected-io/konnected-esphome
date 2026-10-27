@@ -25,9 +25,65 @@ namespace secplus_gdo {
 
     static const char* const TAG = "secplus_gdo";
 
+    // Runs on gdo_main_task: no publish_state, scheduler, preferences or logging here. Anything
+    // ESPHome owns is only safe to touch from the main loop, so the event is queued for loop().
     static void gdo_event_handler(const gdo_status_t* status, gdo_cb_event_t event, void *arg) {
         GDOComponent *gdo = static_cast<GDOComponent *>(arg);
-        switch (event) {
+
+        // The sync retry only talks to gdolib, so it stays on this task to keep its ordering;
+        // the result is logged on the main loop
+        esp_err_t retry_err = ESP_OK;
+        if (event == GDO_CB_EVENT_SYNCED && !status->synced) {
+            retry_err = gdo_set_rolling_code(status->rolling_code + 100);
+            if (retry_err == ESP_OK) {
+                gdo_sync();
+            }
+        }
+
+        gdo->queue_event(status, event, retry_err);
+    }
+
+    void GDOComponent::queue_event(const gdo_status_t *status, gdo_cb_event_t event, esp_err_t retry_err) {
+        GDOEvent *ev = this->event_pool_.allocate();
+        if (ev == nullptr) {
+            // The main loop is stalled; it will republish the current status once it catches up
+            this->event_queue_.increment_dropped_count();
+            this->refresh_needed_.store(true, std::memory_order_relaxed);
+        } else {
+            ev->event = event;
+            ev->status = *status;
+            ev->retry_err = retry_err;
+            // Cannot fail: the pool is one smaller than the queue
+            this->event_queue_.push(ev);
+        }
+        // Also wakes the main loop, so the event is handled right away
+        this->enable_loop_soon_any_context();
+    }
+
+    void GDOComponent::loop() {
+        GDOEvent *ev;
+        while ((ev = this->event_queue_.pop()) != nullptr) {
+            this->handle_event_(*ev);
+            this->event_pool_.release(ev);
+        }
+
+        uint16_t dropped = this->event_queue_.get_and_reset_dropped_count();
+        if (dropped > 0) {
+            ESP_LOGW(TAG, "Dropped %u GDO events, republishing current status", dropped);
+        }
+        if (this->refresh_needed_.exchange(false, std::memory_order_relaxed)) {
+            this->republish_status_();
+        }
+
+        // An event queued after the last pop has already requested the loop again, and that
+        // request is applied after this disable
+        this->disable_loop();
+    }
+
+    // Runs on the main loop: safe to publish, schedule, save preferences and log
+    void GDOComponent::handle_event_(const GDOEvent &ev) {
+        const gdo_status_t *status = &ev.status;
+        switch (ev.event) {
         case GDO_CB_EVENT_SYNCED:
             ESP_LOGD(TAG, "Synced: %s, protocol: %s", status->synced ? "true" : "false", gdo_protocol_type_to_string(status->protocol));
             if (status->protocol == GDO_PROTOCOL_SEC_PLUS_V2) {
@@ -35,35 +91,34 @@ namespace secplus_gdo {
                         status->client_id, status->client_id, status->rolling_code);
                 if (status->synced) {
                     // Save the last successful ClientID rolling code value to NVS for use on reboot
-                    gdo->set_client_id(status->client_id);
-                    gdo->set_rolling_code(status->rolling_code);
+                    this->set_client_id(status->client_id);
+                    this->set_rolling_code(status->rolling_code);
                 }
             }
 
             if (!status->synced) {
-                if (gdo_set_rolling_code(status->rolling_code + 100) != ESP_OK) {
+                if (ev.retry_err != ESP_OK) {
                     ESP_LOGE(TAG, "Failed to set rolling code");
                 } else {
-                    ESP_LOGD(TAG, "Rolling code set to %" PRIu32 ", retryng sync", status->rolling_code);
-                    gdo_sync();
+                    ESP_LOGD(TAG, "Rolling code set to %" PRIu32 ", retrying sync", status->rolling_code + 100);
                 }
             } else {
-                gdo->set_protocol_state(status->protocol);
+                this->set_protocol_state(status->protocol);
             }
 
-            gdo->set_sync_state(status->synced);
+            this->set_sync_state(status->synced);
             break;
         case GDO_CB_EVENT_LIGHT:
-            gdo->set_light_state(status->light);
+            this->set_light_state(status->light);
             break;
         case GDO_CB_EVENT_LOCK:
-            gdo->set_lock_state(status->lock);
+            this->set_lock_state(status->lock);
             break;
         case GDO_CB_EVENT_DOOR_POSITION: {
             float position = (float)(10000 - status->door_position)/10000.0f;
-            gdo->set_door_state(status->door, position);
+            this->set_door_state(status->door, position);
             if (status->door != GDO_DOOR_STATE_OPENING && status->door != GDO_DOOR_STATE_CLOSING) {
-                gdo->set_motor_state(GDO_MOTOR_STATE_OFF);
+                this->set_motor_state(GDO_MOTOR_STATE_OFF);
             }
             break;
         }
@@ -72,26 +127,26 @@ namespace secplus_gdo {
             break;
         case GDO_CB_EVENT_OBSTRUCTION:
             ESP_LOGD(TAG, "Obstruction: %s", gdo_obstruction_state_to_string(status->obstruction));
-            gdo->set_obstruction(status->obstruction);
+            this->set_obstruction(status->obstruction);
             break;
         case GDO_CB_EVENT_MOTION:
             ESP_LOGD(TAG, "Motion: %s", gdo_motion_state_to_string(status->motion));
-            gdo->set_motion_state(status->motion);
+            this->set_motion_state(status->motion);
             break;
         case GDO_CB_EVENT_BATTERY:
             ESP_LOGD(TAG, "Battery: %s", gdo_battery_state_to_string(status->battery));
             break;
         case GDO_CB_EVENT_BUTTON:
             ESP_LOGD(TAG, "Button: %s", gdo_button_state_to_string(status->button));
-            gdo->set_button_state(status->button);
+            this->set_button_state(status->button);
             break;
         case GDO_CB_EVENT_MOTOR:
             ESP_LOGD(TAG, "Motor: %s", gdo_motor_state_to_string(status->motor));
-            gdo->set_motor_state(status->motor);
+            this->set_motor_state(status->motor);
             break;
         case GDO_CB_EVENT_OPENINGS:
             ESP_LOGD(TAG, "Openings: %d", status->openings);
-            gdo->set_openings(status->openings);
+            this->set_openings(status->openings);
             break;
         case GDO_CB_EVENT_TTC:
             ESP_LOGD(TAG, "Time to close: %d", status->ttc_seconds);
@@ -104,19 +159,51 @@ namespace secplus_gdo {
             break;
         case GDO_CB_EVENT_OPEN_DURATION_MEASUREMENT:
             ESP_LOGD(TAG, "Open duration: %d", status->open_ms);
-            gdo->set_open_duration(status->open_ms);
+            this->set_open_duration(status->open_ms);
             break;
         case GDO_CB_EVENT_CLOSE_DURATION_MEASUREMENT:
             ESP_LOGD(TAG, "Close duration: %d", status->close_ms);
-            gdo->set_close_duration(status->close_ms);
+            this->set_close_duration(status->close_ms);
             break;
         default:
-            ESP_LOGD(TAG, "Unknown event: %d", event);
+            ESP_LOGD(TAG, "Unknown event: %d", ev.event);
             break;
         }
     }
 
+    // Catch up after dropped events. Only the latched states: button presses and duration
+    // measurements are one-off edges, and replaying them would re-run their side effects.
+    void GDOComponent::republish_status_() {
+        gdo_status_t status;
+        if (gdo_get_status(&status) != ESP_OK) {
+            return;
+        }
+
+        if (status.synced) {
+            this->set_protocol_state(status.protocol);
+            if (status.protocol == GDO_PROTOCOL_SEC_PLUS_V2) {
+                this->set_client_id(status.client_id);
+                this->set_rolling_code(status.rolling_code);
+                this->set_openings(status.openings);
+                this->set_motion_state(status.motion);
+                this->set_motor_state(status.motor);
+            }
+        }
+        this->set_sync_state(status.synced);
+        this->set_door_state(status.door, (float)(10000 - status.door_position)/10000.0f);
+        this->set_light_state(status.light);
+        this->set_lock_state(status.lock);
+        this->set_obstruction(status.obstruction);
+    }
+
     void GDOComponent::setup() {
+        // Allocate every event slot now so gdo_main_task never mallocs
+        if (!this->event_pool_.warm()) {
+            ESP_LOGE(TAG, "Failed to allocate the GDO event pool");
+            this->mark_failed();
+            return;
+        }
+
         // Set the toggle only state and control here because we cannot guarantee the cover instance was created before the switch
         this->door_->set_toggle_only(this->toggle_only_switch_->state);
         this->toggle_only_switch_->set_control_function(std::bind(&esphome::secplus_gdo::GDODoor::set_toggle_only,

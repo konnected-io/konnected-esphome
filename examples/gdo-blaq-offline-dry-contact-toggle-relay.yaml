@@ -98,7 +98,7 @@ esp32:
     components:
       - name: gdolib
         source: https://github.com/konnected-io/gdolib
-        ref: v1.2.0
+        ref: v1.3.0
 
 ####
 # PACKAGES
