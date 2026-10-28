@@ -1,0 +1,109 @@
+# Adds an Obstruction binary_sensor to the GDO White by tapping the garage door opener's
+# safety-beam (photo eye) wires on a GDO input, for openers with no data link to report it.
+#
+# A Chamberlain/LiftMaster-style beam receiver signals "beam OK" by pulling its 2-wire
+# supply loop low in short pulses (~150 Hz, ~430us low). When the beam is broken the
+# pulses stop and the loop sits steady high. This package counts those pulses in
+# hardware (PCNT) — it never measures a voltage, so it works at any loop voltage the
+# divider brings into logic range:
+#
+#   pulses present            -> clear
+#   no pulses, line high      -> obstructed
+#   no pulses, line low       -> no signal (sensors unpowered/asleep, or a wiring fault);
+#                                the last obstruction state is held
+#
+# WIRING — never connect the beam loop directly to the input. Use a divider that puts the
+# loop's steady-high level between ~2.5V and 3.3V at the pin, with GDO GND on the opener's
+# beam common terminal. For a ~6.5V loop: 22k top, 15k bottom (10k + 5.6k works):
+#
+#   loop signal (+) --[22k]--+-- GDO INPUT
+#                            |
+#                          [15k]
+#                            |
+#   loop common (-) ---------+-- GDO GND
+#
+# The 22k in series also means the GDO can never pull the loop low, so it cannot mask an
+# obstruction from the opener.
+#
+# The input is used without a pull-up, so this replaces garage-door-wired-sensor.yaml on
+# the same pin (the GDO White INPUT terminal is GPIO5). ESP32 only.
+#
+# Exposes a single Obstruction entity. For bench setup or support, also include
+# obstruction-beam-diagnostics.yaml to see the pulse rate and shape.
+#
+# Usage:
+#   - path: packages/gdo/obstruction-beam-sensor.yaml
+#     vars:
+#       pin: GPIO5
+
+defaults:
+  name: Obstruction
+  # Pulse rates below this are treated as "beam not clear". Chamberlain-family sensors
+  # pulse at ~150 Hz; lower this for sensors that pulse slower.
+  min_pulse_hz: "40"
+  # Evaluation window. Breaks are reported within about one window.
+  sample_interval: 250ms
+
+sensor:
+  # Falling edges per window, reported as Hz. Internal: it updates every window, far too
+  # often to send to Home Assistant (obstruction-beam-diagnostics.yaml adds a throttled copy).
+  - platform: pulse_counter
+    id: obstruction_beam_pulse_rate
+    internal: true
+    pin:
+      number: ${pin}
+      mode: INPUT
+      allow_other_uses: true
+    count_mode:
+      rising_edge: DISABLE
+      falling_edge: INCREMENT
+    internal_filter: 10us
+    update_interval: ${sample_interval}
+    unit_of_measurement: Hz
+    accuracy_decimals: 0
+    filters:
+      - multiply: 0.016666667   # pulses/min -> Hz
+    on_value:
+      - lambda: |-
+          std::string state;
+          if (x >= ${min_pulse_hz}) {
+            state = "clear";
+            id(obstruction_beam).publish_state(false);
+          } else if (id(obstruction_beam_line_high).state) {
+            state = "obstructed";
+            id(obstruction_beam).publish_state(true);
+          } else {
+            state = "no signal";
+          }
+          if (id(obstruction_beam_state).state != state) {
+            ESP_LOGI("obstruction_beam", "%s (%.0f Hz)", state.c_str(), x);
+            id(obstruction_beam_state).publish_state(state);
+          }
+
+binary_sensor:
+  - platform: template
+    id: obstruction_beam
+    name: ${name}
+    device_class: problem
+
+  # Steady line level, ignoring the sub-millisecond beam pulses. Only consulted when no
+  # pulses arrive, to tell "beam broken" (high) from "sensors off" (low). Polled rather
+  # than interrupt-driven so the ~300 edges/s never reach the CPU.
+  - platform: gpio
+    id: obstruction_beam_line_high
+    internal: true
+    pin:
+      number: ${pin}
+      mode: INPUT
+      allow_other_uses: true
+    use_interrupt: false
+    filters:
+      - delayed_on_off: 20ms
+
+# Tracks clear / obstructed / no signal for the transition log line. Internal unless
+# obstruction-beam-diagnostics.yaml is included.
+text_sensor:
+  - platform: template
+    id: obstruction_beam_state
+    internal: true
+    update_interval: never

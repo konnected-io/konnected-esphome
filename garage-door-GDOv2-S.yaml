@@ -57,7 +57,7 @@ substitutions:
   name: konnected
   friendly_name: Garage Door Opener
   project_name: konnected.garage-door-gdov2-s
-  project_version: "1.4.3"
+  project_version: "1.5.0"
   garage_door_cover_name: Garage Door
   switch_name: STR output
 
@@ -117,6 +117,15 @@ packages:
       # Enables a wired contact sensor for reporting the open or closed state of the garage door
       # via the physical INPUT terminals.
       - packages/garage-door-wired-sensor.yaml
+
+      ####
+      # OBSTRUCTION BEAM SENSOR
+      # Reports the opener's safety-beam (photo eye) as an Obstruction sensor via the INPUT terminal,
+      # wired through a resistor divider (see the package for wiring). Uses the same terminal as the
+      # wired sensor: to enable, remove garage-door-wired-sensor.yaml above and un-comment below.
+      # - path: packages/gdo/obstruction-beam-sensor.yaml
+      #   vars:
+      #     pin: $wired_sensor_pin
 
       ####
       # GARAGE DOOR RANGE SENSOR
