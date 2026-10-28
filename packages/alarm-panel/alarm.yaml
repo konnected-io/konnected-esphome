@@ -4,7 +4,7 @@ switch:
     name: Siren
     pin: 
       number: $alarm
-      allow_other_uses: true
+      allow_other_uses: $alarm_shared
     platform: gpio
     icon: mdi:bullhorn
     
