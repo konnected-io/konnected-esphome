@@ -357,6 +357,8 @@ These optional packages extend the GDO blaQ with additional hardware integration
 | `gdo/3v-output.yaml` | Configure a GDO input pin as a 3.3V power supply for an external sensor. |
 | `gdo/external-binary-sensor.yaml` | Add a generic binary sensor on a GDO input pin. |
 | `gdo/garage-door-binary-sensor.yaml` | Add a wired contact sensor on a GDO input pin for door state. |
+| `gdo/obstruction-beam-sensor.yaml` | GDO White: report the opener's safety-beam (photo eye) as an Obstruction sensor by tapping the beam wires through a resistor divider on the INPUT terminal. Replaces the wired sensor on that pin; see the package header for wiring. |
+| `gdo/obstruction-beam-diagnostics.yaml` | Optional companion to the above for installs and troubleshooting: exposes the beam pulse rate, duty cycle, pulse width and state as diagnostic entities. |
 
 #### Diagnostics / Misc
 
