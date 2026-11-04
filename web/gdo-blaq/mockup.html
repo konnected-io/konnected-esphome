@@ -2,7 +2,6 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GDO blaQ — UI dev mockup</title>
 <link rel="icon" href="data:">
 <!--
@@ -11,6 +10,9 @@
   with data captured from a real GDOv2-Q, then loads the local www.js /
   www.css. Open directly (file://) or via any static server; edit
   www.js / www.css and reload to see changes.
+
+  Deliberately no viewport meta: the device's page doesn't have one either,
+  and www.js adds it at runtime. Adding it here would hide a regression.
 -->
 <link rel="stylesheet" href="www.css" data-gdo-css>
 </head>
