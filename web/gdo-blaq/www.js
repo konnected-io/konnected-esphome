@@ -318,6 +318,11 @@
   /* ---------- Theme ---------- */
   function applyTheme() {
     root.dataset.theme = theme;
+    /* The color tokens live on .gdo, so <html> can't reach them from CSS. Mobile
+       browsers paint their own bars and overscroll from the page background,
+       which shows as a white band around the UI when nothing sets it here. */
+    document.documentElement.style.backgroundColor =
+      getComputedStyle(root).getPropertyValue("--pg").trim();
     $("g-th-light").classList.toggle("active", theme === "light");
     $("g-th-dark").classList.toggle("active", theme === "dark");
   }
