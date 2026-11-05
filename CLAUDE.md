@@ -104,7 +104,7 @@ scripts/deploy-web-ui.sh --version vN               # publish (prompts before up
 
 Always pass `--version`: the default is `v1`, and snapshots are immutable, so a bare run just
 fails the conflict check. Use the next unused dir (`aws s3 ls s3://app.konnected.io/esp/gdo-blaq/`
-to see what's taken — v4 is current as of 2026-08-26).
+to see what's taken — v5 is current as of 2026-11-04).
 
 **Use the default AWS profile.** The `app.konnected.io` bucket lives in account
 `652695076726`, which is what an unset `AWS_PROFILE` resolves to. The
