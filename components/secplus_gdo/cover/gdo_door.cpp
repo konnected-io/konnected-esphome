@@ -60,12 +60,21 @@ void GDODoor::set_state(gdo_door_state_t state, float position) {
         break;
     }
 
-    #ifdef USE_MQTT // if MQTT component is enabled, do not publish the same state more than once
-    if (this->current_operation == this->prev_operation) { return; }
+    // Record the new state before any early return, so the duplicate check above always
+    // compares against what the opener last reported.
+    const bool state_changed = this->state_ != state;
+    this->state_ = state;
+
+    #ifdef USE_MQTT
+    // If MQTT component is enabled, skip position-only updates while the door is travelling
+    // so they don't flood the broker. A change of door state is always published: OPEN and
+    // CLOSED share COVER_OPERATION_IDLE, so comparing operations alone would drop the first
+    // CLOSED after boot (the cover starts at COVER_OPEN) and any open<->closed change whose
+    // OPENING/CLOSING event was missed.
+    if (!state_changed && this->current_operation == this->prev_operation) { return; }
     #endif
 
     this->publish_state(false);
-    this->state_ = state;
 }
 
 void GDODoor::do_action_after_warning(const cover::CoverCall& call) {
