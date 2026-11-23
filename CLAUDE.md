@@ -48,6 +48,34 @@ Reusable YAML modules that provide specific features:
 
 **mdns** - Modified mDNS component for Konnected service advertisement
 
+**gdo_selftest** - Hardware self-test for the GDO blaQ, used only by
+`garage-door-GDOv2-Q-selftest.yaml` (see below). Drives the bus UART directly, not via gdolib.
+
+## GDOv2-Q Self-Test Firmware
+
+`garage-door-GDOv2-Q-selftest.yaml` is *not* customer firmware. cli-flash-tool
+(`konnected-io/cli-flash-tool`, mode "Self-test + flash") writes it to a unit — returned or
+new — reads the result over USB, then erases it and writes the stock release. Each release
+publishes it as `konnected-esphome-selftest-GDOv2-Q-<ver>.bin` (the slug deliberately doesn't
+start with `garage-door-GDOv2-Q`, so prefix-matching tools can't grab it); it is never in an
+ESP Web Tools manifest.
+
+- **No opener needed.** The Security+ wire is one shared line and the blaQ hears its own TX, so
+  a harness — 12V barrel jack plus a 2.2kΩ pull-up from that 12V to the data terminal, ground
+  to ground — lets it loop bytes back: `bus_idle`, `echo_1200_8e1` (Sec+1.0),
+  `echo_9600_8n1` (Sec+2.0). Plus a WiFi scan. Without the pull-up the line reads 0V, which
+  looks the same as a bus held low.
+- **Hand-held harness.** After boot it plays a "ready" tone and waits (45s, re-prompting every
+  10s) for 300ms of steady pull-up before the bus tests; a failed attempt plays a "re-apply"
+  tone and retries, up to 3 attempts. Only the last attempt's results are reported.
+- **Report contract.** `KTEST <name> <PASS|FAIL|INFO> <detail>` lines between
+  `KTEST BEGIN format=N ...` / `KTEST END <verdict>`, re-printed every 3s, with
+  `KTEST STATUS <text>` progress lines. `REPORT_FORMAT` in `gdo_selftest.cpp` must match
+  `SelfTestReport::FORMAT` in cli-flash-tool — change both together, and bump it when the
+  shape or meaning of a line changes.
+- The LEDs and buzzer can't check themselves: after the tests it loops blue LED → white
+  warning LEDs → beep for the operator to confirm.
+
 ### Component Pattern
 Each component subfolder follows ESPHome's component structure:
 - `__init__.py` - Python code for YAML schema validation and C++ code generation

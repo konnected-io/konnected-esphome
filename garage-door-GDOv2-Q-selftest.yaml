@@ -1,0 +1,165 @@
+####
+##
+## Konnected GDO blaQ (GDOv2-Q) -- hardware self-test firmware
+##
+## filename: garage-door-GDOv2-Q-selftest.yaml
+##
+## NOT customer firmware. cli-flash-tool flashes this onto a unit (new or
+## returned), reads the result over USB, then erases it and flashes the stock
+## release. Published with each release as
+## konnected-esphome-selftest-GDOv2-Q-<version>.bin, and kept out of the ESP Web
+## Tools manifests.
+##
+## FIXTURE (no garage door opener needed):
+##   - 12V into the barrel jack
+##   - a pull-up resistor from that same 12V to the Security+ data terminal,
+##     and the supply ground to the ground terminal, standing in for the
+##     opener's pull-up on the wall-control line
+##   - USB-C to the host running cli-flash-tool
+## The harness can be hand-held against the terminals: see HARNESS below.
+##
+## HARNESS: once booted, the unit plays a rising "ready" tone and waits (up to
+## 45s, re-prompting every 10s) for the harness to make contact -- the line
+## pulled up steadily for 300ms. If a bus test fails (e.g. the contact slipped)
+## it plays a two-note "re-apply" tone and waits again, up to 3 attempts.
+##
+## WHAT IT TESTS (bus tests on harness contact, the rest automatically):
+##   bus_idle        line released -> RX reads idle (catches a stuck TX transistor / short)
+##   echo_1200_8e1   Security+ 1.0 wire format: 32 bytes out TX must come back on RX
+##   echo_9600_8n1   Security+ 2.0 wire format: same
+##   wifi_scan       radio + antenna: strongest AP above a lenient floor
+## then plays a success (or error) tone and loops a light/sound pattern for the
+## operator to confirm by eye and ear: status LED, warning LEDs, a short beep.
+##
+## REPORT: `KTEST ...` lines on the USB serial log, re-printed every 3s:
+##   KTEST BEGIN format=2 fw=1.1.0 mac=64e833692dec
+##   KTEST bus_idle PASS busy=0/120
+##   ...
+##   KTEST END PASS
+## plus `KTEST STATUS <text>` progress lines while it runs.
+##
+## Copyright© 2026 Konnected Inc.
+##
+####
+
+substitutions:
+  name: konnected-selftest
+  friendly_name: GDO blaQ Self-Test
+  project_name: konnected.garage-door-gdov2-q-selftest
+  project_version: "1.1.0"
+
+  # INTERNAL MAPPINGS -- must match garage-door-GDOv2-Q.yaml
+  uart_tx_pin: GPIO1
+  uart_rx_pin: GPIO2
+  warning_beep_pin: GPIO4
+  warning_leds_pin: GPIO3
+  status_led: GPIO18
+
+  rtttl_success: success:d=4,o=6,b=160:8e6,16f6,16g6,8a6,8g6,8e6,8g6,8a6
+  rtttl_failure: failure:d=8,o=4,b=100:d#,p,d#,p,d#,p,d#
+  rtttl_boop: boop:d=32,o=5,b=100:d#
+  rtttl_ready: ready:d=16,o=6,b=180:c,e,g
+  rtttl_reapply: reapply:d=16,o=6,b=180:g,p,g
+
+esphome:
+  name: $name
+  friendly_name: $friendly_name
+  name_add_mac_suffix: true
+  min_version: '2026.2.0'
+  project:
+    name: $project_name
+    version: $project_version
+  platformio_options:
+    board_build.flash_mode: dio
+  on_boot:
+    - priority: -100
+      then:
+        - wait_until:
+            lambda: return id(selftest).is_done();
+        - if:
+            condition:
+              lambda: return id(selftest).passed();
+            then:
+              - rtttl.play: $rtttl_success
+            else:
+              - rtttl.play: $rtttl_failure
+        - wait_until:
+            not: rtttl.is_playing
+        - script.execute: operator_pattern
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+    version: recommended
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [ gdo_selftest ]
+
+logger:
+  level: INFO
+  logs:
+    # The radio retries the placeholder network forever; keep the report readable.
+    wifi: WARN
+    component: WARN
+
+# The radio only needs to scan, never join: the placeholder SSID doesn't exist.
+# No credentials ship in this image, and reboot_timeout: 0s stops the failed
+# joins from rebooting the unit mid-test.
+wifi:
+  networks:
+    - ssid: konnected-selftest-scan-only
+  reboot_timeout: 0s
+  power_save_mode: none
+
+gdo_selftest:
+  id: selftest
+  tx_pin: $uart_tx_pin
+  rx_pin: $uart_rx_pin
+  min_rssi: -80
+  contact_timeout: 45s
+  max_attempts: 3
+  on_waiting_for_contact:
+    - if:
+        condition:
+          lambda: return attempt == 1;
+        then:
+          - rtttl.play: $rtttl_ready
+        else:
+          - rtttl.play: $rtttl_reapply
+
+output:
+  - platform: gpio
+    id: status_led_out
+    pin: $status_led
+  - platform: gpio
+    id: warning_leds_out
+    pin: $warning_leds_pin
+  - platform: ledc
+    id: rtttl_out
+    pin: $warning_beep_pin
+
+rtttl:
+  output: rtttl_out
+
+script:
+  # Runs until the unit is reflashed. One pass every ~3s: blue status LED, then
+  # the white warning LEDs, then a short beep -- the operator confirms all three.
+  - id: operator_pattern
+    mode: single
+    then:
+      - while:
+          condition:
+            lambda: return true;
+          then:
+            - output.turn_on: status_led_out
+            - delay: 400ms
+            - output.turn_off: status_led_out
+            - output.turn_on: warning_leds_out
+            - delay: 400ms
+            - output.turn_off: warning_leds_out
+            - rtttl.play: $rtttl_boop
+            - delay: 2s
