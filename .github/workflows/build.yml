@@ -74,6 +74,14 @@ jobs:
             name: Garage Door GDOv2-Q (blaQ)
             config: garage-door-GDOv2-Q.yaml
             slug: garage-door-GDOv2-Q
+          # Factory/RMA hardware self-test, flashed and then replaced by
+          # cli-flash-tool. Never listed in an ESP Web Tools manifest. The slug
+          # deliberately doesn't start with "garage-door-GDOv2-Q", so tools that
+          # pick release assets by that prefix can't grab it by mistake.
+          - id: selftest-gdov2-q
+            name: GDOv2-Q Self-Test
+            config: garage-door-GDOv2-Q-selftest.yaml
+            slug: selftest-GDOv2-Q
     steps:
       - uses: actions/checkout@v7
 
