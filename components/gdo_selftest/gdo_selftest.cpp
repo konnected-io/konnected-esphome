@@ -433,8 +433,11 @@ bool GDOSelfTest::passed() const {
 }
 
 void GDOSelfTest::report_() {
-  ESP_LOGI(TAG, "KTEST BEGIN format=%d fw=%s mac=%s", REPORT_FORMAT, ESPHOME_PROJECT_VERSION,
-           get_mac_address().c_str());
+  // get_mac_address() (std::string) moved to alloc_helpers.h in ESPHome
+  // 2026.11; the buffer form is in helpers.h on both sides of that change.
+  char mac[MAC_ADDRESS_BUFFER_SIZE];
+  get_mac_address_into_buffer(mac);
+  ESP_LOGI(TAG, "KTEST BEGIN format=%d fw=%s mac=%s", REPORT_FORMAT, ESPHOME_PROJECT_VERSION, mac);
   for (const auto &r : this->results_) {
     const char *v = r.verdict == Verdict::PASS ? "PASS" : r.verdict == Verdict::FAIL ? "FAIL" : "INFO";
     ESP_LOGI(TAG, "KTEST %s %s %s", r.name.c_str(), v, r.detail.c_str());
