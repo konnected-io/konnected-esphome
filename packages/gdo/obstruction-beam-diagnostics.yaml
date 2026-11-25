@@ -1,0 +1,51 @@
+# Optional companion to obstruction-beam-sensor.yaml: exposes what the beam tap is seeing,
+# for wiring a new install or troubleshooting one. Leave it out of normal builds.
+#
+#   Obstruction beam state        clear / obstructed / no signal
+#   Obstruction beam pulse rate   ~150 Hz with a Chamberlain-family beam intact, 0 when broken
+#   Obstruction beam duty cycle   share of time the loop is high (~94% intact, 100% broken)
+#   Obstruction beam pulse width  width of the low pulses (~400us); much wider or missing
+#                                 pulses point at the divider or input filtering
+#
+# Adds a GPIO interrupt on every beam edge (~300/s) for the duty cycle measurement.
+#
+# Usage (same pin as obstruction-beam-sensor.yaml):
+#   - path: packages/gdo/obstruction-beam-diagnostics.yaml
+#     vars:
+#       pin: GPIO5
+
+sensor:
+  - platform: copy
+    source_id: obstruction_beam_pulse_rate
+    name: Obstruction beam pulse rate
+    entity_category: diagnostic
+    filters:
+      - throttle_average: 10s
+
+  - platform: duty_cycle
+    id: obstruction_beam_duty
+    name: Obstruction beam duty cycle
+    entity_category: diagnostic
+    pin:
+      number: ${pin}
+      mode: INPUT
+      allow_other_uses: true
+    update_interval: 10s
+    accuracy_decimals: 1
+
+  - platform: template
+    name: Obstruction beam pulse width
+    entity_category: diagnostic
+    unit_of_measurement: us
+    accuracy_decimals: 0
+    update_interval: 10s
+    lambda: |-
+      const float hz = id(obstruction_beam_pulse_rate).state;
+      if (isnan(hz) || hz < 1) return NAN;
+      return (100.0f - id(obstruction_beam_duty).state) / 100.0f / hz * 1e6f;
+
+text_sensor:
+  - id: !extend obstruction_beam_state
+    name: Obstruction beam state
+    internal: false
+    entity_category: diagnostic
